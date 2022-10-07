@@ -13,7 +13,7 @@ var s *http.Server
 
 func init() {
 	s = &http.Server{
-		Addr:         ":8080",
+		Addr:         "localhost:8080",
 		ReadTimeout:  30 * time.Second,
 		WriteTimeout: 90 * time.Second,
 		IdleTimeout:  120 * time.Second,
@@ -49,7 +49,7 @@ func mainHandler() http.Handler {
 
 			w.Header().Set("content-type", "raw")
 			w.WriteHeader(http.StatusCreated)
-			w.Write([]byte(s.Addr + utils.EncodeURL(longUrl)))
+			w.Write([]byte(utils.JoinURL(s.Addr, utils.EncodeURL(longUrl))))
 			return
 		case http.MethodGet:
 			urlPathComponent := 1

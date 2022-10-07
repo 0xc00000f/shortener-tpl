@@ -1,6 +1,11 @@
 package utils
 
-import "net/url"
+import (
+	"fmt"
+	"net/url"
+	"path"
+	"strings"
+)
 
 var shortUrlMap urlMap
 
@@ -11,6 +16,11 @@ func init() {
 func IsUrl(str string) bool {
 	u, err := url.Parse(str)
 	return err == nil && u.Scheme != "" && u.Host != ""
+}
+
+func JoinURL(base string, paths ...string) string {
+	p := path.Join(paths...)
+	return fmt.Sprintf("%s/%s", strings.TrimRight(base, "/"), strings.TrimLeft(p, "/"))
 }
 
 type urlMap map[string]string
