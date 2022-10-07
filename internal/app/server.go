@@ -2,7 +2,9 @@ package app
 
 import (
 	"io"
+	"log"
 	"net/http"
+	"net/url"
 	"strings"
 	"time"
 
@@ -47,9 +49,14 @@ func mainHandler() http.Handler {
 				return
 			}
 
+			path, err := url.JoinPath("http://"+s.Addr, utils.EncodeURL(longURL))
+			if err != nil {
+				log.Fatal(err)
+			}
+
 			w.Header().Set("content-type", "raw")
 			w.WriteHeader(http.StatusCreated)
-			w.Write([]byte(utils.JoinURL("http://", s.Addr, utils.EncodeURL(longURL))))
+			w.Write([]byte(path))
 			return
 		case http.MethodGet:
 			urlPathComponent := 1
