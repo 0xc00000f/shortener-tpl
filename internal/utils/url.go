@@ -10,7 +10,7 @@ import (
 var shortURLMap urlMap
 
 func init() {
-	shortURLMap = newUrlMap()
+	shortURLMap = newURLMap()
 }
 
 func IsURL(str string) bool {
@@ -25,7 +25,7 @@ func JoinURL(base string, paths ...string) string {
 
 type urlMap map[string]string
 
-func newUrlMap() urlMap {
+func newURLMap() urlMap {
 	return make(urlMap)
 }
 
