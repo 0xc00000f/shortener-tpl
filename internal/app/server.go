@@ -13,7 +13,7 @@ var s *http.Server
 
 func init() {
 	s = &http.Server{
-		Addr:         ":8080",
+		Addr:         "localhost:8080",
 		ReadTimeout:  30 * time.Second,
 		WriteTimeout: 90 * time.Second,
 		IdleTimeout:  120 * time.Second,
@@ -41,27 +41,27 @@ func mainHandler() http.Handler {
 				return
 			}
 
-			longUrl := string(b)
-			if !utils.IsUrl(longUrl) {
+			longURL := string(b)
+			if !utils.IsURL(longURL) {
 				badRequest(w, r)
 				return
 			}
 
 			w.Header().Set("content-type", "raw")
 			w.WriteHeader(http.StatusCreated)
-			w.Write([]byte(s.Addr + utils.EncodeURL(longUrl)))
+			w.Write([]byte(utils.JoinURL(s.Addr, utils.EncodeURL(longURL))))
 			return
 		case http.MethodGet:
 			urlPathComponent := 1
 			urlPart := strings.Split(r.URL.Path, "/")[urlPathComponent]
-			originalUrl := utils.DecodeURL(urlPart)
-			if originalUrl == "" {
+			originalURL := utils.DecodeURL(urlPart)
+			if originalURL == "" {
 				badRequest(w, r)
 				return
 			}
 
 			w.Header().Set("content-type", "application/json")
-			w.Header().Set("Location", originalUrl)
+			w.Header().Set("Location", originalURL)
 			w.WriteHeader(http.StatusTemporaryRedirect)
 			return
 		default:

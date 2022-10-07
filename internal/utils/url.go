@@ -1,16 +1,26 @@
 package utils
 
-import "net/url"
+import (
+	"fmt"
+	"net/url"
+	"path"
+	"strings"
+)
 
-var shortUrlMap urlMap
+var shortURLMap urlMap
 
 func init() {
-	shortUrlMap = newUrlMap()
+	shortURLMap = newUrlMap()
 }
 
-func IsUrl(str string) bool {
+func IsURL(str string) bool {
 	u, err := url.Parse(str)
 	return err == nil && u.Scheme != "" && u.Host != ""
+}
+
+func JoinURL(base string, paths ...string) string {
+	p := path.Join(paths...)
+	return fmt.Sprintf("%s/%s", strings.TrimRight(base, "/"), strings.TrimLeft(p, "/"))
 }
 
 type urlMap map[string]string
@@ -19,22 +29,22 @@ func newUrlMap() urlMap {
 	return make(urlMap)
 }
 
-func EncodeURL(baseUrl string) string {
-	encodedUrl := RandStringRunes(6)
+func EncodeURL(baseURL string) string {
+	encodedURL := RandStringRunes(6)
 	for {
-		_, ok := shortUrlMap[encodedUrl]
+		_, ok := shortURLMap[encodedURL]
 		if ok {
-			encodedUrl = RandStringRunes(6)
+			encodedURL = RandStringRunes(6)
 		} else {
 			break
 		}
 	}
 
-	shortUrlMap[encodedUrl] = baseUrl
+	shortURLMap[encodedURL] = baseURL
 
-	return encodedUrl
+	return encodedURL
 }
 
-func DecodeURL(encodedUrl string) string {
-	return shortUrlMap[encodedUrl]
+func DecodeURL(encodedURL string) string {
+	return shortURLMap[encodedURL]
 }
