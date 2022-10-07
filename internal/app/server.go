@@ -49,7 +49,7 @@ func mainHandler() http.Handler {
 
 			w.Header().Set("content-type", "raw")
 			w.WriteHeader(http.StatusCreated)
-			w.Write([]byte(utils.JoinURL(s.Addr, utils.EncodeURL(longURL))))
+			w.Write([]byte(utils.JoinURL("http://", s.Addr, utils.EncodeURL(longURL))))
 			return
 		case http.MethodGet:
 			urlPathComponent := 1
