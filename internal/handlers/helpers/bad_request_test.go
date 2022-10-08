@@ -33,6 +33,7 @@ func TestBadRequest(t *testing.T) {
 			h := http.HandlerFunc(BadRequest)
 			h.ServeHTTP(w, request)
 			result := w.Result()
+			defer result.Body.Close()
 
 			assert.Equal(t, tt.want.code, result.StatusCode)
 			assert.Equal(t, tt.want.contentType, result.Header.Get("Content-Type"))

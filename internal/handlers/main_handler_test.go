@@ -108,6 +108,7 @@ func TestMainHandlerGet(t *testing.T) {
 
 			hPost.ServeHTTP(wPost, requestPost)
 			resultPost := wPost.Result()
+			defer resultPost.Body.Close()
 
 			assert.Equal(t, resultPost.StatusCode, 201)
 
@@ -126,6 +127,7 @@ func TestMainHandlerGet(t *testing.T) {
 			wGet := httptest.NewRecorder()
 			hPost.ServeHTTP(wGet, requestGet)
 			resultGet := wGet.Result()
+			defer resultGet.Body.Close()
 
 			assert.Equal(t, tt.want.statusCode, resultGet.StatusCode)
 			assert.Equal(t, tt.want.contentType, resultGet.Header.Get("Content-Type"))
