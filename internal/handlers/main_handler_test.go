@@ -5,6 +5,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"io"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -79,6 +80,7 @@ func TestMainHandlerGet(t *testing.T) {
 	type wantGet struct {
 		contentType string
 		statusCode  int
+		location    string
 	}
 	tests := []struct {
 		name        string
@@ -88,11 +90,12 @@ func TestMainHandlerGet(t *testing.T) {
 	}{
 		{
 			name:        "[positive] query to /",
-			requestPost: "/",
+			requestPost: "http://localhost:8080/",
 			postBody:    "https://vk.com",
 			want: wantGet{
 				contentType: "text/plain; charset=utf-8",
 				statusCode:  307,
+				location:    "https://vk.com",
 			},
 		},
 	}
@@ -118,15 +121,15 @@ func TestMainHandlerGet(t *testing.T) {
 			uri := string(b)
 
 			// test
+			log.Print("URI:", uri)
 			requestGet := httptest.NewRequest(http.MethodGet, uri, nil)
 			wGet := httptest.NewRecorder()
-			hGet := MainHandler()
-
-			hGet.ServeHTTP(wGet, requestGet)
+			hPost.ServeHTTP(wGet, requestGet)
 			resultGet := wGet.Result()
 
-			assert.Equal(t, resultGet.StatusCode, tt.want.statusCode)
+			assert.Equal(t, tt.want.statusCode, resultGet.StatusCode)
 			assert.Equal(t, tt.want.contentType, resultGet.Header.Get("Content-Type"))
+			assert.Equal(t, tt.want.location, resultGet.Header.Get("Location"))
 		})
 	}
 }

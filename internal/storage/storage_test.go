@@ -7,10 +7,8 @@ import (
 
 func TestDataStorage_Get(t *testing.T) {
 
-	var storage = dataStorage{}
-	//storage.Set("Jjqtdk", "https://vk.com")
+	var storage = DataStorage{}
 	storage.Set("ytAA2Z", "https://google.com")
-	//storage.Set("4qwpBs", "https://onlyfans.com")
 	storage.Set("hNaU8l", "https://dzen.ru/")
 
 	tests := []struct {
@@ -56,50 +54,53 @@ func TestDataStorage_Get(t *testing.T) {
 
 func TestDataStorage_Set(t *testing.T) {
 
-	var storage = dataStorage{}
-	storage.Set("Jjqtdk", "https://vk.com")
-	storage.Set("ytAA2Z", "https://google.com")
-	storage.Set("4qwpBs", "https://onlyfans.com")
-	storage.Set("hNaU8l", "https://dzen.ru/")
+	var storage = DataStorage{}
 
 	tests := []struct {
 		name  string
 		key   string
 		value string
+		ok    bool
 	}{
 		{
 			name:  "simple set",
 			key:   "Jjqtdk",
 			value: "https://vk.com",
+			ok:    true,
 		},
 		{
 			name:  "simple set #2",
 			key:   "ytAA2Z",
 			value: "https://google.com",
+			ok:    true,
 		},
 		{
 			name:  "rewrite key #1",
 			key:   "Jjqtdk",
 			value: "https://onlyfans.com",
+			ok:    true,
 		},
 		{
 			name:  "rewrite key with empty value #1",
 			key:   "hNaU8l",
 			value: "",
+			ok:    true,
 		},
 		{
 			name:  "empty key #1",
 			key:   "",
 			value: "",
+			ok:    true,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
 			storage.Set(tt.key, tt.value)
-			value, _ := storage.Get(tt.key)
+			value, ok := storage.Get(tt.key)
 
 			assert.Equal(t, value, tt.value)
+			assert.Equal(t, ok, tt.ok)
 		})
 	}
 }

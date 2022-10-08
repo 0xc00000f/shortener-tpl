@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"github.com/0xc00000f/shortener-tpl/internal/handlers/helpers"
+	"github.com/0xc00000f/shortener-tpl/internal/storage"
 	"github.com/0xc00000f/shortener-tpl/internal/utils"
 	"io"
 	"log"
@@ -10,6 +11,9 @@ import (
 )
 
 func MainHandler() http.Handler {
+
+	var storage = storage.NewStorage()
+
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case http.MethodPost:
@@ -34,13 +38,13 @@ func MainHandler() http.Handler {
 
 			w.Header().Set("content-type", "text/plain; charset=utf-8")
 			w.WriteHeader(http.StatusCreated)
-			w.Write([]byte("http://" + r.Host + "/" + helpers.EncodeURL(longURL)))
+			w.Write([]byte("http://" + r.Host + "/" + helpers.EncodeAndStoreURL(longURL, storage)))
 			return
 		case http.MethodGet:
 			urlPathComponent := 1
 			urlPart := strings.Split(r.URL.Path, "/")[urlPathComponent]
 
-			originalURL, ok := helpers.DecodeURL(urlPart)
+			originalURL, ok := helpers.DecodeURLFromStorage(urlPart, storage)
 			if !ok {
 				helpers.BadRequest(w, r)
 				return

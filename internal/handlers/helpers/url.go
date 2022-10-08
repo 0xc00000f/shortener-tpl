@@ -5,21 +5,30 @@ import (
 	"github.com/0xc00000f/shortener-tpl/internal/utils"
 )
 
-func EncodeURL(baseURL string) string {
-	encodedURL := utils.RandStringRunes(6)
+func encodeURL(len int) (encodedURL string) {
+	encodedURL = utils.RandStringRunes(len)
+	return
+}
+
+func encodeURLWithDefaultSize() string {
+	return encodeURL(6)
+}
+
+func EncodeAndStoreURL(baseURL string, urlStorage storage.URLStorage) (encodedURL string) {
+	encodedURL = encodeURLWithDefaultSize()
 	for {
-		_, ok := storage.Storage.Get(encodedURL)
+		_, ok := urlStorage.Get(encodedURL)
 		if ok {
-			encodedURL = utils.RandStringRunes(6)
+			encodedURL = encodeURLWithDefaultSize()
 		} else {
 			break
 		}
 	}
 
-	storage.Storage.Set(encodedURL, baseURL)
+	urlStorage.Set(encodedURL, baseURL)
 	return encodedURL
 }
 
-func DecodeURL(encodedURL string) (baseURL string, ok bool) {
-	return storage.Storage.Get(encodedURL)
+func DecodeURLFromStorage(encodedURL string, urlStorage storage.URLStorage) (baseURL string, ok bool) {
+	return urlStorage.Get(encodedURL)
 }
