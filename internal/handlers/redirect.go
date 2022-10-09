@@ -7,17 +7,19 @@ import (
 	"net/http"
 )
 
-func Redirect(w http.ResponseWriter, r *http.Request) {
-	urlPart := chi.URLParam(r, "url")
+func Redirect(storage storage.URLStorage) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		urlPart := chi.URLParam(r, "url")
 
-	originalURL, ok := helpers.DecodeURLFromStorage(urlPart, storage.Storage)
-	if !ok {
-		helpers.BadRequest(w, r)
+		originalURL, ok := helpers.DecodeURLFromStorage(urlPart, storage)
+		if !ok {
+			helpers.BadRequest(w, r)
+			return
+		}
+
+		w.Header().Set("content-type", "text/plain; charset=utf-8")
+		w.Header().Set("Location", originalURL)
+		w.WriteHeader(http.StatusTemporaryRedirect)
 		return
 	}
-
-	w.Header().Set("content-type", "text/plain; charset=utf-8")
-	w.Header().Set("Location", originalURL)
-	w.WriteHeader(http.StatusTemporaryRedirect)
-	return
 }

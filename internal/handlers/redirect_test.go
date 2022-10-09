@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"github.com/0xc00000f/shortener-tpl/internal/storage"
 	"github.com/0xc00000f/shortener-tpl/internal/utils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -18,7 +19,7 @@ func TestRedirect(t *testing.T) {
 		statusCode  int
 		location    string
 	}
-	//storage := storage.NewStorage()
+	storage := storage.NewStorage()
 	tests := []struct {
 		name        string
 		requestPost string
@@ -41,7 +42,9 @@ func TestRedirect(t *testing.T) {
 			// prepare data
 			requestPost := httptest.NewRequest(http.MethodPost, tt.requestPost, strings.NewReader(tt.postBody))
 			wPost := httptest.NewRecorder()
-			SaveURL(wPost, requestPost)
+			SaveURL(storage)(wPost, requestPost)
+
+			log.Print("Storage:", storage)
 
 			resultPost := wPost.Result()
 			defer resultPost.Body.Close()
@@ -60,10 +63,12 @@ func TestRedirect(t *testing.T) {
 			// test
 			log.Print("URI:", uri)
 			requestGet := httptest.NewRequest(http.MethodGet, uri, nil)
-			wGet := httptest.NewRecorder()
-			Redirect(wGet, requestGet)
+			//wGet := httptest.NewRecorder()
+			Redirect(storage)(wPost, requestGet)
 
-			resultGet := wGet.Result()
+			log.Print("Storage:", storage)
+
+			resultGet := wPost.Result()
 			defer resultGet.Body.Close()
 
 			assert.Equal(t, tt.want.statusCode, resultGet.StatusCode)

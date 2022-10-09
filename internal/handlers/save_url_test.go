@@ -1,10 +1,12 @@
 package handlers
 
 import (
+	"github.com/0xc00000f/shortener-tpl/internal/storage"
 	"github.com/0xc00000f/shortener-tpl/internal/utils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"io"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -16,7 +18,8 @@ func TestSaveURL(t *testing.T) {
 		contentType string
 		statusCode  int
 	}
-	//storage := storage.NewStorage()
+	storage := storage.NewStorage()
+
 	tests := []struct {
 		name     string
 		request  string
@@ -33,15 +36,6 @@ func TestSaveURL(t *testing.T) {
 			},
 		},
 		{
-			name:     "[negative] query to /{anything}",
-			request:  "/mjkjn",
-			postBody: "https://vk.com",
-			want: wantPost{
-				contentType: "text/plain; charset=utf-8",
-				statusCode:  400,
-			},
-		},
-		{
 			name:     "[negative] incorrect body",
 			request:  "/",
 			postBody: "ht:/vk.om",
@@ -55,8 +49,9 @@ func TestSaveURL(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			request := httptest.NewRequest(http.MethodPost, tt.request, strings.NewReader(tt.postBody))
 			w := httptest.NewRecorder()
-			SaveURL(w, request)
+			SaveURL(storage)(w, request)
 			result := w.Result()
+			log.Print(storage)
 
 			assert.Equal(t, tt.want.statusCode, result.StatusCode)
 			assert.Equal(t, tt.want.contentType, result.Header.Get("Content-Type"))
