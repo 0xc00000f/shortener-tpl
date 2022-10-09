@@ -7,6 +7,8 @@ type URLStorage interface {
 
 type DataStorage map[string]string
 
+var Storage = NewStorage()
+
 func NewStorage() DataStorage {
 	return make(DataStorage)
 }

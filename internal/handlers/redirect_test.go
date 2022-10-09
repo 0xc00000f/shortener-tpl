@@ -12,76 +12,13 @@ import (
 	"testing"
 )
 
-func TestMainHandlerPost(t *testing.T) {
-	type wantPost struct {
-		contentType string
-		statusCode  int
-	}
-	tests := []struct {
-		name     string
-		request  string
-		postBody string
-		want     wantPost
-	}{
-		{
-			name:     "[positive] query to /",
-			request:  "/",
-			postBody: "https://vk.com",
-			want: wantPost{
-				contentType: "text/plain; charset=utf-8",
-				statusCode:  201,
-			},
-		},
-		{
-			name:     "[negative] query to /{anything}",
-			request:  "/mjkjn",
-			postBody: "https://vk.com",
-			want: wantPost{
-				contentType: "text/plain; charset=utf-8",
-				statusCode:  400,
-			},
-		},
-		{
-			name:     "[negative] incorrect body",
-			request:  "/",
-			postBody: "ht:/vk.om",
-			want: wantPost{
-				contentType: "text/plain; charset=utf-8",
-				statusCode:  400,
-			},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			request := httptest.NewRequest(http.MethodPost, tt.request, strings.NewReader(tt.postBody))
-			w := httptest.NewRecorder()
-			h := MainHandler()
-
-			h.ServeHTTP(w, request)
-			result := w.Result()
-
-			assert.Equal(t, tt.want.statusCode, result.StatusCode)
-			assert.Equal(t, tt.want.contentType, result.Header.Get("Content-Type"))
-
-			if result.StatusCode == 201 {
-				b, err := io.ReadAll(result.Body)
-				require.NoError(t, err)
-
-				err = result.Body.Close()
-				require.NoError(t, err)
-
-				assert.True(t, utils.IsURL(string(b)))
-			}
-		})
-	}
-}
-
-func TestMainHandlerGet(t *testing.T) {
+func TestRedirect(t *testing.T) {
 	type wantGet struct {
 		contentType string
 		statusCode  int
 		location    string
 	}
+	//storage := storage.NewStorage()
 	tests := []struct {
 		name        string
 		requestPost string
@@ -104,9 +41,8 @@ func TestMainHandlerGet(t *testing.T) {
 			// prepare data
 			requestPost := httptest.NewRequest(http.MethodPost, tt.requestPost, strings.NewReader(tt.postBody))
 			wPost := httptest.NewRecorder()
-			hPost := MainHandler()
+			SaveURL(wPost, requestPost)
 
-			hPost.ServeHTTP(wPost, requestPost)
 			resultPost := wPost.Result()
 			defer resultPost.Body.Close()
 
@@ -125,7 +61,8 @@ func TestMainHandlerGet(t *testing.T) {
 			log.Print("URI:", uri)
 			requestGet := httptest.NewRequest(http.MethodGet, uri, nil)
 			wGet := httptest.NewRecorder()
-			hPost.ServeHTTP(wGet, requestGet)
+			Redirect(wGet, requestGet)
+
 			resultGet := wGet.Result()
 			defer resultGet.Body.Close()
 
