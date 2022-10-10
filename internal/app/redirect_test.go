@@ -20,8 +20,9 @@ func testRequest(t *testing.T, ts *httptest.Server, method, path string, body io
 
 	req, err := http.NewRequest(method, url, body)
 	require.NoError(t, err)
-
-	resp, err := http.DefaultClient.Do(req)
+	
+	transport := http.Transport{}
+	resp, err := transport.RoundTrip(req)
 	require.NoError(t, err)
 
 	respBody, err := io.ReadAll(resp.Body)
@@ -32,7 +33,7 @@ func testRequest(t *testing.T, ts *httptest.Server, method, path string, body io
 	return resp.StatusCode, string(respBody)
 }
 
-func TestRouter(t *testing.T) {
+func TestRedirect(t *testing.T) {
 	r := NewRouter()
 	ts := httptest.NewServer(r)
 	defer ts.Close()

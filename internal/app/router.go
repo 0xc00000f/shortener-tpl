@@ -1,8 +1,7 @@
 package app
 
 import (
-	"github.com/0xc00000f/shortener-tpl/internal/handlers"
-	"github.com/0xc00000f/shortener-tpl/internal/handlers/helpers"
+	"github.com/0xc00000f/shortener-tpl/internal/app/helpers"
 	"github.com/0xc00000f/shortener-tpl/internal/storage"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -18,10 +17,10 @@ func NewRouter() *chi.Mux {
 	r.Use(middleware.Recoverer)
 
 	r.Route("/", func(r chi.Router) {
-		r.Post("/", handlers.SaveURL(storage))
+		r.Post("/", SaveURL(storage))
 
 		r.Route("/{url}", func(r chi.Router) {
-			r.Get("/", handlers.Redirect(storage))
+			r.Get("/", Redirect(storage))
 			r.Post("/", helpers.BadRequest)
 		})
 

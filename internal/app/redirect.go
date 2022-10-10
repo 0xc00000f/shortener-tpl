@@ -1,7 +1,7 @@
-package handlers
+package app
 
 import (
-	"github.com/0xc00000f/shortener-tpl/internal/handlers/helpers"
+	helpers2 "github.com/0xc00000f/shortener-tpl/internal/app/helpers"
 	"github.com/0xc00000f/shortener-tpl/internal/storage"
 	"github.com/go-chi/chi/v5"
 	"net/http"
@@ -11,9 +11,9 @@ func Redirect(storage storage.URLStorage) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		urlPart := chi.URLParam(r, "url")
 
-		originalURL, ok := helpers.DecodeURLFromStorage(urlPart, storage)
+		originalURL, ok := helpers2.DecodeURLFromStorage(urlPart, storage)
 		if !ok {
-			helpers.BadRequest(w, r)
+			helpers2.BadRequest(w, r)
 			return
 		}
 
