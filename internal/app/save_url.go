@@ -20,6 +20,5 @@ func SaveURL(storage storage.URLStorage) http.HandlerFunc {
 		w.Header().Set("content-type", "text/plain; charset=utf-8")
 		w.WriteHeader(http.StatusCreated)
 		w.Write([]byte("http://" + r.Host + "/" + helpers2.EncodeAndStoreURL(longURL, storage)))
-		return
 	}
 }

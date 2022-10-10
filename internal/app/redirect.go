@@ -20,6 +20,5 @@ func Redirect(storage storage.URLStorage) http.HandlerFunc {
 		w.Header().Set("content-type", "text/plain; charset=utf-8")
 		w.Header().Set("Location", originalURL)
 		w.WriteHeader(http.StatusTemporaryRedirect)
-		return
 	}
 }
