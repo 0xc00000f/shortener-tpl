@@ -5,9 +5,8 @@ import (
 	"github.com/0xc00000f/shortener-tpl/internal/utils"
 )
 
-func encodeURL(len int) (encodedURL string) {
-	encodedURL = utils.RandStringRunes(len)
-	return
+func encodeURL(len int) string {
+	return utils.RandStringRunes(len)
 }
 
 func encodeURLWithDefaultSize() string {
@@ -15,14 +14,14 @@ func encodeURLWithDefaultSize() string {
 }
 
 func EncodeAndStoreURL(baseURL string, urlStorage storage.URLStorage) (encodedURL string) {
-	encodedURL = encodeURLWithDefaultSize()
+Loop:
 	for {
+		encodedURL = encodeURLWithDefaultSize()
 		_, ok := urlStorage.Get(encodedURL)
 		if ok {
-			encodedURL = encodeURLWithDefaultSize()
-		} else {
-			break
+			continue Loop
 		}
+		break
 	}
 
 	urlStorage.Set(encodedURL, baseURL)

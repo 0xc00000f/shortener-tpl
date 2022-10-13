@@ -1,13 +1,14 @@
 package app
 
 import (
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func testRequest(t *testing.T, ts *httptest.Server, method, path string, body io.Reader, isFullPath bool) (int, string) {
@@ -20,7 +21,7 @@ func testRequest(t *testing.T, ts *httptest.Server, method, path string, body io
 
 	req, err := http.NewRequest(method, url, body)
 	require.NoError(t, err)
-	
+
 	transport := http.Transport{}
 	resp, err := transport.RoundTrip(req)
 	require.NoError(t, err)

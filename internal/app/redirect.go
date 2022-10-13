@@ -1,10 +1,11 @@
 package app
 
 import (
+	"net/http"
+
 	helpers2 "github.com/0xc00000f/shortener-tpl/internal/app/helpers"
 	"github.com/0xc00000f/shortener-tpl/internal/storage"
 	"github.com/go-chi/chi/v5"
-	"net/http"
 )
 
 func Redirect(storage storage.URLStorage) http.HandlerFunc {
@@ -13,7 +14,7 @@ func Redirect(storage storage.URLStorage) http.HandlerFunc {
 
 		originalURL, ok := helpers2.DecodeURLFromStorage(urlPart, storage)
 		if !ok {
-			helpers2.BadRequest(w, r)
+			http.Error(w, "400 page not found", http.StatusBadRequest)
 			return
 		}
 

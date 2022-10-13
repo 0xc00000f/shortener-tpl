@@ -1,12 +1,13 @@
 package app
 
 import (
-	"github.com/0xc00000f/shortener-tpl/internal/utils"
-	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/0xc00000f/shortener-tpl/internal/utils"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestSaveURL(t *testing.T) {

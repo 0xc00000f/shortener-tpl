@@ -1,10 +1,11 @@
 package helpers
 
 import (
+	"testing"
+
 	"github.com/0xc00000f/shortener-tpl/internal/storage"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"testing"
 )
 
 func TestEncodeURL(t *testing.T) {
