@@ -42,6 +42,11 @@ func TestIsURL(t *testing.T) {
 			url:     "http://google.com",
 			isValid: true,
 		},
+		{
+			name:    "valid #2",
+			url:     "https://ya.ru",
+			isValid: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

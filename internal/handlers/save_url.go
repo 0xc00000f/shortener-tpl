@@ -1,16 +1,16 @@
-package app
+package handlers
 
 import (
 	"fmt"
 	"io"
 	"net/http"
 
-	helpers2 "github.com/0xc00000f/shortener-tpl/internal/app/helpers"
-	"github.com/0xc00000f/shortener-tpl/internal/storage"
+	"github.com/0xc00000f/shortener-tpl/internal/api"
+
 	"github.com/0xc00000f/shortener-tpl/internal/utils"
 )
 
-func SaveURL(storage storage.URLStorage) http.HandlerFunc {
+func SaveURL(s api.Shortener) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		b, err := io.ReadAll(r.Body)
 		longURL := string(b)
@@ -21,7 +21,13 @@ func SaveURL(storage storage.URLStorage) http.HandlerFunc {
 
 		w.Header().Set("content-type", "text/plain; charset=utf-8")
 		w.WriteHeader(http.StatusCreated)
-		encodedURL := helpers2.EncodeAndStoreURL(longURL, storage)
-		fmt.Fprint(w, "http://%v/%v", r.Host, encodedURL)
+		short, err := s.Short(longURL)
+		if err != nil {
+			http.Error(w, "400 page not found", http.StatusBadRequest)
+			return
+		}
+
+		fullEncodedURL := fmt.Sprintf("http://%s/%s", r.Host, short)
+		w.Write([]byte(fullEncodedURL))
 	}
 }

@@ -1,4 +1,4 @@
-package helpers
+package logic
 
 import (
 	"net/http"
@@ -26,7 +26,6 @@ func TestBadRequest(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		// запускаем каждый тест
 		t.Run(tt.name, func(t *testing.T) {
 			request := httptest.NewRequest(http.MethodGet, "/", nil)
 

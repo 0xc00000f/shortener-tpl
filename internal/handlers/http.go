@@ -1,15 +1,14 @@
-package app
+package handlers
 
 import (
-	"github.com/0xc00000f/shortener-tpl/internal/app/helpers"
-	"github.com/0xc00000f/shortener-tpl/internal/storage"
+	"github.com/0xc00000f/shortener-tpl/internal/api"
+	"github.com/0xc00000f/shortener-tpl/internal/logic"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 )
 
-func NewRouter() *chi.Mux {
+func NewRouter(sa *api.ShortenerApi) *chi.Mux {
 	r := chi.NewRouter()
-	storage := storage.NewStorage()
 
 	r.Use(middleware.RequestID)
 	r.Use(middleware.RealIP)
@@ -17,11 +16,11 @@ func NewRouter() *chi.Mux {
 	r.Use(middleware.Recoverer)
 
 	r.Route("/", func(r chi.Router) {
-		r.Post("/", SaveURL(storage))
+		r.Post("/", SaveURL(sa.Logic()))
 
 		r.Route("/{url}", func(r chi.Router) {
-			r.Get("/", Redirect(storage))
-			r.Post("/", helpers.BadRequest)
+			r.Get("/", Redirect(sa.Logic()))
+			r.Post("/", logic.BadRequest)
 		})
 
 	})
