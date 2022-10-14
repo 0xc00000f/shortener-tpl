@@ -2,8 +2,9 @@ package logic
 
 import (
 	"errors"
-	"github.com/stretchr/testify/require"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 
 	"github.com/0xc00000f/shortener-tpl/internal/storage"
 	"github.com/stretchr/testify/assert"
