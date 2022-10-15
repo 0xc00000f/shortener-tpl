@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/0xc00000f/shortener-tpl/internal/api"
 	"github.com/0xc00000f/shortener-tpl/internal/logic"
@@ -21,5 +22,9 @@ func main() {
 	apiInstance := handlers.NewRouter(sa)
 
 	log.Print("shortener-tpl: Enter main()")
-	log.Fatal(http.ListenAndServe(":8080", apiInstance))
+	address, ok := os.LookupEnv("SERVER_ADDRESS")
+	if !ok {
+		address = ":8080"
+	}
+	log.Fatal(http.ListenAndServe(address, apiInstance))
 }

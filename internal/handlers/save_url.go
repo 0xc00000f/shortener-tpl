@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/go-chi/chi/v5"
 
@@ -37,7 +38,13 @@ func SaveURL(s api.Shortener) http.HandlerFunc {
 			return
 		}
 
-		fullEncodedURL := fmt.Sprintf("http://%s/%s", r.Host, short)
+		baseUrl, ok := os.LookupEnv("BASE_URL")
+		var fullEncodedURL string
+		if ok {
+			fullEncodedURL = fmt.Sprintf("http://%s/%s", baseUrl, short)
+		} else {
+			fullEncodedURL = fmt.Sprintf("http://%s/%s", r.Host, short)
+		}
 		w.Write([]byte(fullEncodedURL))
 	}
 }
@@ -74,7 +81,14 @@ func SaveURLJson(s api.Shortener) http.HandlerFunc {
 		}
 		log.Printf("short:%v", short)
 
-		fullEncodedURL := fmt.Sprintf("http://%s/%s", r.Host, short)
+		baseUrl, ok := os.LookupEnv("BASE_URL")
+		var fullEncodedURL string
+		if ok {
+			fullEncodedURL = fmt.Sprintf("http://%s/%s", baseUrl, short)
+		} else {
+			fullEncodedURL = fmt.Sprintf("http://%s/%s", r.Host, short)
+		}
+
 		resp := ShortResponse{Result: fullEncodedURL}
 
 		respBody, err := json.Marshal(resp)
