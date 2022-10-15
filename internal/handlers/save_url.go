@@ -38,10 +38,10 @@ func SaveURL(s api.Shortener) http.HandlerFunc {
 			return
 		}
 
-		baseUrl, ok := os.LookupEnv("BASE_URL")
+		baseURL, ok := os.LookupEnv("BASE_URL")
 		var fullEncodedURL string
 		if ok {
-			fullEncodedURL = fmt.Sprintf("http://%s/%s", baseUrl, short)
+			fullEncodedURL = fmt.Sprintf("%s/%s", baseURL, short)
 		} else {
 			fullEncodedURL = fmt.Sprintf("http://%s/%s", r.Host, short)
 		}
@@ -81,10 +81,10 @@ func SaveURLJson(s api.Shortener) http.HandlerFunc {
 		}
 		log.Printf("short:%v", short)
 
-		baseUrl, ok := os.LookupEnv("BASE_URL")
+		baseURL, ok := os.LookupEnv("BASE_URL")
 		var fullEncodedURL string
 		if ok {
-			fullEncodedURL = fmt.Sprintf("http://%s/%s", baseUrl, short)
+			fullEncodedURL = fmt.Sprintf("%s/%s", baseURL, short)
 		} else {
 			fullEncodedURL = fmt.Sprintf("http://%s/%s", r.Host, short)
 		}
