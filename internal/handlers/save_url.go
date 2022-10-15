@@ -1,8 +1,10 @@
 package handlers
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -37,5 +39,52 @@ func SaveURL(s api.Shortener) http.HandlerFunc {
 
 		fullEncodedURL := fmt.Sprintf("http://%s/%s", r.Host, short)
 		w.Write([]byte(fullEncodedURL))
+	}
+}
+
+type ShortRequest struct {
+	URL string `json:"url"`
+}
+
+type ShortResponse struct {
+	Result string `json:"result"`
+}
+
+func SaveURLJson(s api.Shortener) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		req := ShortRequest{}
+		b, err := io.ReadAll(r.Body)
+		log.Printf("b:%v", b)
+		log.Printf("b string:%v", string(b))
+		//long := string(b)
+		//if err != nil || !utils.IsURL(long) {
+		//	http.Error(w, "400 page not found", http.StatusBadRequest)
+		//	return
+		//}
+		if err := json.Unmarshal(b, &req); err != nil {
+			http.Error(w, "400 page not found", http.StatusBadRequest)
+			return
+		}
+		log.Printf("req:%v", req)
+
+		short, err := s.Short(req.URL)
+		if err != nil {
+			http.Error(w, "400 page not found", http.StatusBadRequest)
+			return
+		}
+		log.Printf("short:%v", short)
+
+		resp := ShortResponse{Result: short}
+		respBody, err := json.Marshal(resp)
+		if err != nil {
+			http.Error(w, "400 page not found", http.StatusBadRequest)
+			return
+		}
+		log.Printf("respBody:%v", respBody)
+		log.Printf("respBodyString:%v", string(respBody))
+
+		w.Header().Set("content-type", "application/json")
+		w.WriteHeader(http.StatusCreated)
+		w.Write(respBody)
 	}
 }

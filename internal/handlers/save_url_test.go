@@ -1,6 +1,9 @@
 package handlers
 
 import (
+	"encoding/json"
+	"fmt"
+	"github.com/stretchr/testify/require"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -27,4 +30,26 @@ func TestSaveURL(t *testing.T) {
 	statusCode, body := testRequest(t, ts, "POST", "/", strings.NewReader("https://vk.com"), true)
 	assert.Equal(t, http.StatusCreated, statusCode)
 	assert.True(t, utils.IsURL(body))
+}
+
+func TestSaveURLJson(t *testing.T) {
+	shortLength := 7
+
+	storage := storage.NewStorage()
+	sa := api.NewShortenerApi(logic.NewURLEncoder(
+		logic.SetStorage(storage),
+		logic.SetLength(shortLength),
+	))
+	apiInstance := NewRouter(sa)
+	ts := httptest.NewServer(apiInstance)
+	defer ts.Close()
+
+	statusCode, body := testRequest(t, ts, "POST", "/api/shorten",
+		strings.NewReader(fmt.Sprintf("{\"%v\":\"%v\"}", "url", "https://vk.com")), true)
+	assert.Equal(t, http.StatusCreated, statusCode)
+
+	resp := ShortResponse{}
+	err := json.Unmarshal([]byte(body), &resp)
+	require.NoError(t, err)
+	assert.True(t, len(resp.Result) == shortLength)
 }
