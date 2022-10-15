@@ -4,10 +4,10 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/stretchr/testify/require"
-
 	"github.com/0xc00000f/shortener-tpl/internal/storage"
+
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestURLEncoder_Encode(t *testing.T) {

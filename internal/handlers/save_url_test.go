@@ -9,8 +9,8 @@ import (
 	"github.com/0xc00000f/shortener-tpl/internal/api"
 	"github.com/0xc00000f/shortener-tpl/internal/logic"
 	"github.com/0xc00000f/shortener-tpl/internal/storage"
-
 	"github.com/0xc00000f/shortener-tpl/internal/utils"
+
 	"github.com/stretchr/testify/assert"
 )
 

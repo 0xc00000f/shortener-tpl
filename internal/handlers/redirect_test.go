@@ -50,6 +50,7 @@ func TestRedirect(t *testing.T) {
 	statusCode, body := testRequest(t, ts, "POST", "/", strings.NewReader("https://vk.com"), true)
 	assert.Equal(t, http.StatusCreated, statusCode)
 
-	statusCode, _ = testRequest(t, ts, "GET", body, nil, false)
+	statusCode, body = testRequest(t, ts, "GET", body, nil, false)
 	assert.Equal(t, http.StatusTemporaryRedirect, statusCode)
+	assert.Empty(t, body)
 }

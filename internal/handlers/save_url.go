@@ -5,6 +5,8 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/go-chi/chi/v5"
+
 	"github.com/0xc00000f/shortener-tpl/internal/api"
 
 	"github.com/0xc00000f/shortener-tpl/internal/utils"
@@ -12,6 +14,12 @@ import (
 
 func SaveURL(s api.Shortener) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		urlPart := chi.URLParam(r, "url")
+		if len(urlPart) > 0 {
+			http.Error(w, "400 page not found", http.StatusBadRequest)
+			return
+		}
+
 		b, err := io.ReadAll(r.Body)
 		longURL := string(b)
 		if err != nil || !utils.IsURL(longURL) {

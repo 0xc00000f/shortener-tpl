@@ -1,8 +1,10 @@
 package handlers
 
 import (
+	"net/http"
+
 	"github.com/0xc00000f/shortener-tpl/internal/api"
-	"github.com/0xc00000f/shortener-tpl/internal/logic"
+
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 )
@@ -20,7 +22,9 @@ func NewRouter(sa *api.ShortenerApi) *chi.Mux {
 
 		r.Route("/{url}", func(r chi.Router) {
 			r.Get("/", Redirect(sa.Logic()))
-			r.Post("/", logic.BadRequest)
+			r.Post("/", func(w http.ResponseWriter, r *http.Request) {
+				http.Error(w, "400 page not found", http.StatusBadRequest)
+			})
 		})
 
 	})
