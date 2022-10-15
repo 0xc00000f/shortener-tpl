@@ -56,11 +56,11 @@ func SaveURLJson(s api.Shortener) http.HandlerFunc {
 		b, err := io.ReadAll(r.Body)
 		log.Printf("b:%v", b)
 		log.Printf("b string:%v", string(b))
-		//long := string(b)
-		//if err != nil || !utils.IsURL(long) {
-		//	http.Error(w, "400 page not found", http.StatusBadRequest)
-		//	return
-		//}
+		if err != nil {
+			http.Error(w, "400 page not found", http.StatusBadRequest)
+			return
+		}
+		
 		if err := json.Unmarshal(b, &req); err != nil {
 			http.Error(w, "400 page not found", http.StatusBadRequest)
 			return
