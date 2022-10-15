@@ -1,13 +1,13 @@
 package api
 
-type ShortenerApi struct {
+type ShortenerAPI struct {
 	logic Shortener
 }
 
-func NewShortenerApi(logic Shortener) *ShortenerApi {
-	return &ShortenerApi{logic: logic}
+func NewShortenerAPI(logic Shortener) *ShortenerAPI {
+	return &ShortenerAPI{logic: logic}
 }
 
-func (sa *ShortenerApi) Logic() Shortener {
+func (sa *ShortenerAPI) Logic() Shortener {
 	return sa.logic
 }

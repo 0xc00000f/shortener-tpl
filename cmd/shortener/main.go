@@ -14,7 +14,7 @@ import (
 func main() {
 
 	storage := storage.NewStorage()
-	sa := api.NewShortenerApi(logic.NewURLEncoder(
+	sa := api.NewShortenerAPI(logic.NewURLEncoder(
 		logic.SetStorage(storage),
 		logic.SetLength(7),
 	))
