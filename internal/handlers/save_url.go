@@ -60,7 +60,7 @@ func SaveURLJson(s api.Shortener) http.HandlerFunc {
 			http.Error(w, "400 page not found", http.StatusBadRequest)
 			return
 		}
-		
+
 		if err := json.Unmarshal(b, &req); err != nil {
 			http.Error(w, "400 page not found", http.StatusBadRequest)
 			return
@@ -74,7 +74,9 @@ func SaveURLJson(s api.Shortener) http.HandlerFunc {
 		}
 		log.Printf("short:%v", short)
 
-		resp := ShortResponse{Result: short}
+		fullEncodedURL := fmt.Sprintf("http://%s/%s", r.Host, short)
+		resp := ShortResponse{Result: fullEncodedURL}
+
 		respBody, err := json.Marshal(resp)
 		if err != nil {
 			http.Error(w, "400 page not found", http.StatusBadRequest)
