@@ -51,5 +51,5 @@ func TestSaveURLJson(t *testing.T) {
 	resp := ShortResponse{}
 	err := json.Unmarshal([]byte(body), &resp)
 	require.NoError(t, err)
-	assert.True(t, utils.IsURL(body))
+	assert.True(t, utils.IsURL(resp.Result))
 }
