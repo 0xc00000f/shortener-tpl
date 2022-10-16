@@ -2,14 +2,21 @@ package storage
 
 import (
 	"errors"
+	"github.com/stretchr/testify/require"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
-func TestMemoryStorage_Get(t *testing.T) {
+func TestFileStorage_Get(t *testing.T) {
 
-	var storage = MemoryStorage{}
+	file, err := os.CreateTemp(os.TempDir(), "testfilestorage*")
+	require.NoError(t, err)
+
+	storage, err := NewFileStorage(file.Name())
+	require.NoError(t, err)
+
 	storage.Store("ytAA2Z", "https://google.com")
 	storage.Store("hNaU8l", "https://dzen.ru/")
 
@@ -54,9 +61,13 @@ func TestMemoryStorage_Get(t *testing.T) {
 	}
 }
 
-func TestMemoryStorage_Set(t *testing.T) {
+func TestFileStorage_Set(t *testing.T) {
 
-	var storage = MemoryStorage{}
+	file, err := os.CreateTemp(os.TempDir(), "testfilestorage*")
+	require.NoError(t, err)
+
+	storage, err := NewFileStorage(file.Name())
+	require.NoError(t, err)
 
 	tests := []struct {
 		name     string

@@ -57,6 +57,10 @@ func (fs FileStorage) InitMemory() error {
 
 		fs.memory[url.Short] = url.Long
 	}
+	if err = fs.Close(); err != nil {
+		log.Print("FileStorage::InitMemory -- fs.Close error")
+		return err
+	}
 	return nil
 }
 
@@ -101,32 +105,5 @@ func (fs FileStorage) writeURL(short, long string) error {
 }
 
 func (fs FileStorage) IsKeyExist(short string) (bool, error) {
-
-	fi, err := fs.file.Stat()
-	if err != nil {
-		log.Print("FileStorage::IsKeyExist -- file.Stat error")
-		return false, err
-	}
-	if fi.Size() == 0 {
-		return false, nil
-	}
-
-	scanner := bufio.NewScanner(fs.file)
-	var url url
-
-	for scanner.Scan() {
-
-		data := scanner.Bytes()
-
-		err = json.Unmarshal(data, &url)
-		if err != nil {
-			return false, err
-		}
-
-		if url.Short == short {
-			return true, nil
-		}
-	}
-
-	return false, nil
+	return fs.memory.IsKeyExist(short)
 }
