@@ -18,7 +18,7 @@ import (
 )
 
 func TestSaveURL(t *testing.T) {
-	storage := storage.NewStorage()
+	storage := storage.NewMemoryStorage()
 	sa := api.NewShortenerAPI(logic.NewURLEncoder(
 		logic.SetStorage(storage),
 		logic.SetLength(7),
@@ -35,7 +35,7 @@ func TestSaveURL(t *testing.T) {
 func TestSaveURLJson(t *testing.T) {
 	shortLength := 7
 
-	storage := storage.NewStorage()
+	storage := storage.NewMemoryStorage()
 	sa := api.NewShortenerAPI(logic.NewURLEncoder(
 		logic.SetStorage(storage),
 		logic.SetLength(shortLength),

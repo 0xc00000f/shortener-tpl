@@ -38,7 +38,7 @@ func testRequest(t *testing.T, ts *httptest.Server, method, path string, body io
 }
 
 func TestRedirect(t *testing.T) {
-	storage := storage.NewStorage()
+	storage := storage.NewMemoryStorage()
 	sa := api.NewShortenerAPI(logic.NewURLEncoder(
 		logic.SetStorage(storage),
 		logic.SetLength(7),

@@ -4,7 +4,7 @@ import "errors"
 
 type MemoryStorage map[string]string
 
-func NewStorage() MemoryStorage {
+func NewMemoryStorage() MemoryStorage {
 	return make(MemoryStorage)
 }
 
@@ -31,7 +31,7 @@ func (ds MemoryStorage) Store(short, long string) error {
 	return nil
 }
 
-func (ds MemoryStorage) IsKeyExist(short string) bool {
+func (ds MemoryStorage) IsKeyExist(short string) (bool, error) {
 	_, ok := ds[short]
-	return ok
+	return ok, nil
 }

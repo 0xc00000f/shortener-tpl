@@ -67,6 +67,7 @@ func SaveURLJson(s api.Shortener) http.HandlerFunc {
 			http.Error(w, "400 page not found", http.StatusBadRequest)
 			return
 		}
+		defer r.Body.Close()
 
 		if err := json.Unmarshal(b, &req); err != nil {
 			http.Error(w, "400 page not found", http.StatusBadRequest)

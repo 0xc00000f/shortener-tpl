@@ -42,7 +42,11 @@ func (ue *URLEncoder) encode() string {
 func (ue *URLEncoder) Short(long string) (short string, err error) {
 	for {
 		short = ue.encode()
-		if ue.storage.IsKeyExist(short) {
+		exist, err := ue.storage.IsKeyExist(short)
+		if err != nil {
+			return "", err
+		}
+		if exist {
 			continue
 		}
 		break

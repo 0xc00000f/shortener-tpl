@@ -39,7 +39,7 @@ func TestURLEncoder_Encode(t *testing.T) {
 
 func TestURLEncoder_Short(t *testing.T) {
 
-	var storage = storage.NewStorage()
+	var storage = storage.NewMemoryStorage()
 
 	tests := []struct {
 		name   string
@@ -94,7 +94,7 @@ func TestURLEncoder_Short(t *testing.T) {
 
 func TestURLEncoder_Get(t *testing.T) {
 
-	var storage = storage.NewStorage()
+	var storage = storage.NewMemoryStorage()
 	storage.Store("ytAA2Z", "https://google.com")
 	storage.Store("hNaU8l", "https://dzen.ru/")
 
