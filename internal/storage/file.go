@@ -57,10 +57,6 @@ func (fs FileStorage) InitMemory() error {
 
 		fs.memory[url.Short] = url.Long
 	}
-	if err = fs.Close(); err != nil {
-		log.Print("FileStorage::InitMemory -- fs.Close error")
-		return err
-	}
 	return nil
 }
 
