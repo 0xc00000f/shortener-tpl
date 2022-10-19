@@ -14,8 +14,8 @@ import (
 )
 
 var (
-	fsp_f    *string
-	addressf *string
+	fspF     *string
+	addressF *string
 	baseURL  *string
 
 	systemAddressKey         = "SERVER_ADDRESS"
@@ -24,8 +24,8 @@ var (
 )
 
 func init() {
-	fsp_f = flag.String("a", "", "responsible for the path to the file with shortened URLs")
-	addressf = flag.String("f", "", "responsible for the start address of the HTTP server")
+	fspF = flag.String("a", "", "responsible for the path to the file with shortened URLs")
+	addressF = flag.String("f", "", "responsible for the start address of the HTTP server")
 	baseURL = flag.String(
 		"b",
 		"",
@@ -70,9 +70,9 @@ func chooseStorage() (logic logic.URLStorager, err error) {
 	log.Print("main::chooseStorage -- entered")
 	defer log.Printf("main::chooseStorage -- finished, returned storager: %v, error: %s", logic, err)
 
-	if *fsp_f != "" {
-		log.Printf("main::chooseStorage -- choose storage from flag: %s", *fsp_f)
-		return creatingFileStorage(*fsp_f)
+	if *fspF != "" {
+		log.Printf("main::chooseStorage -- choose storage from flag: %s", *fspF)
+		return creatingFileStorage(*fspF)
 	}
 
 	log.Printf("main::chooseStorage -- trying choose storage from system variable: %s", systemFileStoragePathKey)
@@ -117,8 +117,8 @@ func creatingFileStorage(path string) (logic logic.URLStorager, err error) {
 
 func chooseAddress() (address string) {
 	log.Print("main::chooseAddress -- entered")
-	if *addressf != "" {
-		address = *addressf
+	if *addressF != "" {
+		address = *addressF
 		log.Printf("main::chooseAddress -- chose address from flag: %s", address)
 	} else {
 		var ok bool
