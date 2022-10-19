@@ -24,8 +24,8 @@ var (
 )
 
 func init() {
-	fspF = flag.String("a", "", "responsible for the path to the file with shortened URLs")
-	addressF = flag.String("f", "", "responsible for the start address of the HTTP server")
+	fspF = flag.String("f", "", "responsible for the path to the file with shortened URLs")
+	addressF = flag.String("a", "", "responsible for the start address of the HTTP server")
 	baseURL = flag.String(
 		"b",
 		"",
