@@ -8,11 +8,11 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-func Redirect(s api.Shortener) http.HandlerFunc {
+func Redirect(sa api.ShortenerAPI) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		urlPart := chi.URLParam(r, "url")
 
-		originalURL, err := s.Get(urlPart)
+		originalURL, err := sa.Logic().Get(urlPart)
 		if err != nil {
 			http.Error(w, "400 page not found", http.StatusBadRequest)
 			return

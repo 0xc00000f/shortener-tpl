@@ -18,11 +18,11 @@ func NewRouter(sa *api.ShortenerAPI) *chi.Mux {
 	r.Use(middleware.Recoverer)
 
 	r.Route("/", func(r chi.Router) {
-		r.Post("/", SaveURL(sa.Logic()))
-		r.Post("/api/shorten", SaveURLJson(sa.Logic()))
+		r.Post("/", SaveURL(*sa))
+		r.Post("/api/shorten", SaveURLJson(*sa))
 
 		r.Route("/{url}", func(r chi.Router) {
-			r.Get("/", Redirect(sa.Logic()))
+			r.Get("/", Redirect(*sa))
 			r.Post("/", func(w http.ResponseWriter, r *http.Request) {
 				http.Error(w, "400 page not found", http.StatusBadRequest)
 			})
