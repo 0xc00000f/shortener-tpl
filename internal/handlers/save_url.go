@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"compress/gzip"
 	"encoding/json"
 	"fmt"
 	"github.com/go-chi/chi/v5"
@@ -27,7 +28,26 @@ func SaveURL(sa api.ShortenerAPI) http.HandlerFunc {
 			return
 		}
 
-		b, err := io.ReadAll(r.Body)
+		var reader io.Reader
+		log.Printf("handlers::SaveURL -- checking supporting gzip in header Content-Encoding")
+		if r.Header.Get(`Content-Encoding`) == `gzip` {
+			log.Printf("handlers::SaveURL -- creating gzip reader")
+			gz, err := gzip.NewReader(r.Body)
+			if err != nil {
+				log.Printf("handlers::SaveURL -- cant create gzip reader")
+				http.Error(w, "400 page not found", http.StatusBadRequest)
+				return
+			}
+			reader = gz
+			log.Printf("handlers::SaveURL -- gzip reader created")
+			defer gz.Close()
+		} else {
+			log.Printf("handlers::SaveURL -- gzip isnt supported")
+			reader = r.Body
+			defer r.Body.Close()
+		}
+
+		b, err := io.ReadAll(reader)
 		log.Printf("handlers::SaveURL -- reading body, body: %v, err: %v", string(b), err)
 		longURL := string(b)
 		if err != nil || !utils.IsURL(longURL) {
@@ -35,7 +55,6 @@ func SaveURL(sa api.ShortenerAPI) http.HandlerFunc {
 			http.Error(w, "400 page not found", http.StatusBadRequest)
 			return
 		}
-		defer r.Body.Close()
 
 		log.Printf("handlers::SaveURL -- call Logic::Short, params -- longURL: %v", longURL)
 		short, err := sa.Logic().Short(longURL)
@@ -83,7 +102,28 @@ func SaveURLJson(sa api.ShortenerAPI) http.HandlerFunc {
 		defer log.Print("handlers::SaveURLJson -- finished")
 
 		req := ShortRequest{}
-		b, err := io.ReadAll(r.Body)
+
+		var reader io.Reader
+		log.Printf("handlers::SaveURL -- checking supporting gzip in header Content-Encoding")
+		if r.Header.Get(`Content-Encoding`) == `gzip` {
+			log.Printf("handlers::SaveURL -- creating gzip reader")
+			gz, err := gzip.NewReader(r.Body)
+			if err != nil {
+				log.Printf("handlers::SaveURL -- cant create gzip reader: %v", err)
+				http.Error(w, "400 page not found", http.StatusBadRequest)
+				return
+			}
+			reader = gz
+			log.Printf("handlers::SaveURL -- gzip reader created")
+			defer gz.Close()
+		} else {
+			log.Printf("handlers::SaveURL -- gzip isnt supported")
+			reader = r.Body
+			defer r.Body.Close()
+		}
+
+		b, err := io.ReadAll(reader)
+
 		log.Printf("handlers::SaveURLJson -- reading body, body: %v, err: %v", string(b), err)
 
 		if err != nil {
@@ -91,7 +131,6 @@ func SaveURLJson(sa api.ShortenerAPI) http.HandlerFunc {
 			http.Error(w, "400 page not found", http.StatusBadRequest)
 			return
 		}
-		defer r.Body.Close()
 
 		log.Printf("handlers::SaveURLJson -- unmarshaling body")
 		if err := json.Unmarshal(b, &req); err != nil {
