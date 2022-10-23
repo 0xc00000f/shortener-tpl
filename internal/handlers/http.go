@@ -1,9 +1,9 @@
 package handlers
 
 import (
-	"net/http"
-
+	"compress/flate"
 	"github.com/0xc00000f/shortener-tpl/internal/api"
+	"net/http"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -16,6 +16,18 @@ func NewRouter(sa *api.ShortenerAPI) *chi.Mux {
 	r.Use(middleware.RealIP)
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
+	r.Use(middleware.AllowContentEncoding("gzip"))
+	compressor := middleware.NewCompressor(flate.DefaultCompression)
+	r.Use(compressor.Handler)
+
+	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(400)
+		w.Write([]byte("400 page not found"))
+	})
+	r.MethodNotAllowed(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(400)
+		w.Write([]byte("400 page not found"))
+	})
 
 	r.Route("/", func(r chi.Router) {
 		r.Post("/", SaveURL(*sa))
@@ -23,11 +35,8 @@ func NewRouter(sa *api.ShortenerAPI) *chi.Mux {
 
 		r.Route("/{url}", func(r chi.Router) {
 			r.Get("/", Redirect(*sa))
-			r.Post("/", func(w http.ResponseWriter, r *http.Request) {
-				http.Error(w, "400 page not found", http.StatusBadRequest)
-			})
 		})
-
 	})
+
 	return r
 }
