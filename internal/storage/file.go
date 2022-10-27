@@ -36,7 +36,7 @@ func (fs FileStorage) Close() error {
 func (fs FileStorage) InitMemory() error {
 	fi, err := fs.file.Stat()
 	if err != nil {
-		log.Print("FileStorage::InitMemory -- file.Stat error")
+		log.Printf("getting file info error: %v", err)
 		return err
 	}
 	if fi.Size() == 0 {
@@ -51,7 +51,7 @@ func (fs FileStorage) InitMemory() error {
 
 		err = json.Unmarshal(data, &url)
 		if err != nil {
-			log.Print("FileStorage::InitMemory -- json.Unmarshal error")
+			log.Printf("init memory unmarshal error: %v", err)
 			return err
 		}
 
@@ -68,12 +68,12 @@ func (fs FileStorage) Store(short, long string) error {
 
 	err := fs.memory.Store(short, long)
 	if err != nil {
-		log.Print("FileStorage::Store -- memory.Store error")
+		log.Printf("in-memory store error: %v", err)
 		return err
 	}
 	err = fs.writeURL(short, long)
 	if err != nil {
-		log.Print("FileStorage::Store -- writeURL error")
+		log.Printf("writing url in file error: %v", err)
 		return err
 	}
 
@@ -87,14 +87,14 @@ func (fs FileStorage) writeURL(short, long string) error {
 	}
 	b, err := json.Marshal(s)
 	if err != nil {
-		log.Print("FileStorage::writeURL -- Marshal error")
+		log.Printf("writing url in file marshaling error: %v", err)
 		return err
 	}
 	b = append(b, '\n')
 
 	_, err = fs.file.Write(b)
 	if err != nil {
-		log.Print("FileStorage::writeURL -- file.Write error")
+		log.Printf("writing in file error: %v", err)
 		return err
 	}
 	return nil
