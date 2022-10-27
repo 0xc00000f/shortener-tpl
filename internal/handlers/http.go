@@ -2,8 +2,9 @@ package handlers
 
 import (
 	"compress/flate"
-	"github.com/0xc00000f/shortener-tpl/internal/api"
 	"net/http"
+
+	"github.com/0xc00000f/shortener-tpl/internal/api"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"

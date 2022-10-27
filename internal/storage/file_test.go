@@ -2,11 +2,13 @@ package storage
 
 import (
 	"errors"
-	"github.com/stretchr/testify/require"
 	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+
+	"go.uber.org/zap"
 )
 
 func TestFileStorage_Get(t *testing.T) {
@@ -14,7 +16,7 @@ func TestFileStorage_Get(t *testing.T) {
 	file, err := os.CreateTemp(os.TempDir(), "testfilestorage*")
 	require.NoError(t, err)
 
-	storage, err := NewFileStorage(file.Name())
+	storage, err := NewFileStorage(file.Name(), zap.L())
 	require.NoError(t, err)
 
 	storage.Store("ytAA2Z", "https://google.com")
@@ -66,7 +68,7 @@ func TestFileStorage_Set(t *testing.T) {
 	file, err := os.CreateTemp(os.TempDir(), "testfilestorage*")
 	require.NoError(t, err)
 
-	storage, err := NewFileStorage(file.Name())
+	storage, err := NewFileStorage(file.Name(), zap.L())
 	require.NoError(t, err)
 
 	tests := []struct {

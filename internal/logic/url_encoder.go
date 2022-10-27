@@ -2,6 +2,8 @@ package logic
 
 import (
 	"github.com/0xc00000f/shortener-tpl/internal/utils"
+
+	"go.uber.org/zap"
 )
 
 var preferredLength = 6
@@ -9,6 +11,7 @@ var preferredLength = 6
 type URLEncoder struct {
 	length  int
 	storage URLStorager
+	l       *zap.Logger
 }
 
 type Option func(ue *URLEncoder)
@@ -32,6 +35,12 @@ func SetLength(length int) Option {
 func SetStorage(s URLStorager) Option {
 	return func(ue *URLEncoder) {
 		ue.storage = s
+	}
+}
+
+func SetLogger(l *zap.Logger) Option {
+	return func(ue *URLEncoder) {
+		ue.l = l
 	}
 }
 

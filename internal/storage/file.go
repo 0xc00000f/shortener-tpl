@@ -3,13 +3,16 @@ package storage
 import (
 	"bufio"
 	"encoding/json"
-	"log"
 	"os"
+
+	"go.uber.org/zap"
 )
 
 type FileStorage struct {
 	file   *os.File
 	memory MemoryStorage
+
+	l *zap.Logger
 }
 
 type url struct {
@@ -17,7 +20,7 @@ type url struct {
 	Long  string `json:"long"`
 }
 
-func NewFileStorage(filename string) (FileStorage, error) {
+func NewFileStorage(filename string, logger *zap.Logger) (FileStorage, error) {
 	file, err := os.OpenFile(filename, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0777)
 	if err != nil {
 		return FileStorage{}, err
@@ -26,6 +29,7 @@ func NewFileStorage(filename string) (FileStorage, error) {
 	return FileStorage{
 		file:   file,
 		memory: NewMemoryStorage(),
+		l:      logger,
 	}, nil
 }
 
@@ -36,7 +40,7 @@ func (fs FileStorage) Close() error {
 func (fs FileStorage) InitMemory() error {
 	fi, err := fs.file.Stat()
 	if err != nil {
-		log.Printf("getting file info error: %v", err)
+		fs.l.Error("getting file info error", zap.Error(err))
 		return err
 	}
 	if fi.Size() == 0 {
@@ -51,7 +55,7 @@ func (fs FileStorage) InitMemory() error {
 
 		err = json.Unmarshal(data, &url)
 		if err != nil {
-			log.Printf("init memory unmarshal error: %v", err)
+			fs.l.Error("init memory unmarshal error", zap.Error(err))
 			return err
 		}
 
@@ -68,12 +72,12 @@ func (fs FileStorage) Store(short, long string) error {
 
 	err := fs.memory.Store(short, long)
 	if err != nil {
-		log.Printf("in-memory store error: %v", err)
+		fs.l.Error("in-memory store error", zap.Error(err))
 		return err
 	}
 	err = fs.writeURL(short, long)
 	if err != nil {
-		log.Printf("writing url in file error: %v", err)
+		fs.l.Error("writing url in file error", zap.Error(err))
 		return err
 	}
 
@@ -87,14 +91,14 @@ func (fs FileStorage) writeURL(short, long string) error {
 	}
 	b, err := json.Marshal(s)
 	if err != nil {
-		log.Printf("writing url in file marshaling error: %v", err)
+		fs.l.Error("writing url in file marshaling error", zap.Error(err))
 		return err
 	}
 	b = append(b, '\n')
 
 	_, err = fs.file.Write(b)
 	if err != nil {
-		log.Printf("writing in file error: %v", err)
+		fs.l.Error("writing in file error: %v", zap.Error(err))
 		return err
 	}
 	return nil

@@ -1,10 +1,15 @@
 package api
 
-import "os"
+import (
+	"os"
+
+	"go.uber.org/zap"
+)
 
 type ShortenerAPI struct {
 	logic   Shortener
 	BaseURL string
+	L       *zap.Logger
 }
 
 type Option func(sa *ShortenerAPI)
@@ -37,5 +42,11 @@ func InitBaseURL(baseURL string) Option {
 		}
 
 		sa.BaseURL = os.Getenv("BASE_URL")
+	}
+}
+
+func SetLogger(l *zap.Logger) Option {
+	return func(sa *ShortenerAPI) {
+		sa.L = l
 	}
 }
