@@ -1,4 +1,4 @@
-package utils
+package rand
 
 import (
 	"testing"
@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestRandStringRunes(t *testing.T) {
+func TestString(t *testing.T) {
 	tests := []struct {
 		name    string
 		letters int
@@ -26,7 +26,7 @@ func TestRandStringRunes(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			randString := RandStringRunes(tt.letters)
+			randString := String(tt.letters)
 			assert.Equal(t, len(randString), tt.letters)
 		})
 	}

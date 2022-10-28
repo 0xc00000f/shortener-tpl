@@ -1,7 +1,7 @@
 package logic
 
 import (
-	"github.com/0xc00000f/shortener-tpl/internal/utils"
+	"github.com/0xc00000f/shortener-tpl/internal/rand"
 
 	"go.uber.org/zap"
 )
@@ -44,7 +44,7 @@ func SetLogger(l *zap.Logger) Option {
 }
 
 func (ue *URLEncoder) encode() string {
-	return utils.RandStringRunes(ue.length)
+	return rand.String(ue.length)
 }
 
 func (ue *URLEncoder) Short(long string) (short string, err error) {
