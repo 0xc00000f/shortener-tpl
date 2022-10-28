@@ -104,5 +104,4 @@ func (cfg *cfg) chooseAddress() {
 	}
 
 	cfg.Address = address
-	return
 }
