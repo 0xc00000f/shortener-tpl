@@ -8,7 +8,7 @@ import (
 	"net/http"
 
 	"github.com/0xc00000f/shortener-tpl/internal/api"
-	"github.com/0xc00000f/shortener-tpl/internal/utils"
+	"github.com/0xc00000f/shortener-tpl/internal/url"
 
 	"github.com/go-chi/chi/v5"
 	"go.uber.org/zap"
@@ -41,7 +41,7 @@ func SaveURL(sa api.ShortenerAPI) http.HandlerFunc {
 
 		b, err := io.ReadAll(reader)
 		long := string(b)
-		if err != nil || !utils.IsURL(long) {
+		if err != nil || !url.Valid(long) {
 			sa.L.Error("checking body isn't success")
 			http.Error(w, "400 page not found", http.StatusBadRequest)
 			return

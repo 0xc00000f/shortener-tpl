@@ -11,7 +11,7 @@ import (
 	"github.com/0xc00000f/shortener-tpl/internal/api"
 	"github.com/0xc00000f/shortener-tpl/internal/logic"
 	"github.com/0xc00000f/shortener-tpl/internal/storage"
-	"github.com/0xc00000f/shortener-tpl/internal/utils"
+	"github.com/0xc00000f/shortener-tpl/internal/url"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -30,7 +30,7 @@ func TestSaveURL(t *testing.T) {
 
 	statusCode, body := testRequest(t, ts, "POST", "/", strings.NewReader("https://vk.com"), true)
 	assert.Equal(t, http.StatusCreated, statusCode)
-	assert.True(t, utils.IsURL(body))
+	assert.True(t, url.Valid(body))
 }
 
 func TestSaveURLJson(t *testing.T) {
@@ -53,5 +53,5 @@ func TestSaveURLJson(t *testing.T) {
 	resp := ShortResponse{}
 	err := json.Unmarshal([]byte(body), &resp)
 	require.NoError(t, err)
-	assert.True(t, utils.IsURL(resp.Result))
+	assert.True(t, url.Valid(resp.Result))
 }
