@@ -39,12 +39,12 @@ func testRequest(t *testing.T, ts *httptest.Server, method, path string, body io
 
 func TestRedirect(t *testing.T) {
 	storage := storage.NewMemoryStorage()
-	logic := encoder.NewURLEncoder(
+	encoder := encoder.New(
 		encoder.SetStorage(storage),
 		encoder.SetLength(7),
 	)
 
-	sa := shortener.New(shortener.SetEncoder(logic))
+	sa := shortener.New(shortener.SetEncoder(encoder))
 	apiInstance := NewRouter(sa)
 	ts := httptest.NewServer(apiInstance)
 	defer ts.Close()

@@ -75,7 +75,7 @@ func TestURLEncoder_Short(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			ue := NewURLEncoder(
+			ue := New(
 				SetLength(tt.length),
 				SetStorage(storage))
 			short, err := ue.Short(tt.long)
@@ -133,7 +133,7 @@ func TestURLEncoder_Get(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			ue := NewURLEncoder(
+			ue := New(
 				SetLength(preferredLength),
 				SetStorage(storage))
 			long, err := ue.Get(tt.short)

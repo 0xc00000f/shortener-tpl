@@ -24,7 +24,7 @@ func main() {
 		l.Fatal("creating config error", zap.Error(err))
 	}
 
-	encoder := encoder.NewURLEncoder(
+	encoder := encoder.New(
 		encoder.SetStorage(cfg.Storage),
 		encoder.SetLength(7),
 		encoder.SetLogger(l),

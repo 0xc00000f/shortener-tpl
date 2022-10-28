@@ -19,11 +19,11 @@ import (
 
 func TestSaveURL(t *testing.T) {
 	storage := storage.NewMemoryStorage()
-	logic := encoder.NewURLEncoder(
+	encoder := encoder.New(
 		encoder.SetStorage(storage),
 		encoder.SetLength(7),
 	)
-	sa := shortener.New(shortener.SetEncoder(logic))
+	sa := shortener.New(shortener.SetEncoder(encoder))
 	apiInstance := NewRouter(sa)
 	ts := httptest.NewServer(apiInstance)
 	defer ts.Close()
@@ -37,11 +37,11 @@ func TestSaveURLJson(t *testing.T) {
 	shortLength := 7
 
 	storage := storage.NewMemoryStorage()
-	logic := encoder.NewURLEncoder(
+	encoder := encoder.New(
 		encoder.SetStorage(storage),
 		encoder.SetLength(shortLength),
 	)
-	sa := shortener.New(shortener.SetEncoder(logic))
+	sa := shortener.New(shortener.SetEncoder(encoder))
 	apiInstance := NewRouter(sa)
 	ts := httptest.NewServer(apiInstance)
 	defer ts.Close()

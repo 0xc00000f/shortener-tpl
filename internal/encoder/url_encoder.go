@@ -14,7 +14,7 @@ type URLEncoder struct {
 
 type Option func(ue *URLEncoder)
 
-func NewURLEncoder(options ...Option) *URLEncoder {
+func New(options ...Option) *URLEncoder {
 	const preferredLength = 6
 	ue := URLEncoder{length: preferredLength}
 
