@@ -5,10 +5,10 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/0xc00000f/shortener-tpl/internal/api"
 	"github.com/0xc00000f/shortener-tpl/internal/config"
 	"github.com/0xc00000f/shortener-tpl/internal/handlers"
 	"github.com/0xc00000f/shortener-tpl/internal/logic"
+	"github.com/0xc00000f/shortener-tpl/internal/shortener"
 
 	"go.uber.org/zap"
 )
@@ -30,10 +30,10 @@ func main() {
 		logic.SetLogger(l),
 	)
 
-	shortener := api.NewShortenerAPI(
-		api.SetLogic(encoder),
-		api.InitBaseURL(cfg.BaseURL),
-		api.SetLogger(l),
+	shortener := shortener.NewShortenerAPI(
+		shortener.SetLogic(encoder),
+		shortener.InitBaseURL(cfg.BaseURL),
+		shortener.SetLogger(l),
 	)
 
 	router := handlers.NewRouter(shortener)

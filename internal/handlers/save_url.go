@@ -7,14 +7,14 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/0xc00000f/shortener-tpl/internal/api"
+	"github.com/0xc00000f/shortener-tpl/internal/shortener"
 	"github.com/0xc00000f/shortener-tpl/internal/url"
 
 	"github.com/go-chi/chi/v5"
 	"go.uber.org/zap"
 )
 
-func SaveURL(sa *api.ShortenerAPI) http.HandlerFunc {
+func SaveURL(sa *shortener.ShortenerAPI) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		urlPart := chi.URLParam(r, "url")
 
@@ -77,7 +77,7 @@ type ShortResponse struct {
 	Result string `json:"result"`
 }
 
-func SaveURLJson(sa *api.ShortenerAPI) http.HandlerFunc {
+func SaveURLJson(sa *shortener.ShortenerAPI) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		req := ShortRequest{}
 

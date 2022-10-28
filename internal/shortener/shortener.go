@@ -1,4 +1,4 @@
-package api
+package shortener
 
 import (
 	"os"

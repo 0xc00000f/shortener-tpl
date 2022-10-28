@@ -8,8 +8,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/0xc00000f/shortener-tpl/internal/api"
 	"github.com/0xc00000f/shortener-tpl/internal/logic"
+	"github.com/0xc00000f/shortener-tpl/internal/shortener"
 	"github.com/0xc00000f/shortener-tpl/internal/storage"
 	"github.com/0xc00000f/shortener-tpl/internal/url"
 
@@ -23,7 +23,7 @@ func TestSaveURL(t *testing.T) {
 		logic.SetStorage(storage),
 		logic.SetLength(7),
 	)
-	sa := api.NewShortenerAPI(api.SetLogic(logic))
+	sa := shortener.NewShortenerAPI(shortener.SetLogic(logic))
 	apiInstance := NewRouter(sa)
 	ts := httptest.NewServer(apiInstance)
 	defer ts.Close()
@@ -41,7 +41,7 @@ func TestSaveURLJson(t *testing.T) {
 		logic.SetStorage(storage),
 		logic.SetLength(shortLength),
 	)
-	sa := api.NewShortenerAPI(api.SetLogic(logic))
+	sa := shortener.NewShortenerAPI(shortener.SetLogic(logic))
 	apiInstance := NewRouter(sa)
 	ts := httptest.NewServer(apiInstance)
 	defer ts.Close()

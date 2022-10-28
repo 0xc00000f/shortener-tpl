@@ -4,13 +4,13 @@ import (
 	"compress/flate"
 	"net/http"
 
-	"github.com/0xc00000f/shortener-tpl/internal/api"
+	"github.com/0xc00000f/shortener-tpl/internal/shortener"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 )
 
-func NewRouter(sa *api.ShortenerAPI) *chi.Mux {
+func NewRouter(sa *shortener.ShortenerAPI) *chi.Mux {
 	r := chi.NewRouter()
 
 	r.Use(middleware.RequestID)

@@ -3,12 +3,12 @@ package handlers
 import (
 	"net/http"
 
-	"github.com/0xc00000f/shortener-tpl/internal/api"
+	"github.com/0xc00000f/shortener-tpl/internal/shortener"
 
 	"github.com/go-chi/chi/v5"
 )
 
-func Redirect(sa *api.ShortenerAPI) http.HandlerFunc {
+func Redirect(sa *shortener.ShortenerAPI) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		short := chi.URLParam(r, "url")
 

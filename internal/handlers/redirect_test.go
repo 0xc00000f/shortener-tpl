@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/0xc00000f/shortener-tpl/internal/api"
 	"github.com/0xc00000f/shortener-tpl/internal/logic"
+	"github.com/0xc00000f/shortener-tpl/internal/shortener"
 	"github.com/0xc00000f/shortener-tpl/internal/storage"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -44,7 +44,7 @@ func TestRedirect(t *testing.T) {
 		logic.SetLength(7),
 	)
 
-	sa := api.NewShortenerAPI(api.SetLogic(logic))
+	sa := shortener.NewShortenerAPI(shortener.SetLogic(logic))
 	apiInstance := NewRouter(sa)
 	ts := httptest.NewServer(apiInstance)
 	defer ts.Close()
