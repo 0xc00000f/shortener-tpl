@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/0xc00000f/shortener-tpl/internal/logic"
+	"github.com/0xc00000f/shortener-tpl/internal/encoder"
 	"github.com/0xc00000f/shortener-tpl/internal/shortener"
 	"github.com/0xc00000f/shortener-tpl/internal/storage"
 	"github.com/stretchr/testify/assert"
@@ -39,9 +39,9 @@ func testRequest(t *testing.T, ts *httptest.Server, method, path string, body io
 
 func TestRedirect(t *testing.T) {
 	storage := storage.NewMemoryStorage()
-	logic := logic.NewURLEncoder(
-		logic.SetStorage(storage),
-		logic.SetLength(7),
+	logic := encoder.NewURLEncoder(
+		encoder.SetStorage(storage),
+		encoder.SetLength(7),
 	)
 
 	sa := shortener.NewShortenerAPI(shortener.SetLogic(logic))

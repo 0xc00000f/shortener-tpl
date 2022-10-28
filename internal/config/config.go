@@ -4,17 +4,17 @@ import (
 	"flag"
 	"os"
 
-	"github.com/0xc00000f/shortener-tpl/internal/logic"
+	"github.com/0xc00000f/shortener-tpl/internal/encoder"
 	"github.com/0xc00000f/shortener-tpl/internal/storage"
 
 	"go.uber.org/zap"
 )
 
 type cfg struct {
-	filepath string            // path to the file with shortened URLs
-	Address  string            // address of the HTTP server
-	BaseURL  string            // base URL of the resulting shortened URL
-	Storage  logic.URLStorager // storage instance shortened URLs: in-memory / file
+	filepath string              // path to the file with shortened URLs
+	Address  string              // address of the HTTP server
+	BaseURL  string              // base URL of the resulting shortened URL
+	Storage  encoder.URLStorager // storage instance shortened URLs: in-memory / file
 
 	l *zap.Logger // logger
 }

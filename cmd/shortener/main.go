@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/0xc00000f/shortener-tpl/internal/config"
+	"github.com/0xc00000f/shortener-tpl/internal/encoder"
 	"github.com/0xc00000f/shortener-tpl/internal/handlers"
-	"github.com/0xc00000f/shortener-tpl/internal/logic"
 	"github.com/0xc00000f/shortener-tpl/internal/shortener"
 
 	"go.uber.org/zap"
@@ -24,10 +24,10 @@ func main() {
 		l.Fatal("creating config error", zap.Error(err))
 	}
 
-	encoder := logic.NewURLEncoder(
-		logic.SetStorage(cfg.Storage),
-		logic.SetLength(7),
-		logic.SetLogger(l),
+	encoder := encoder.NewURLEncoder(
+		encoder.SetStorage(cfg.Storage),
+		encoder.SetLength(7),
+		encoder.SetLogger(l),
 	)
 
 	shortener := shortener.NewShortenerAPI(
