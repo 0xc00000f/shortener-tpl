@@ -31,11 +31,11 @@ func NewRouter(sa *api.ShortenerAPI) *chi.Mux {
 	})
 
 	r.Route("/", func(r chi.Router) {
-		r.Post("/", SaveURL(*sa))
-		r.Post("/api/shorten", SaveURLJson(*sa))
+		r.Post("/", SaveURL(sa))
+		r.Post("/api/shorten", SaveURLJson(sa))
 
 		r.Route("/{url}", func(r chi.Router) {
-			r.Get("/", Redirect(*sa))
+			r.Get("/", Redirect(sa))
 		})
 	})
 

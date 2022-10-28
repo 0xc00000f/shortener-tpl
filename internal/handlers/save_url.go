@@ -14,7 +14,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func SaveURL(sa api.ShortenerAPI) http.HandlerFunc {
+func SaveURL(sa *api.ShortenerAPI) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		urlPart := chi.URLParam(r, "url")
 
@@ -77,7 +77,7 @@ type ShortResponse struct {
 	Result string `json:"result"`
 }
 
-func SaveURLJson(sa api.ShortenerAPI) http.HandlerFunc {
+func SaveURLJson(sa *api.ShortenerAPI) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		req := ShortRequest{}
 

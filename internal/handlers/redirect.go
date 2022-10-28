@@ -8,7 +8,7 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-func Redirect(sa api.ShortenerAPI) http.HandlerFunc {
+func Redirect(sa *api.ShortenerAPI) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		short := chi.URLParam(r, "url")
 
