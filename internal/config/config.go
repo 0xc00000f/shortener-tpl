@@ -59,7 +59,7 @@ func (cfg *cfg) chooseStorage() (err error) {
 	if !ok {
 		// create in-memory storage
 		cfg.l.Info("choose in-memory storage")
-		cfg.Storage = storage.NewMemoryStorage()
+		cfg.Storage = storage.NewMemoryStorage(cfg.l)
 		return nil
 	}
 

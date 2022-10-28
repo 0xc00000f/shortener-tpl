@@ -28,7 +28,7 @@ func NewFileStorage(filename string, logger *zap.Logger) (FileStorage, error) {
 
 	return FileStorage{
 		file:   file,
-		memory: NewMemoryStorage(),
+		memory: NewMemoryStorage(nil),
 		l:      logger,
 	}, nil
 }
@@ -59,7 +59,7 @@ func (fs FileStorage) InitMemory() error {
 			return err
 		}
 
-		fs.memory[url.Short] = url.Long
+		fs.memory.storage[url.Short] = url.Long
 	}
 	return nil
 }

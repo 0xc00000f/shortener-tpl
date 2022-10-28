@@ -9,7 +9,7 @@ import (
 
 func TestMemoryStorage_Get(t *testing.T) {
 
-	var storage = MemoryStorage{}
+	var storage = NewMemoryStorage(nil)
 	storage.Store("ytAA2Z", "https://google.com")
 	storage.Store("hNaU8l", "https://dzen.ru/")
 
@@ -56,7 +56,7 @@ func TestMemoryStorage_Get(t *testing.T) {
 
 func TestMemoryStorage_Set(t *testing.T) {
 
-	var storage = MemoryStorage{}
+	var storage = NewMemoryStorage(nil)
 
 	tests := []struct {
 		name     string

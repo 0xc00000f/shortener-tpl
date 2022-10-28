@@ -18,7 +18,7 @@ import (
 )
 
 func TestSaveURL(t *testing.T) {
-	storage := storage.NewMemoryStorage()
+	storage := storage.NewMemoryStorage(nil)
 	encoder := encoder.New(
 		encoder.SetStorage(storage),
 		encoder.SetLength(7),
@@ -36,7 +36,7 @@ func TestSaveURL(t *testing.T) {
 func TestSaveURLJson(t *testing.T) {
 	shortLength := 7
 
-	storage := storage.NewMemoryStorage()
+	storage := storage.NewMemoryStorage(nil)
 	encoder := encoder.New(
 		encoder.SetStorage(storage),
 		encoder.SetLength(shortLength),

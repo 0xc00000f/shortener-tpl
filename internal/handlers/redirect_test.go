@@ -38,7 +38,7 @@ func testRequest(t *testing.T, ts *httptest.Server, method, path string, body io
 }
 
 func TestRedirect(t *testing.T) {
-	storage := storage.NewMemoryStorage()
+	storage := storage.NewMemoryStorage(nil)
 	encoder := encoder.New(
 		encoder.SetStorage(storage),
 		encoder.SetLength(7),
