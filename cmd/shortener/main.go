@@ -30,8 +30,8 @@ func main() {
 		encoder.SetLogger(l),
 	)
 
-	shortener := shortener.NewShortenerAPI(
-		shortener.SetLogic(encoder),
+	shortener := shortener.New(
+		shortener.SetEncoder(encoder),
 		shortener.InitBaseURL(cfg.BaseURL),
 		shortener.SetLogger(l),
 	)

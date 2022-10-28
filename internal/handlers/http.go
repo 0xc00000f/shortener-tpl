@@ -10,7 +10,7 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 )
 
-func NewRouter(sa *shortener.ShortenerAPI) *chi.Mux {
+func NewRouter(sa *shortener.NaiveShortener) *chi.Mux {
 	r := chi.NewRouter()
 
 	r.Use(middleware.RequestID)

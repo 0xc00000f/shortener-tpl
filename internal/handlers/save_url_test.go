@@ -23,7 +23,7 @@ func TestSaveURL(t *testing.T) {
 		encoder.SetStorage(storage),
 		encoder.SetLength(7),
 	)
-	sa := shortener.NewShortenerAPI(shortener.SetLogic(logic))
+	sa := shortener.New(shortener.SetEncoder(logic))
 	apiInstance := NewRouter(sa)
 	ts := httptest.NewServer(apiInstance)
 	defer ts.Close()
@@ -41,7 +41,7 @@ func TestSaveURLJson(t *testing.T) {
 		encoder.SetStorage(storage),
 		encoder.SetLength(shortLength),
 	)
-	sa := shortener.NewShortenerAPI(shortener.SetLogic(logic))
+	sa := shortener.New(shortener.SetEncoder(logic))
 	apiInstance := NewRouter(sa)
 	ts := httptest.NewServer(apiInstance)
 	defer ts.Close()

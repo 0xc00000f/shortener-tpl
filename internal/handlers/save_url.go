@@ -14,7 +14,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func SaveURL(sa *shortener.ShortenerAPI) http.HandlerFunc {
+func SaveURL(sa *shortener.NaiveShortener) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		urlPart := chi.URLParam(r, "url")
 
@@ -47,7 +47,7 @@ func SaveURL(sa *shortener.ShortenerAPI) http.HandlerFunc {
 			return
 		}
 
-		short, err := sa.Logic().Short(long)
+		short, err := sa.Encoder().Short(long)
 		if err != nil {
 			sa.L.Error("creating short isn't success: %v", zap.Error(err))
 			http.Error(w, "400 page not found", http.StatusBadRequest)
@@ -77,7 +77,7 @@ type ShortResponse struct {
 	Result string `json:"result"`
 }
 
-func SaveURLJson(sa *shortener.ShortenerAPI) http.HandlerFunc {
+func SaveURLJson(sa *shortener.NaiveShortener) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		req := ShortRequest{}
 
@@ -110,7 +110,7 @@ func SaveURLJson(sa *shortener.ShortenerAPI) http.HandlerFunc {
 			return
 		}
 
-		short, err := sa.Logic().Short(req.URL)
+		short, err := sa.Encoder().Short(req.URL)
 		if err != nil {
 			sa.L.Error("creating short isn't success", zap.Error(err))
 			http.Error(w, "400 page not found", http.StatusBadRequest)

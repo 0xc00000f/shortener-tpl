@@ -44,7 +44,7 @@ func TestRedirect(t *testing.T) {
 		encoder.SetLength(7),
 	)
 
-	sa := shortener.NewShortenerAPI(shortener.SetLogic(logic))
+	sa := shortener.New(shortener.SetEncoder(logic))
 	apiInstance := NewRouter(sa)
 	ts := httptest.NewServer(apiInstance)
 	defer ts.Close()
