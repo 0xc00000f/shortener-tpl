@@ -40,14 +40,14 @@ func SaveURL(sa api.ShortenerAPI) http.HandlerFunc {
 		}
 
 		b, err := io.ReadAll(reader)
-		longURL := string(b)
-		if err != nil || !utils.IsURL(longURL) {
+		long := string(b)
+		if err != nil || !utils.IsURL(long) {
 			sa.L.Error("checking body isn't success")
 			http.Error(w, "400 page not found", http.StatusBadRequest)
 			return
 		}
 
-		short, err := sa.Logic().Short(longURL)
+		short, err := sa.Logic().Short(long)
 		if err != nil {
 			sa.L.Error("creating short isn't success: %v", zap.Error(err))
 			http.Error(w, "400 page not found", http.StatusBadRequest)

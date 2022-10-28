@@ -7,9 +7,9 @@ import (
 )
 
 type ShortenerAPI struct {
-	logic   Shortener
-	BaseURL string
-	L       *zap.Logger
+	shortener Shortener
+	BaseURL   string
+	L         *zap.Logger
 }
 
 type Option func(sa *ShortenerAPI)
@@ -25,12 +25,12 @@ func NewShortenerAPI(options ...Option) *ShortenerAPI {
 }
 
 func (sa *ShortenerAPI) Logic() Shortener {
-	return sa.logic
+	return sa.shortener
 }
 
 func SetLogic(logic Shortener) Option {
 	return func(sa *ShortenerAPI) {
-		sa.logic = logic
+		sa.shortener = logic
 	}
 }
 

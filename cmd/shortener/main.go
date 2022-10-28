@@ -20,20 +20,20 @@ func main() {
 		l.Fatal("creating config error", zap.Error(err))
 	}
 
-	logic := logic.NewURLEncoder(
+	encoder := logic.NewURLEncoder(
 		logic.SetStorage(cfg.Storage),
 		logic.SetLength(7),
 		logic.SetLogger(l),
 	)
 
-	sa := api.NewShortenerAPI(
-		api.SetLogic(logic),
+	shortener := api.NewShortenerAPI(
+		api.SetLogic(encoder),
 		api.InitBaseURL(cfg.BaseURL),
 		api.SetLogger(l),
 	)
 
-	apiInstance := handlers.NewRouter(sa)
+	router := handlers.NewRouter(shortener)
 
 	l.Info("starting server", zap.String("address", cfg.Address))
-	l.Fatal("server fatal error", zap.Error(http.ListenAndServe(cfg.Address, apiInstance)))
+	l.Fatal("server fatal error", zap.Error(http.ListenAndServe(cfg.Address, router)))
 }

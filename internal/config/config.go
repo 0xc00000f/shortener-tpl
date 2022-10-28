@@ -46,7 +46,7 @@ func parseFlags() (filepath string, address string, baseURL string) {
 }
 
 func (cfg *cfg) chooseStorage() (err error) {
-	const systemFileStoragePathKey = "FILE_STORAGE_PATH"
+	const fileStorageKey = "FILE_STORAGE_PATH" // file storage path key -- environment variable
 
 	// if filepath is set by flags create file storage
 	if cfg.filepath != "" {
@@ -55,7 +55,7 @@ func (cfg *cfg) chooseStorage() (err error) {
 	}
 
 	// try to set filepath from system environment variable
-	filepath, ok := os.LookupEnv(systemFileStoragePathKey)
+	filepath, ok := os.LookupEnv(fileStorageKey)
 	if !ok {
 		// create in-memory storage
 		cfg.l.Info("choose in-memory storage")
@@ -87,7 +87,7 @@ func (cfg *cfg) creatingFileStorage(path string) (err error) {
 }
 
 func (cfg *cfg) chooseAddress() {
-	const systemAddressKey = "SERVER_ADDRESS"
+	const systemAddressKey = "SERVER_ADDRESS" // address key -- environment variable
 	const defaultAddress = ":8080"
 
 	// if is set by flags

@@ -10,16 +10,16 @@ import (
 
 func Redirect(sa api.ShortenerAPI) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		urlPart := chi.URLParam(r, "url")
+		short := chi.URLParam(r, "url")
 
-		originalURL, err := sa.Logic().Get(urlPart)
+		long, err := sa.Logic().Get(short)
 		if err != nil {
 			http.Error(w, "400 page not found", http.StatusBadRequest)
 			return
 		}
 
 		w.Header().Set("content-type", "text/plain; charset=utf-8")
-		w.Header().Set("Location", originalURL)
+		w.Header().Set("Location", long)
 		w.WriteHeader(http.StatusTemporaryRedirect)
 	}
 }
