@@ -12,41 +12,41 @@ type NaiveShortener struct {
 	L       *zap.Logger
 }
 
-type Option func(sa *NaiveShortener)
+type Option func(ns *NaiveShortener)
 
 func New(options ...Option) *NaiveShortener {
-	sa := NaiveShortener{}
+	ns := NaiveShortener{}
 
 	for _, fn := range options {
-		fn(&sa)
+		fn(&ns)
 	}
 
-	return &sa
+	return &ns
 }
 
-func (sa *NaiveShortener) Encoder() Shortener {
-	return sa.encoder
+func (ns *NaiveShortener) Encoder() Shortener {
+	return ns.encoder
 }
 
 func SetEncoder(encoder Shortener) Option {
-	return func(sa *NaiveShortener) {
-		sa.encoder = encoder
+	return func(ns *NaiveShortener) {
+		ns.encoder = encoder
 	}
 }
 
 func InitBaseURL(baseURL string) Option {
-	return func(sa *NaiveShortener) {
+	return func(ns *NaiveShortener) {
 		if len(baseURL) > 0 {
-			sa.BaseURL = baseURL
+			ns.BaseURL = baseURL
 			return
 		}
 
-		sa.BaseURL = os.Getenv("BASE_URL")
+		ns.BaseURL = os.Getenv("BASE_URL")
 	}
 }
 
 func SetLogger(l *zap.Logger) Option {
-	return func(sa *NaiveShortener) {
-		sa.L = l
+	return func(ns *NaiveShortener) {
+		ns.L = l
 	}
 }
