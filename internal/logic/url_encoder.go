@@ -6,8 +6,6 @@ import (
 	"go.uber.org/zap"
 )
 
-var preferredLength = 6
-
 type URLEncoder struct {
 	length  int
 	storage URLStorager
@@ -17,6 +15,7 @@ type URLEncoder struct {
 type Option func(ue *URLEncoder)
 
 func NewURLEncoder(options ...Option) *URLEncoder {
+	const preferredLength = 6
 	ue := URLEncoder{length: preferredLength}
 
 	for _, fn := range options {
