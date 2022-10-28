@@ -19,7 +19,7 @@ type cfg struct {
 	l *zap.Logger // logger
 }
 
-func NewConfig(logger *zap.Logger) (cfg, error) {
+func New(logger *zap.Logger) (cfg, error) {
 	filepath, address, baseURL := parseFlags()
 
 	cfg := cfg{l: logger, filepath: filepath, Address: address, BaseURL: baseURL}

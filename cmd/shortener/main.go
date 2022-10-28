@@ -19,7 +19,7 @@ func main() {
 	l, _ := zap.NewProduction()
 	defer l.Sync()
 
-	cfg, err := config.NewConfig(l)
+	cfg, err := config.New(l)
 	if err != nil {
 		l.Fatal("creating config error", zap.Error(err))
 	}
