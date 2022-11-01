@@ -33,17 +33,9 @@ func SaveURL(sa *shortener.NaiveShortener) http.HandlerFunc {
 		}
 		defer rc.Close()
 
-		b, err := io.ReadAll(rc)
-		long := string(b)
-		if err != nil || !url.Valid(long) {
-			sa.L.Error("checking body isn't success")
-			http.Error(w, "400 page not found", http.StatusBadRequest)
-			return
-		}
-
-		short, err := sa.Encoder().Short(long)
+		short, err := createShort(sa, rc, false)
 		if err != nil {
-			sa.L.Error("creating short isn't success: %v", zap.Error(err))
+			sa.L.Error("creating short isn't success", zap.Error(err))
 			http.Error(w, "400 page not found", http.StatusBadRequest)
 			return
 		}
@@ -89,8 +81,6 @@ type ShortResponse struct {
 
 func SaveURLJson(sa *shortener.NaiveShortener) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		req := ShortRequest{}
-
 		rc, err := readBody(r, sa.L)
 		if err != nil {
 			sa.L.Error("read body err", zap.Error(err))
@@ -99,21 +89,7 @@ func SaveURLJson(sa *shortener.NaiveShortener) http.HandlerFunc {
 		}
 		defer rc.Close()
 
-		b, err := io.ReadAll(rc)
-
-		if err != nil {
-			sa.L.Error("checking body isn't success", zap.Error(err))
-			http.Error(w, "400 page not found", http.StatusBadRequest)
-			return
-		}
-
-		if err := json.Unmarshal(b, &req); err != nil {
-			sa.L.Error("unmarshalling isn't success", zap.Error(err))
-			http.Error(w, "400 page not found", http.StatusBadRequest)
-			return
-		}
-
-		short, err := sa.Encoder().Short(req.URL)
+		short, err := createShort(sa, rc, true)
 		if err != nil {
 			sa.L.Error("creating short isn't success", zap.Error(err))
 			http.Error(w, "400 page not found", http.StatusBadRequest)
@@ -140,4 +116,40 @@ func SaveURLJson(sa *shortener.NaiveShortener) http.HandlerFunc {
 		w.WriteHeader(http.StatusCreated)
 		w.Write(respBody)
 	}
+}
+
+func createShort(sa *shortener.NaiveShortener, r io.Reader, isJSON bool) (short string, err error) {
+
+	req := ShortRequest{}
+	b, err := io.ReadAll(r)
+	if err != nil {
+		sa.L.Error("reading body isn't success", zap.Error(err))
+		return "", err
+	}
+
+	var long string
+	switch isJSON {
+	case true:
+		err = json.Unmarshal(b, &req)
+		if err != nil {
+			sa.L.Error("unmarshalling isn't success", zap.Error(err))
+			return "", err
+		}
+		long = req.URL
+	case false:
+		long = string(b)
+	}
+
+	if !url.Valid(long) {
+		sa.L.Error("url in body isn't valid")
+		return "", errors.New("url in body isn't valid")
+	}
+
+	short, err = sa.Encoder().Short(long)
+	if err != nil {
+		sa.L.Error("creating short isn't success", zap.Error(err))
+		return "", err
+	}
+
+	return short, nil
 }
