@@ -20,9 +20,16 @@ type cfg struct {
 }
 
 func New(logger *zap.Logger) (cfg, error) {
-	filepath, address, baseURL := parseFlags()
+	cfg := cfg{l: logger}
 
-	cfg := cfg{l: logger, filepath: filepath, Address: address, BaseURL: baseURL}
+	flag.StringVar(&cfg.filepath, "f", "", "responsible for the path to the file with shortened URLs")
+	flag.StringVar(&cfg.Address, "a", "", "responsible for the start Address of the HTTP server")
+	flag.StringVar(&cfg.BaseURL,
+		"b",
+		"",
+		"responsible for the base Address of the resulting shortened URL")
+	flag.Parse()
+
 	err := cfg.chooseStorage()
 	if err != nil {
 		cfg.l.Error("choose storage err", zap.Error(err))
@@ -31,18 +38,6 @@ func New(logger *zap.Logger) (cfg, error) {
 	cfg.chooseAddress()
 
 	return cfg, nil
-}
-
-func parseFlags() (filepath string, address string, baseURL string) {
-	flag.StringVar(&filepath, "f", "", "responsible for the path to the file with shortened URLs")
-	flag.StringVar(&address, "a", "", "responsible for the start Address of the HTTP server")
-	flag.StringVar(&baseURL,
-		"b",
-		"",
-		"responsible for the base Address of the resulting shortened URL")
-
-	flag.Parse()
-	return
 }
 
 func (cfg *cfg) chooseStorage() (err error) {
