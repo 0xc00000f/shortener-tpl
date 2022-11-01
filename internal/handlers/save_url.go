@@ -3,6 +3,7 @@ package handlers
 import (
 	"compress/gzip"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -24,22 +25,15 @@ func SaveURL(sa *shortener.NaiveShortener) http.HandlerFunc {
 			return
 		}
 
-		var reader io.Reader
-		if r.Header.Get(`Content-Encoding`) == `gzip` {
-			gz, err := gzip.NewReader(r.Body)
-			if err != nil {
-				sa.L.Error("can't create gzip reader", zap.Error(err))
-				http.Error(w, "400 page not found", http.StatusBadRequest)
-				return
-			}
-			reader = gz
-			defer gz.Close()
-		} else {
-			reader = r.Body
-			defer r.Body.Close()
+		rc, err := readBody(r, sa.L)
+		if err != nil {
+			sa.L.Error("read body err", zap.Error(err))
+			http.Error(w, "400 page not found", http.StatusBadRequest)
+			return
 		}
+		defer rc.Close()
 
-		b, err := io.ReadAll(reader)
+		b, err := io.ReadAll(rc)
 		long := string(b)
 		if err != nil || !url.Valid(long) {
 			sa.L.Error("checking body isn't success")
@@ -69,6 +63,22 @@ func SaveURL(sa *shortener.NaiveShortener) http.HandlerFunc {
 	}
 }
 
+func readBody(r *http.Request, l *zap.Logger) (io.ReadCloser, error) {
+	var readCloser io.ReadCloser
+	if r.Header.Get(`Content-Encoding`) == `gzip` {
+		gz, err := gzip.NewReader(r.Body)
+		if err != nil {
+			l.Error("can't create gzip readCloser", zap.Error(err))
+			return nil, errors.New("can't create gzip readCloser")
+		}
+		readCloser = gz
+		return readCloser, nil
+	}
+	readCloser = r.Body
+
+	return readCloser, nil
+}
+
 type ShortRequest struct {
 	URL string `json:"url"`
 }
@@ -81,22 +91,15 @@ func SaveURLJson(sa *shortener.NaiveShortener) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		req := ShortRequest{}
 
-		var reader io.Reader
-		if r.Header.Get(`Content-Encoding`) == `gzip` {
-			gz, err := gzip.NewReader(r.Body)
-			if err != nil {
-				sa.L.Error("cant create gzip reader", zap.Error(err))
-				http.Error(w, "400 page not found", http.StatusBadRequest)
-				return
-			}
-			reader = gz
-			defer gz.Close()
-		} else {
-			reader = r.Body
-			defer r.Body.Close()
+		rc, err := readBody(r, sa.L)
+		if err != nil {
+			sa.L.Error("read body err", zap.Error(err))
+			http.Error(w, "400 page not found", http.StatusBadRequest)
+			return
 		}
+		defer rc.Close()
 
-		b, err := io.ReadAll(reader)
+		b, err := io.ReadAll(rc)
 
 		if err != nil {
 			sa.L.Error("checking body isn't success", zap.Error(err))
