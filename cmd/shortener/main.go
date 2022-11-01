@@ -39,5 +39,5 @@ func main() {
 	router := handlers.NewRouter(shortener)
 
 	l.Info("starting server", zap.String("address", cfg.Address))
-	l.Fatal("server fatal error", zap.Error(http.ListenAndServe(cfg.Address, router)))
+	l.Fatal("http server down", zap.Error(http.ListenAndServe(cfg.Address, router)))
 }
