@@ -3,7 +3,6 @@ package handlers
 import (
 	"compress/gzip"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -61,7 +60,7 @@ func readBody(r *http.Request, l *zap.Logger) (io.ReadCloser, error) {
 		gz, err := gzip.NewReader(r.Body)
 		if err != nil {
 			l.Error("can't create gzip readCloser", zap.Error(err))
-			return nil, errors.New("can't create gzip readCloser")
+			return nil, err
 		}
 		readCloser = gz
 		return readCloser, nil
@@ -142,7 +141,7 @@ func createShort(sa *shortener.NaiveShortener, r io.Reader, isJSON bool) (short 
 
 	if !url.Valid(long) {
 		sa.L.Error("url in body isn't valid")
-		return "", errors.New("url in body isn't valid")
+		return "", url.ErrInvalidURL
 	}
 
 	short, err = sa.Encoder().Short(long)

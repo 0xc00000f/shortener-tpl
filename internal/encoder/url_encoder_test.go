@@ -1,11 +1,10 @@
 package encoder
 
 import (
-	"errors"
-	"github.com/0xc00000f/shortener-tpl/internal/rand"
 	"testing"
 
-	"github.com/0xc00000f/shortener-tpl/internal/storage"
+	"github.com/0xc00000f/shortener-tpl/internal/rand"
+	s "github.com/0xc00000f/shortener-tpl/internal/storage"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -41,7 +40,7 @@ func TestURLEncoder_Encode(t *testing.T) {
 
 func TestURLEncoder_Short(t *testing.T) {
 
-	var storage = storage.NewMemoryStorage(nil)
+	var store = s.NewMemoryStorage(nil)
 
 	tests := []struct {
 		name   string
@@ -65,20 +64,20 @@ func TestURLEncoder_Short(t *testing.T) {
 			name:   "negative #1 - empty long url",
 			length: PreferredLength,
 			long:   "",
-			err:    errors.New("empty string as a value isn't allowed"),
+			err:    s.ErrEmptyValue,
 		},
 		{
 			name:   "negative #2 - empty short url",
 			length: 0,
 			long:   "https://ya.ru/",
-			err:    errors.New("empty string as a key isn't allowed"),
+			err:    s.ErrEmptyKey,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			ue := New(
 				SetLength(tt.length),
-				SetStorage(storage),
+				SetStorage(store),
 				SetRandom(rand.New(true)),
 			)
 			short, err := ue.Short(tt.long)
@@ -98,7 +97,7 @@ func TestURLEncoder_Short(t *testing.T) {
 
 func TestURLEncoder_Get(t *testing.T) {
 
-	var storage = storage.NewMemoryStorage(nil)
+	var storage = s.NewMemoryStorage(nil)
 	storage.Store("ytAA2Z", "https://google.com")
 	storage.Store("hNaU8l", "https://dzen.ru/")
 
@@ -124,13 +123,13 @@ func TestURLEncoder_Get(t *testing.T) {
 			name:  "negative #1 - key is not exist",
 			short: "not exist",
 			long:  "https://dzen.ru/",
-			err:   errors.New("key is not exist"),
+			err:   s.ErrNoKeyFound,
 		},
 		{
 			name:  "negative #2 - empty short",
 			short: "",
 			long:  "https://dzen.ru/",
-			err:   errors.New("empty string as a key isn't allowed"),
+			err:   s.ErrEmptyKey,
 		},
 	}
 	for _, tt := range tests {

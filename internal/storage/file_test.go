@@ -1,7 +1,6 @@
 package storage
 
 import (
-	"errors"
 	"os"
 	"testing"
 
@@ -44,13 +43,13 @@ func TestFileStorage_Get(t *testing.T) {
 			name:  "negative #1",
 			key:   "4qwpBs",
 			value: "",
-			err:   errors.New("key is not exist"),
+			err:   ErrNoKeyFound,
 		},
 		{
 			name:  "negative #2",
 			key:   "",
 			value: "",
-			err:   errors.New("empty string as a key isn't allowed"),
+			err:   ErrEmptyKey,
 		},
 	}
 	for _, tt := range tests {
@@ -96,15 +95,15 @@ func TestFileStorage_Set(t *testing.T) {
 			name:     "empty value #1",
 			key:      "hNaU8l",
 			value:    "",
-			errStore: errors.New("empty string as a value isn't allowed"),
-			errGet:   errors.New("key is not exist"),
+			errStore: ErrEmptyValue,
+			errGet:   ErrNoKeyFound,
 		},
 		{
 			name:     "empty key #1",
 			key:      "",
 			value:    "",
-			errStore: errors.New("empty string as a key isn't allowed"),
-			errGet:   errors.New("empty string as a key isn't allowed"),
+			errStore: ErrEmptyKey,
+			errGet:   ErrEmptyKey,
 		},
 	}
 	for _, tt := range tests {
