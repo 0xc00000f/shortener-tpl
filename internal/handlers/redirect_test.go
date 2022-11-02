@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"github.com/0xc00000f/shortener-tpl/internal/rand"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -42,6 +43,7 @@ func TestRedirect(t *testing.T) {
 	encoder := encoder.New(
 		encoder.SetStorage(storage),
 		encoder.SetLength(7),
+		encoder.SetRandom(rand.New(true)),
 	)
 
 	sa := shortener.New(shortener.SetEncoder(encoder))

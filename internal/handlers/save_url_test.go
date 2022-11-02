@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/0xc00000f/shortener-tpl/internal/rand"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -22,6 +23,7 @@ func TestSaveURL(t *testing.T) {
 	encoder := encoder.New(
 		encoder.SetStorage(storage),
 		encoder.SetLength(7),
+		encoder.SetRandom(rand.New(true)),
 	)
 	sa := shortener.New(shortener.SetEncoder(encoder))
 	apiInstance := NewRouter(sa)
@@ -40,6 +42,7 @@ func TestSaveURLJson(t *testing.T) {
 	encoder := encoder.New(
 		encoder.SetStorage(storage),
 		encoder.SetLength(shortLength),
+		encoder.SetRandom(rand.New(true)),
 	)
 	sa := shortener.New(shortener.SetEncoder(encoder))
 	apiInstance := NewRouter(sa)

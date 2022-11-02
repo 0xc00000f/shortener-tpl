@@ -2,6 +2,7 @@ package encoder
 
 import (
 	"errors"
+	"github.com/0xc00000f/shortener-tpl/internal/rand"
 	"testing"
 
 	"github.com/0xc00000f/shortener-tpl/internal/storage"
@@ -11,6 +12,7 @@ import (
 )
 
 func TestURLEncoder_Encode(t *testing.T) {
+	r := rand.New(false)
 	tests := []struct {
 		name    string
 		letters int
@@ -30,7 +32,7 @@ func TestURLEncoder_Encode(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			ue := URLEncoder{length: tt.letters}
+			ue := URLEncoder{length: tt.letters, rand: r}
 			url := ue.encode()
 			assert.Equal(t, len(url), tt.letters)
 		})
@@ -77,7 +79,9 @@ func TestURLEncoder_Short(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			ue := New(
 				SetLength(tt.length),
-				SetStorage(storage))
+				SetStorage(storage),
+				SetRandom(rand.New(true)),
+			)
 			short, err := ue.Short(tt.long)
 			assert.Equal(t, tt.err, err)
 			if err != nil {
