@@ -9,7 +9,9 @@ import (
 type URLEncoder struct {
 	length  int
 	storage URLStorager
-	l       *zap.Logger
+	rand    rand.Random
+
+	l *zap.Logger
 }
 
 type Option func(ue *URLEncoder)
@@ -43,8 +45,14 @@ func SetLogger(l *zap.Logger) Option {
 	}
 }
 
+func SetRandom(r rand.Random) Option {
+	return func(ue *URLEncoder) {
+		ue.rand = r
+	}
+}
+
 func (ue *URLEncoder) encode() string {
-	return rand.String(ue.length)
+	return ue.rand.String(ue.length)
 }
 
 func (ue *URLEncoder) Short(long string) (short string, err error) {

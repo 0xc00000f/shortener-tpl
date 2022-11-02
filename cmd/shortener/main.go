@@ -1,21 +1,18 @@
 package main
 
 import (
-	"math/rand"
 	"net/http"
-	"time"
 
 	"github.com/0xc00000f/shortener-tpl/internal/config"
 	"github.com/0xc00000f/shortener-tpl/internal/encoder"
 	"github.com/0xc00000f/shortener-tpl/internal/handlers"
+	"github.com/0xc00000f/shortener-tpl/internal/rand"
 	"github.com/0xc00000f/shortener-tpl/internal/shortener"
 
 	"go.uber.org/zap"
 )
 
 func main() {
-	rand.Seed(time.Now().UnixNano())
-
 	l, _ := zap.NewProduction()
 	defer l.Sync()
 
@@ -27,6 +24,7 @@ func main() {
 	encoder := encoder.New(
 		encoder.SetStorage(cfg.Storage),
 		encoder.SetLength(7),
+		encoder.SetRandom(rand.New(false)),
 		encoder.SetLogger(l),
 	)
 
