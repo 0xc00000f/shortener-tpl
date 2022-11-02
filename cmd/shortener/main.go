@@ -8,6 +8,7 @@ import (
 	"github.com/0xc00000f/shortener-tpl/internal/handlers"
 	"github.com/0xc00000f/shortener-tpl/internal/rand"
 	"github.com/0xc00000f/shortener-tpl/internal/shortener"
+	"github.com/0xc00000f/shortener-tpl/internal/storage"
 
 	"go.uber.org/zap"
 )
@@ -21,8 +22,13 @@ func main() {
 		l.Fatal("creating config error", zap.Error(err))
 	}
 
+	storage, err := storage.New(cfg)
+	if err != nil {
+		l.Fatal("creating storage error", zap.Error(err))
+	}
+
 	encoder := encoder.New(
-		encoder.SetStorage(cfg.Storage),
+		encoder.SetStorage(storage),
 		encoder.SetLength(7),
 		encoder.SetRandom(rand.New(false)),
 		encoder.SetLogger(l),

@@ -4,9 +4,6 @@ import (
 	"flag"
 	"os"
 
-	"github.com/0xc00000f/shortener-tpl/internal/encoder"
-	"github.com/0xc00000f/shortener-tpl/internal/storage"
-
 	"go.uber.org/zap"
 )
 
@@ -17,10 +14,9 @@ const (
 )
 
 type Cfg struct {
-	Filepath string              // path to the file with shortened URLs
-	Address  string              // address of the HTTP server
-	BaseURL  string              // base URL of the resulting shortened URL
-	Storage  encoder.URLStorager // storage instance shortened URLs: in-memory / file
+	Filepath string // path to the file with shortened URLs
+	Address  string // address of the HTTP server
+	BaseURL  string // base URL of the resulting shortened URL
 
 	L *zap.Logger // logger
 }
@@ -36,53 +32,30 @@ func New(logger *zap.Logger) (Cfg, error) {
 		"responsible for the base Address of the resulting shortened URL")
 	flag.Parse()
 
-	err := cfg.chooseStorage()
-	if err != nil {
-		cfg.L.Error("choose storage err", zap.Error(err))
-		return cfg, err
-	}
+	cfg.chooseFilepath()
 	cfg.chooseAddress()
 
 	return cfg, nil
 }
 
-	// if filepath is set by flags create file storage
-func (cfg *Cfg) chooseStorage() (err error) {
+func (cfg *Cfg) chooseFilepath() {
+	// if filepath is set by flags
 	if cfg.Filepath != "" {
-		cfg.L.Info("choose storage from flag", zap.String("Filepath", cfg.Filepath))
-		return cfg.creatingFileStorage(cfg.Filepath)
+		cfg.L.Info("choose filepath from flag", zap.String("Filepath", cfg.Filepath))
+		return
 	}
 
 	// try to set filepath from system environment variable
 	filepath, ok := os.LookupEnv(FileStorageKey)
 	if !ok {
-		// create in-memory storage
-		cfg.L.Info("choose in-memory storage")
-		cfg.Storage = storage.NewMemoryStorage(cfg.L)
-		return nil
+		cfg.L.Info("Filepath is empty", zap.String("Filepath", cfg.Filepath))
+		return
 	}
 
 	// filepath is set by system environment variable, create file storage
 	cfg.Filepath = filepath
-	cfg.L.Info("choose storage from environment variable", zap.String("Filepath", filepath))
-	return cfg.creatingFileStorage(filepath)
-}
-
-func (cfg *Cfg) creatingFileStorage(path string) (err error) {
-	storage, err := storage.NewFileStorage(path, cfg.L)
-	if err != nil {
-		cfg.L.Error("creating file storage err", zap.Error(err))
-		return err
-	}
-
-	err = storage.InitMemory()
-	if err != nil {
-		cfg.L.Error("init file storage memory err", zap.Error(err))
-		return err
-	}
-
-	cfg.Storage = storage
-	return nil
+	cfg.L.Info("Filepath found in environment variable",
+		zap.String("environment variable", FileStorageKey), zap.String("Filepath", cfg.Filepath))
 }
 
 func (cfg *Cfg) chooseAddress() {
