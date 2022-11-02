@@ -10,6 +10,12 @@ import (
 	"go.uber.org/zap"
 )
 
+const (
+	FileStorageKey   = "FILE_STORAGE_PATH" // file storage path key -- environment variable
+	SystemAddressKey = "SERVER_ADDRESS"    // address key -- environment variable
+	DefaultAddress   = ":8080"
+)
+
 type cfg struct {
 	filepath string              // path to the file with shortened URLs
 	Address  string              // address of the HTTP server
@@ -41,8 +47,6 @@ func New(logger *zap.Logger) (cfg, error) {
 }
 
 func (cfg *cfg) chooseStorage() (err error) {
-	const fileStorageKey = "FILE_STORAGE_PATH" // file storage path key -- environment variable
-
 	// if filepath is set by flags create file storage
 	if cfg.filepath != "" {
 		cfg.l.Info("choose storage from flag", zap.String("filepath", cfg.filepath))
@@ -50,7 +54,7 @@ func (cfg *cfg) chooseStorage() (err error) {
 	}
 
 	// try to set filepath from system environment variable
-	filepath, ok := os.LookupEnv(fileStorageKey)
+	filepath, ok := os.LookupEnv(FileStorageKey)
 	if !ok {
 		// create in-memory storage
 		cfg.l.Info("choose in-memory storage")
@@ -82,9 +86,6 @@ func (cfg *cfg) creatingFileStorage(path string) (err error) {
 }
 
 func (cfg *cfg) chooseAddress() {
-	const systemAddressKey = "SERVER_ADDRESS" // address key -- environment variable
-	const defaultAddress = ":8080"
-
 	// if is set by flags
 	if cfg.Address != "" {
 		return
@@ -92,10 +93,10 @@ func (cfg *cfg) chooseAddress() {
 
 	var ok bool
 	// try to set value from system environment variable
-	address, ok := os.LookupEnv(systemAddressKey)
+	address, ok := os.LookupEnv(SystemAddressKey)
 	if !ok {
 		// set default value
-		address = defaultAddress
+		address = DefaultAddress
 	}
 
 	cfg.Address = address

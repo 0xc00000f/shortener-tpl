@@ -42,7 +42,6 @@ func TestURLEncoder_Encode(t *testing.T) {
 func TestURLEncoder_Short(t *testing.T) {
 
 	var storage = storage.NewMemoryStorage(nil)
-	const preferredLength = 6
 
 	tests := []struct {
 		name   string
@@ -52,19 +51,19 @@ func TestURLEncoder_Short(t *testing.T) {
 	}{
 		{
 			name:   "positive #1",
-			length: preferredLength,
+			length: PreferredLength,
 			long:   "https://google.com",
 			err:    nil,
 		},
 		{
 			name:   "positive #2",
-			length: preferredLength,
+			length: PreferredLength,
 			long:   "https://dzen.ru/",
 			err:    nil,
 		},
 		{
 			name:   "negative #1 - empty long url",
-			length: preferredLength,
+			length: PreferredLength,
 			long:   "",
 			err:    errors.New("empty string as a value isn't allowed"),
 		},
@@ -99,7 +98,6 @@ func TestURLEncoder_Short(t *testing.T) {
 
 func TestURLEncoder_Get(t *testing.T) {
 
-	const preferredLength = 6
 	var storage = storage.NewMemoryStorage(nil)
 	storage.Store("ytAA2Z", "https://google.com")
 	storage.Store("hNaU8l", "https://dzen.ru/")
@@ -138,7 +136,7 @@ func TestURLEncoder_Get(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			ue := New(
-				SetLength(preferredLength),
+				SetLength(PreferredLength),
 				SetStorage(storage))
 			long, err := ue.Get(tt.short)
 			require.Equal(t, tt.err, err)
