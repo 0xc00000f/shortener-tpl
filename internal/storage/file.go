@@ -68,6 +68,10 @@ func (fs FileStorage) Get(short string) (long string, err error) {
 	return fs.memory.Get(short)
 }
 
+func (fs FileStorage) GetAll() (result map[string]string, err error) {
+	return fs.memory.storage, nil
+}
+
 func (fs FileStorage) Store(short, long string) error {
 
 	err := fs.memory.Store(short, long)

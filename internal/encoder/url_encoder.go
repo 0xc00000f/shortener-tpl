@@ -79,3 +79,7 @@ func (ue *URLEncoder) Short(long string) (short string, err error) {
 func (ue *URLEncoder) Get(short string) (long string, err error) {
 	return ue.storage.Get(short)
 }
+
+func (ue *URLEncoder) GetAll() (result map[string]string, err error) {
+	return ue.storage.GetAll()
+}

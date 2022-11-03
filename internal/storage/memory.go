@@ -51,3 +51,7 @@ func (ms MemoryStorage) IsKeyExist(short string) (bool, error) {
 	_, ok := ms.storage[short]
 	return ok, nil
 }
+
+func (ms MemoryStorage) GetAll() (result map[string]string, err error) {
+	return ms.storage, nil
+}

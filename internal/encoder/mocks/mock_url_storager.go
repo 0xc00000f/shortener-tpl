@@ -48,6 +48,21 @@ func (mr *MockURLStoragerMockRecorder) Get(short interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockURLStorager)(nil).Get), short)
 }
 
+// GetAll mocks base method.
+func (m *MockURLStorager) GetAll() (map[string]string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAll")
+	ret0, _ := ret[0].(map[string]string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAll indicates an expected call of GetAll.
+func (mr *MockURLStoragerMockRecorder) GetAll() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAll", reflect.TypeOf((*MockURLStorager)(nil).GetAll))
+}
+
 // IsKeyExist mocks base method.
 func (m *MockURLStorager) IsKeyExist(short string) (bool, error) {
 	m.ctrl.T.Helper()
