@@ -1,6 +1,11 @@
 package encoder
 
 import (
+	"errors"
+	storageMock "github.com/0xc00000f/shortener-tpl/internal/encoder/mocks"
+	"github.com/golang/mock/gomock"
+	"github.com/stretchr/testify/require"
+	"go.uber.org/zap"
 	"testing"
 
 	"github.com/0xc00000f/shortener-tpl/internal/rand"
@@ -35,112 +40,160 @@ func TestURLEncoder_Encode(t *testing.T) {
 	}
 }
 
-func TestURLEncoder_Short(t *testing.T) {
+func TestURLEncoder_Short_Positive(t *testing.T) {
+	ctl := gomock.NewController(t)
+	defer ctl.Finish()
 
-	//var store = s.NewMemoryStorage(nil)
-	//
-	//tests := []struct {
-	//	name   string
-	//	length int
-	//	long   string
-	//	err    error
-	//}{
-	//	{
-	//		name:   "positive #1",
-	//		length: PreferredLength,
-	//		long:   "https://google.com",
-	//		err:    nil,
-	//	},
-	//	{
-	//		name:   "positive #2",
-	//		length: PreferredLength,
-	//		long:   "https://dzen.ru/",
-	//		err:    nil,
-	//	},
-	//	{
-	//		name:   "negative #1 - empty long url",
-	//		length: PreferredLength,
-	//		long:   "",
-	//		err:    s.ErrEmptyValue,
-	//	},
-	//	{
-	//		name:   "negative #2 - empty short url",
-	//		length: 0,
-	//		long:   "https://ya.ru/",
-	//		err:    s.ErrEmptyKey,
-	//	},
-	//}
-	//for _, tt := range tests {
-	//	t.Run(tt.name, func(t *testing.T) {
-	//		ue := New(
-	//			SetLength(tt.length),
-	//			SetStorage(store),
-	//			SetRandom(rand.New(true)),
-	//		)
-	//		short, err := ue.Short(tt.long)
-	//		assert.Equal(t, tt.err, err)
-	//		if err != nil {
-	//			assert.Equal(t, 0, len(short))
-	//			return
-	//		}
-	//		assert.Equal(t, tt.length, len(short))
-	//
-	//		long, err := ue.Get(short)
-	//		assert.Nil(t, err)
-	//		assert.Equal(t, long, tt.long)
-	//	})
-	//}
+	storage := storageMock.NewMockURLStorager(ctl)
+	ue := New(
+		SetLength(PreferredLength),
+		SetStorage(storage),
+		SetLogger(zap.L()),
+		SetRandom(rand.New(true)),
+	)
+
+	tests := []struct {
+		name  string
+		short string
+		long  string
+	}{
+		{
+			name:  "positive #1",
+			short: "BpLnfg", // first predictable result of ue.encode()
+			long:  "https://google.com",
+		},
+		{
+			name:  "positive #2",
+			short: "Dsc2WD", // second predictable result of ue.encode()
+			long:  "https://dzen.ru/",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			storage.EXPECT().IsKeyExist(tt.short).Return(false, nil)
+			storage.EXPECT().Store(tt.short, tt.long).Return(nil)
+
+			short, err := ue.Short(tt.long)
+			require.NoError(t, err)
+			assert.Equal(t, tt.short, short)
+		})
+	}
+}
+
+func TestURLEncoder_Short_IsKeyExist_Error(t *testing.T) {
+	ctl := gomock.NewController(t)
+	defer ctl.Finish()
+
+	storage := storageMock.NewMockURLStorager(ctl)
+	ue := New(
+		SetLength(PreferredLength),
+		SetStorage(storage),
+		SetLogger(zap.L()),
+		SetRandom(rand.New(true)),
+	)
+
+	expectedShort := "BpLnfg" // first predictable result of ue.encode()
+	long := "https://dzen.ru/"
+	storageErr := errors.New("db is down")
+
+	storage.EXPECT().IsKeyExist(expectedShort).Return(false, storageErr)
+	short, err := ue.Short(long)
+
+	require.ErrorIs(t, err, storageErr)
+	assert.Equal(t, "", short)
+
+}
+
+func TestURLEncoder_Short_Positive_IsKeyExist_IfExist(t *testing.T) {
+	ctl := gomock.NewController(t)
+	defer ctl.Finish()
+
+	storage := storageMock.NewMockURLStorager(ctl)
+	ue := New(
+		SetLength(PreferredLength),
+		SetStorage(storage),
+		SetLogger(zap.L()),
+		SetRandom(rand.New(true)),
+	)
+
+	firstShort := "BpLnfg"  // first predictable result of ue.encode()
+	secondShort := "Dsc2WD" // second predictable result of ue.encode()
+	long := "https://dzen.ru/"
+
+	storage.EXPECT().IsKeyExist(firstShort).Return(true, nil)
+	storage.EXPECT().IsKeyExist(secondShort).Return(false, nil)
+	storage.EXPECT().Store(secondShort, long).Return(nil)
+	short, err := ue.Short(long)
+
+	require.NoError(t, err)
+	assert.Equal(t, secondShort, short)
+
+}
+
+func TestURLEncoder_Short_Store_Error(t *testing.T) {
+	ctl := gomock.NewController(t)
+	defer ctl.Finish()
+
+	storage := storageMock.NewMockURLStorager(ctl)
+	ue := New(
+		SetLength(PreferredLength),
+		SetStorage(storage),
+		SetLogger(zap.L()),
+		SetRandom(rand.New(true)),
+	)
+
+	expectedShort := "BpLnfg" // first predictable result of ue.encode()
+	long := "https://dzen.ru/"
+	storageErr := errors.New("db is down")
+
+	storage.EXPECT().IsKeyExist(expectedShort).Return(false, nil)
+	storage.EXPECT().Store(expectedShort, long).Return(storageErr)
+
+	short, err := ue.Short(long)
+	require.ErrorIs(t, err, storageErr)
+	assert.Equal(t, "", short)
+
 }
 
 func TestURLEncoder_Get(t *testing.T) {
+	ctl := gomock.NewController(t)
+	defer ctl.Finish()
 
-	//var storage = s.NewMemoryStorage(nil)
-	//storage.Store("ytAA2Z", "https://google.com")
-	//storage.Store("hNaU8l", "https://dzen.ru/")
-	//
-	//tests := []struct {
-	//	name  string
-	//	short string
-	//	long  string
-	//	err   error
-	//}{
-	//	{
-	//		name:  "positive #1",
-	//		short: "ytAA2Z",
-	//		long:  "https://google.com",
-	//		err:   nil,
-	//	},
-	//	{
-	//		name:  "positive #2",
-	//		short: "hNaU8l",
-	//		long:  "https://dzen.ru/",
-	//		err:   nil,
-	//	},
-	//	{
-	//		name:  "negative #1 - key is not exist",
-	//		short: "not exist",
-	//		long:  "https://dzen.ru/",
-	//		err:   s.ErrNoKeyFound,
-	//	},
-	//	{
-	//		name:  "negative #2 - empty short",
-	//		short: "",
-	//		long:  "https://dzen.ru/",
-	//		err:   s.ErrEmptyKey,
-	//	},
-	//}
-	//for _, tt := range tests {
-	//	t.Run(tt.name, func(t *testing.T) {
-	//		ue := New(
-	//			SetLength(PreferredLength),
-	//			SetStorage(storage))
-	//		long, err := ue.Get(tt.short)
-	//		require.Equal(t, tt.err, err)
-	//		if err != nil {
-	//			return
-	//		}
-	//		assert.Equal(t, tt.long, long)
-	//
-	//	})
-	//}
+	storage := storageMock.NewMockURLStorager(ctl)
+	ue := New(
+		SetLength(PreferredLength),
+		SetStorage(storage),
+		SetLogger(zap.L()),
+		SetRandom(rand.New(true)),
+	)
+
+	short := "BpLnfg" // first predictable result of ue.encode()
+	expectedLong := "https://dzen.ru/"
+	storage.EXPECT().Get(short).Return(expectedLong, nil)
+
+	long, err := ue.Get(short)
+	require.NoError(t, err)
+	assert.Equal(t, expectedLong, long)
+}
+
+func TestURLEncoder_Get_Error(t *testing.T) {
+	ctl := gomock.NewController(t)
+	defer ctl.Finish()
+
+	storage := storageMock.NewMockURLStorager(ctl)
+	ue := New(
+		SetLength(PreferredLength),
+		SetStorage(storage),
+		SetLogger(zap.L()),
+		SetRandom(rand.New(true)),
+	)
+
+	short := "BpLnfg" // first predictable result of ue.encode()
+	expectedLong := ""
+	storageErr := errors.New("db is down")
+	storage.EXPECT().Get(short).Return("", storageErr)
+
+	long, err := ue.Get(short)
+	require.ErrorIs(t, err, storageErr)
+	assert.Equal(t, expectedLong, long)
 }
