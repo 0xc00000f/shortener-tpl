@@ -8,6 +8,7 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
+	uuid "github.com/google/uuid"
 )
 
 // MockShortener is a mock of Shortener interface.
@@ -49,31 +50,31 @@ func (mr *MockShortenerMockRecorder) Get(short interface{}) *gomock.Call {
 }
 
 // GetAll mocks base method.
-func (m *MockShortener) GetAll() (map[string]string, error) {
+func (m *MockShortener) GetAll(userID uuid.UUID) (map[string]string, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetAll")
+	ret := m.ctrl.Call(m, "GetAll", userID)
 	ret0, _ := ret[0].(map[string]string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetAll indicates an expected call of GetAll.
-func (mr *MockShortenerMockRecorder) GetAll() *gomock.Call {
+func (mr *MockShortenerMockRecorder) GetAll(userID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAll", reflect.TypeOf((*MockShortener)(nil).GetAll))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAll", reflect.TypeOf((*MockShortener)(nil).GetAll), userID)
 }
 
 // Short mocks base method.
-func (m *MockShortener) Short(long string) (string, error) {
+func (m *MockShortener) Short(userID uuid.UUID, long string) (string, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Short", long)
+	ret := m.ctrl.Call(m, "Short", userID, long)
 	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Short indicates an expected call of Short.
-func (mr *MockShortenerMockRecorder) Short(long interface{}) *gomock.Call {
+func (mr *MockShortenerMockRecorder) Short(userID, long interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Short", reflect.TypeOf((*MockShortener)(nil).Short), long)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Short", reflect.TypeOf((*MockShortener)(nil).Short), userID, long)
 }

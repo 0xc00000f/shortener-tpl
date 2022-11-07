@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"github.com/google/uuid"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -9,8 +10,8 @@ import (
 func TestMemoryStorage_Get(t *testing.T) {
 
 	var storage = NewMemoryStorage(nil)
-	storage.Store("ytAA2Z", "https://google.com")
-	storage.Store("hNaU8l", "https://dzen.ru/")
+	storage.Store(uuid.Nil, "ytAA2Z", "https://google.com")
+	storage.Store(uuid.Nil, "hNaU8l", "https://dzen.ru/")
 
 	tests := []struct {
 		name  string
@@ -96,7 +97,7 @@ func TestMemoryStorage_Set(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
-			err := storage.Store(tt.key, tt.value)
+			err := storage.Store(uuid.Nil, tt.key, tt.value)
 			assert.Equal(t, tt.errStore, err)
 
 			value, err := storage.Get(tt.key)

@@ -2,6 +2,7 @@ package encoder
 
 import (
 	"github.com/0xc00000f/shortener-tpl/internal/rand"
+	"github.com/google/uuid"
 
 	"go.uber.org/zap"
 )
@@ -56,7 +57,7 @@ func (ue *URLEncoder) encode() string {
 	return ue.rand.String(ue.length)
 }
 
-func (ue *URLEncoder) Short(long string) (short string, err error) {
+func (ue *URLEncoder) Short(userID uuid.UUID, long string) (short string, err error) {
 	for {
 		short = ue.encode()
 		exist, err := ue.storage.IsKeyExist(short)
@@ -69,7 +70,7 @@ func (ue *URLEncoder) Short(long string) (short string, err error) {
 		break
 	}
 
-	err = ue.storage.Store(short, long)
+	err = ue.storage.Store(userID, short, long)
 	if err != nil {
 		return "", err
 	}
@@ -80,6 +81,6 @@ func (ue *URLEncoder) Get(short string) (long string, err error) {
 	return ue.storage.Get(short)
 }
 
-func (ue *URLEncoder) GetAll() (result map[string]string, err error) {
-	return ue.storage.GetAll()
+func (ue *URLEncoder) GetAll(userID uuid.UUID) (result map[string]string, err error) {
+	return ue.storage.GetAll(userID)
 }

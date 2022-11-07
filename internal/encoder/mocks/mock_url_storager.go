@@ -8,6 +8,7 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
+	uuid "github.com/google/uuid"
 )
 
 // MockURLStorager is a mock of URLStorager interface.
@@ -49,18 +50,18 @@ func (mr *MockURLStoragerMockRecorder) Get(short interface{}) *gomock.Call {
 }
 
 // GetAll mocks base method.
-func (m *MockURLStorager) GetAll() (map[string]string, error) {
+func (m *MockURLStorager) GetAll(userID uuid.UUID) (map[string]string, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetAll")
+	ret := m.ctrl.Call(m, "GetAll", userID)
 	ret0, _ := ret[0].(map[string]string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetAll indicates an expected call of GetAll.
-func (mr *MockURLStoragerMockRecorder) GetAll() *gomock.Call {
+func (mr *MockURLStoragerMockRecorder) GetAll(userID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAll", reflect.TypeOf((*MockURLStorager)(nil).GetAll))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAll", reflect.TypeOf((*MockURLStorager)(nil).GetAll), userID)
 }
 
 // IsKeyExist mocks base method.
@@ -79,15 +80,15 @@ func (mr *MockURLStoragerMockRecorder) IsKeyExist(short interface{}) *gomock.Cal
 }
 
 // Store mocks base method.
-func (m *MockURLStorager) Store(short, long string) error {
+func (m *MockURLStorager) Store(userID uuid.UUID, short, long string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Store", short, long)
+	ret := m.ctrl.Call(m, "Store", userID, short, long)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Store indicates an expected call of Store.
-func (mr *MockURLStoragerMockRecorder) Store(short, long interface{}) *gomock.Call {
+func (mr *MockURLStoragerMockRecorder) Store(userID, short, long interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Store", reflect.TypeOf((*MockURLStorager)(nil).Store), short, long)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Store", reflect.TypeOf((*MockURLStorager)(nil).Store), userID, short, long)
 }

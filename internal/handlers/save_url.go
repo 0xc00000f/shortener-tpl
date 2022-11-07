@@ -4,6 +4,7 @@ import (
 	"compress/gzip"
 	"encoding/json"
 	"fmt"
+	"github.com/google/uuid"
 	"io"
 	"net/http"
 
@@ -32,7 +33,7 @@ func SaveURL(sa *shortener.NaiveShortener) http.HandlerFunc {
 		}
 		defer rc.Close()
 
-		short, err := createShort(sa, rc, false)
+		short, err := createShort(sa, rc, uuid.Nil, false)
 		if err != nil {
 			sa.L.Error("creating short isn't success", zap.Error(err))
 			http.Error(w, "400 page not found", http.StatusBadRequest)
@@ -88,7 +89,7 @@ func SaveURLJson(sa *shortener.NaiveShortener) http.HandlerFunc {
 		}
 		defer rc.Close()
 
-		short, err := createShort(sa, rc, true)
+		short, err := createShort(sa, rc, uuid.Nil, true)
 		if err != nil {
 			sa.L.Error("creating short isn't success", zap.Error(err))
 			http.Error(w, "400 page not found", http.StatusBadRequest)
@@ -117,7 +118,7 @@ func SaveURLJson(sa *shortener.NaiveShortener) http.HandlerFunc {
 	}
 }
 
-func createShort(sa *shortener.NaiveShortener, r io.Reader, isJSON bool) (short string, err error) {
+func createShort(sa *shortener.NaiveShortener, r io.Reader, userID uuid.UUID, isJSON bool) (short string, err error) {
 
 	req := ShortRequest{}
 	b, err := io.ReadAll(r)
@@ -144,7 +145,7 @@ func createShort(sa *shortener.NaiveShortener, r io.Reader, isJSON bool) (short 
 		return "", url.ErrInvalidURL
 	}
 
-	short, err = sa.Encoder().Short(long)
+	short, err = sa.Encoder().Short(userID, long)
 	if err != nil {
 		sa.L.Error("creating short isn't success", zap.Error(err))
 		return "", err

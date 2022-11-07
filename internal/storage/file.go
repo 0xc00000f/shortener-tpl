@@ -3,6 +3,7 @@ package storage
 import (
 	"bufio"
 	"encoding/json"
+	"github.com/google/uuid"
 	"os"
 
 	"go.uber.org/zap"
@@ -16,8 +17,9 @@ type FileStorage struct {
 }
 
 type url struct {
-	Short string `json:"short"`
-	Long  string `json:"long"`
+	UserID uuid.UUID `json:"userID,omitempty"`
+	Short  string    `json:"short"`
+	Long   string    `json:"long"`
 }
 
 func NewFileStorage(filename string, logger *zap.Logger) (FileStorage, error) {
@@ -60,6 +62,9 @@ func (fs FileStorage) InitMemory() error {
 		}
 
 		fs.memory.storage[url.Short] = url.Long
+		if url.UserID != uuid.Nil {
+			fs.memory.history[url.UserID][url.Short] = url.Long
+		}
 	}
 	return nil
 }
@@ -68,18 +73,18 @@ func (fs FileStorage) Get(short string) (long string, err error) {
 	return fs.memory.Get(short)
 }
 
-func (fs FileStorage) GetAll() (result map[string]string, err error) {
-	return fs.memory.storage, nil
+func (fs FileStorage) GetAll(userID uuid.UUID) (result map[string]string, err error) {
+	return fs.memory.history[userID], nil
 }
 
-func (fs FileStorage) Store(short, long string) error {
+func (fs FileStorage) Store(userID uuid.UUID, short, long string) error {
 
-	err := fs.memory.Store(short, long)
+	err := fs.memory.Store(userID, short, long)
 	if err != nil {
 		fs.l.Error("in-memory store error", zap.Error(err))
 		return err
 	}
-	err = fs.writeURL(short, long)
+	err = fs.writeURL(uuid.Nil, short, long)
 	if err != nil {
 		fs.l.Error("writing url in file error", zap.Error(err))
 		return err
@@ -88,10 +93,11 @@ func (fs FileStorage) Store(short, long string) error {
 	return nil
 }
 
-func (fs FileStorage) writeURL(short, long string) error {
+func (fs FileStorage) writeURL(userID uuid.UUID, short, long string) error {
 	s := url{
-		Short: short,
-		Long:  long,
+		UserID: userID,
+		Short:  short,
+		Long:   long,
 	}
 	b, err := json.Marshal(s)
 	if err != nil {

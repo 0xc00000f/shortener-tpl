@@ -4,6 +4,7 @@ import (
 	"errors"
 	storageMock "github.com/0xc00000f/shortener-tpl/internal/encoder/mocks"
 	"github.com/golang/mock/gomock"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 	"testing"
@@ -71,9 +72,9 @@ func TestURLEncoder_Short_Positive(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			storage.EXPECT().IsKeyExist(tt.short).Return(false, nil)
-			storage.EXPECT().Store(tt.short, tt.long).Return(nil)
+			storage.EXPECT().Store(uuid.Nil, tt.short, tt.long).Return(nil)
 
-			short, err := ue.Short(tt.long)
+			short, err := ue.Short(uuid.Nil, tt.long)
 			require.NoError(t, err)
 			assert.Equal(t, tt.short, short)
 		})
@@ -97,7 +98,7 @@ func TestURLEncoder_Short_IsKeyExist_Error(t *testing.T) {
 	storageErr := errors.New("db is down")
 
 	storage.EXPECT().IsKeyExist(expectedShort).Return(false, storageErr)
-	short, err := ue.Short(long)
+	short, err := ue.Short(uuid.Nil, long)
 
 	require.ErrorIs(t, err, storageErr)
 	assert.Equal(t, "", short)
@@ -122,8 +123,8 @@ func TestURLEncoder_Short_Positive_IsKeyExist_IfExist(t *testing.T) {
 
 	storage.EXPECT().IsKeyExist(firstShort).Return(true, nil)
 	storage.EXPECT().IsKeyExist(secondShort).Return(false, nil)
-	storage.EXPECT().Store(secondShort, long).Return(nil)
-	short, err := ue.Short(long)
+	storage.EXPECT().Store(uuid.Nil, secondShort, long).Return(nil)
+	short, err := ue.Short(uuid.Nil, long)
 
 	require.NoError(t, err)
 	assert.Equal(t, secondShort, short)
@@ -147,9 +148,9 @@ func TestURLEncoder_Short_Store_Error(t *testing.T) {
 	storageErr := errors.New("db is down")
 
 	storage.EXPECT().IsKeyExist(expectedShort).Return(false, nil)
-	storage.EXPECT().Store(expectedShort, long).Return(storageErr)
+	storage.EXPECT().Store(uuid.Nil, expectedShort, long).Return(storageErr)
 
-	short, err := ue.Short(long)
+	short, err := ue.Short(uuid.Nil, long)
 	require.ErrorIs(t, err, storageErr)
 	assert.Equal(t, "", short)
 

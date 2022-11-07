@@ -2,7 +2,7 @@ package storage
 
 import (
 	"errors"
-
+	"github.com/google/uuid"
 	"go.uber.org/zap"
 )
 
@@ -14,12 +14,14 @@ var (
 
 type MemoryStorage struct {
 	storage map[string]string
+	history map[uuid.UUID]map[string]string
 	l       *zap.Logger
 }
 
 func NewMemoryStorage(logger *zap.Logger) MemoryStorage {
 	return MemoryStorage{
 		storage: make(map[string]string),
+		history: make(map[uuid.UUID]map[string]string),
 		l:       logger,
 	}
 }
@@ -36,12 +38,15 @@ func (ms MemoryStorage) Get(short string) (long string, err error) {
 	return long, nil
 }
 
-func (ms MemoryStorage) Store(short, long string) error {
+func (ms MemoryStorage) Store(id uuid.UUID, short, long string) error {
 	if len(short) == 0 {
 		return ErrEmptyKey
 	}
 	if len(long) == 0 {
 		return ErrEmptyValue
+	}
+	if id != uuid.Nil {
+		ms.history[id][short] = long
 	}
 	ms.storage[short] = long
 	return nil
@@ -52,6 +57,6 @@ func (ms MemoryStorage) IsKeyExist(short string) (bool, error) {
 	return ok, nil
 }
 
-func (ms MemoryStorage) GetAll() (result map[string]string, err error) {
-	return ms.storage, nil
+func (ms MemoryStorage) GetAll(uuid uuid.UUID) (result map[string]string, err error) {
+	return ms.history[uuid], nil
 }
