@@ -63,6 +63,9 @@ func (fs FileStorage) InitMemory() error {
 
 		fs.memory.storage[url.Short] = url.Long
 		if url.UserID != uuid.Nil {
+			if _, ok := fs.memory.history[url.UserID]; !ok {
+				fs.memory.history[url.UserID] = map[string]string{}
+			}
 			fs.memory.history[url.UserID][url.Short] = url.Long
 		}
 	}
@@ -84,7 +87,7 @@ func (fs FileStorage) Store(userID uuid.UUID, short, long string) error {
 		fs.l.Error("in-memory store error", zap.Error(err))
 		return err
 	}
-	err = fs.writeURL(uuid.Nil, short, long)
+	err = fs.writeURL(userID, short, long)
 	if err != nil {
 		fs.l.Error("writing url in file error", zap.Error(err))
 		return err

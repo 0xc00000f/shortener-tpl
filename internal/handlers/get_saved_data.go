@@ -3,9 +3,9 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/google/uuid"
-	"log"
 	"net/http"
+
+	"github.com/0xc00000f/shortener-tpl/internal/user"
 
 	"github.com/0xc00000f/shortener-tpl/internal/shortener"
 
@@ -14,12 +14,15 @@ import (
 
 func GetSavedData(sa *shortener.NaiveShortener) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		all, err := sa.Encoder().GetAll(uuid.New())
+		u, ok := GetUserFromRequest(r)
+		if !ok {
+			u = user.Nil
+		}
+		all, err := sa.Encoder().GetAll(u.UserID)
 		if err != nil {
 			http.Error(w, "400 page not found", http.StatusBadRequest)
 			return
 		}
-		log.Printf("all: %v", all)
 
 		if len(all) == 0 {
 			w.Header().Set("content-type", "application/json")

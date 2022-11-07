@@ -20,6 +20,7 @@ func NewRouter(sa *shortener.NaiveShortener) *chi.Mux {
 	r.Use(middleware.AllowContentEncoding("gzip"))
 	compressor := middleware.NewCompressor(flate.DefaultCompression)
 	r.Use(compressor.Handler)
+	r.Use(CookieAuth)
 
 	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(400)

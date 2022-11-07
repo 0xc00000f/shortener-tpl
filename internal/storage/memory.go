@@ -38,15 +38,18 @@ func (ms MemoryStorage) Get(short string) (long string, err error) {
 	return long, nil
 }
 
-func (ms MemoryStorage) Store(id uuid.UUID, short, long string) error {
+func (ms MemoryStorage) Store(userID uuid.UUID, short, long string) error {
 	if len(short) == 0 {
 		return ErrEmptyKey
 	}
 	if len(long) == 0 {
 		return ErrEmptyValue
 	}
-	if id != uuid.Nil {
-		ms.history[id][short] = long
+	if userID != uuid.Nil {
+		if _, ok := ms.history[userID]; !ok {
+			ms.history[userID] = map[string]string{}
+		}
+		ms.history[userID][short] = long
 	}
 	ms.storage[short] = long
 	return nil

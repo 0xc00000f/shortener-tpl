@@ -4,14 +4,15 @@ import (
 	"compress/gzip"
 	"encoding/json"
 	"fmt"
-	"github.com/google/uuid"
 	"io"
 	"net/http"
 
 	"github.com/0xc00000f/shortener-tpl/internal/shortener"
 	"github.com/0xc00000f/shortener-tpl/internal/url"
+	"github.com/0xc00000f/shortener-tpl/internal/user"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/google/uuid"
 	"go.uber.org/zap"
 )
 
@@ -33,7 +34,12 @@ func SaveURL(sa *shortener.NaiveShortener) http.HandlerFunc {
 		}
 		defer rc.Close()
 
-		short, err := createShort(sa, rc, uuid.Nil, false)
+		u, ok := GetUserFromRequest(r)
+		if !ok {
+			u = user.Nil
+		}
+
+		short, err := createShort(sa, rc, u.UserID, false)
 		if err != nil {
 			sa.L.Error("creating short isn't success", zap.Error(err))
 			http.Error(w, "400 page not found", http.StatusBadRequest)
@@ -89,7 +95,12 @@ func SaveURLJson(sa *shortener.NaiveShortener) http.HandlerFunc {
 		}
 		defer rc.Close()
 
-		short, err := createShort(sa, rc, uuid.Nil, true)
+		u, ok := GetUserFromRequest(r)
+		if !ok {
+			u = user.Nil
+		}
+
+		short, err := createShort(sa, rc, u.UserID, true)
 		if err != nil {
 			sa.L.Error("creating short isn't success", zap.Error(err))
 			http.Error(w, "400 page not found", http.StatusBadRequest)
