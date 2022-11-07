@@ -45,6 +45,9 @@ func (u *User) UserEncryptToString() (string, error) {
 
 func (u *User) UserDecrypt(b []byte) error {
 	aesBlock, err := crypto.NewAESBlock()
+	if err != nil {
+		return err
+	}
 
 	dst := make([]byte, len(uuid.UUID{}))
 	aesBlock.Decrypt(dst, b)
@@ -69,8 +72,5 @@ func (u *User) UserDecryptFromString(s string) error {
 func Valid(ciphertext string) bool {
 	u := User{}
 	err := u.UserDecryptFromString(ciphertext)
-	if err != nil {
-		return false
-	}
-	return true
+	return err == nil
 }
