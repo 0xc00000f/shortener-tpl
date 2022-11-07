@@ -1,20 +1,25 @@
-package logic
+package encoder
 
 import (
-	"github.com/0xc00000f/shortener-tpl/internal/utils"
+	"github.com/0xc00000f/shortener-tpl/internal/rand"
+
+	"go.uber.org/zap"
 )
 
-var preferredLength = 6
+const PreferredLength = 6
 
 type URLEncoder struct {
 	length  int
 	storage URLStorager
+	rand    rand.Random
+
+	l *zap.Logger
 }
 
 type Option func(ue *URLEncoder)
 
-func NewURLEncoder(options ...Option) *URLEncoder {
-	ue := URLEncoder{length: preferredLength}
+func New(options ...Option) *URLEncoder {
+	ue := URLEncoder{length: PreferredLength}
 
 	for _, fn := range options {
 		fn(&ue)
@@ -35,8 +40,20 @@ func SetStorage(s URLStorager) Option {
 	}
 }
 
+func SetLogger(l *zap.Logger) Option {
+	return func(ue *URLEncoder) {
+		ue.l = l
+	}
+}
+
+func SetRandom(r rand.Random) Option {
+	return func(ue *URLEncoder) {
+		ue.rand = r
+	}
+}
+
 func (ue *URLEncoder) encode() string {
-	return utils.RandStringRunes(ue.length)
+	return ue.rand.String(ue.length)
 }
 
 func (ue *URLEncoder) Short(long string) (short string, err error) {

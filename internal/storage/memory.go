@@ -1,37 +1,53 @@
 package storage
 
-import "errors"
+import (
+	"errors"
 
-type MemoryStorage map[string]string
+	"go.uber.org/zap"
+)
 
-func NewMemoryStorage() MemoryStorage {
-	return make(MemoryStorage)
+var (
+	ErrNoKeyFound = errors.New("key is not exist")
+	ErrEmptyKey   = errors.New("empty string as a key isn't allowed")
+	ErrEmptyValue = errors.New("empty string as a value isn't allowed")
+)
+
+type MemoryStorage struct {
+	storage map[string]string
+	l       *zap.Logger
 }
 
-func (ds MemoryStorage) Get(short string) (value string, err error) {
+func NewMemoryStorage(logger *zap.Logger) MemoryStorage {
+	return MemoryStorage{
+		storage: make(map[string]string),
+		l:       logger,
+	}
+}
+
+func (ms MemoryStorage) Get(short string) (long string, err error) {
 	if len(short) == 0 {
-		err = errors.New("empty string as a key isn't allowed")
+		err = ErrEmptyKey
 		return "", err
 	}
-	value, ok := ds[short]
+	long, ok := ms.storage[short]
 	if !ok {
-		return "", errors.New("key is not exist")
+		return "", ErrNoKeyFound
 	}
-	return value, nil
+	return long, nil
 }
 
-func (ds MemoryStorage) Store(short, long string) error {
+func (ms MemoryStorage) Store(short, long string) error {
 	if len(short) == 0 {
-		return errors.New("empty string as a key isn't allowed")
+		return ErrEmptyKey
 	}
 	if len(long) == 0 {
-		return errors.New("empty string as a value isn't allowed")
+		return ErrEmptyValue
 	}
-	ds[short] = long
+	ms.storage[short] = long
 	return nil
 }
 
-func (ds MemoryStorage) IsKeyExist(short string) (bool, error) {
-	_, ok := ds[short]
+func (ms MemoryStorage) IsKeyExist(short string) (bool, error) {
+	_, ok := ms.storage[short]
 	return ok, nil
 }

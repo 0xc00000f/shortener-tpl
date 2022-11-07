@@ -1,4 +1,4 @@
-package logic
+package encoder
 
 type URLStorager interface {
 	Get(short string) (string, error)

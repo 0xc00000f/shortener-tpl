@@ -1,4 +1,4 @@
-package utils
+package url
 
 import (
 	"testing"
@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestIsURL(t *testing.T) {
+func TestValid(t *testing.T) {
 	tests := []struct {
 		name    string
 		url     string
@@ -50,7 +50,7 @@ func TestIsURL(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			v := IsURL(tt.url)
+			v := Valid(tt.url)
 			assert.Equal(t, tt.isValid, v)
 		})
 	}

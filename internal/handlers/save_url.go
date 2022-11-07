@@ -4,88 +4,70 @@ import (
 	"compress/gzip"
 	"encoding/json"
 	"fmt"
-	"github.com/go-chi/chi/v5"
 	"io"
-	"log"
 	"net/http"
 
-	"github.com/0xc00000f/shortener-tpl/internal/api"
-	"github.com/0xc00000f/shortener-tpl/internal/utils"
+	"github.com/0xc00000f/shortener-tpl/internal/shortener"
+	"github.com/0xc00000f/shortener-tpl/internal/url"
+
+	"github.com/go-chi/chi/v5"
+	"go.uber.org/zap"
 )
 
-func SaveURL(sa api.ShortenerAPI) http.HandlerFunc {
+func SaveURL(sa *shortener.NaiveShortener) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		log.Printf("handlers::SaveURL -- entered, arguments - sa: %v", sa)
-		defer log.Print("handlers::SaveURL -- finished")
-
-		log.Print("handlers::SaveURL -- checking correct url param")
 		urlPart := chi.URLParam(r, "url")
-		log.Printf("handlers::SaveURL -- checking correct url param, urlPart: %s", urlPart)
 
 		if len(urlPart) > 0 {
-			log.Printf("handlers::SaveURL -- checking url param isn't success, returning 400 err")
+			sa.L.Error("checking url param isn't success")
 			http.Error(w, "400 page not found", http.StatusBadRequest)
 			return
 		}
 
-		var reader io.Reader
-		log.Printf("handlers::SaveURL -- checking supporting gzip in header Content-Encoding")
-		if r.Header.Get(`Content-Encoding`) == `gzip` {
-			log.Printf("handlers::SaveURL -- creating gzip reader")
-			gz, err := gzip.NewReader(r.Body)
-			if err != nil {
-				log.Printf("handlers::SaveURL -- cant create gzip reader")
-				http.Error(w, "400 page not found", http.StatusBadRequest)
-				return
-			}
-			reader = gz
-			log.Printf("handlers::SaveURL -- gzip reader created")
-			defer gz.Close()
-		} else {
-			log.Printf("handlers::SaveURL -- gzip isnt supported")
-			reader = r.Body
-			defer r.Body.Close()
-		}
-
-		b, err := io.ReadAll(reader)
-		log.Printf("handlers::SaveURL -- reading body, body: %v, err: %v", string(b), err)
-		longURL := string(b)
-		if err != nil || !utils.IsURL(longURL) {
-			log.Printf("handlers::SaveURL -- checking is body url or err != nil isn't success, returning 400 err")
-			http.Error(w, "400 page not found", http.StatusBadRequest)
-			return
-		}
-
-		log.Printf("handlers::SaveURL -- call Logic::Short, params -- longURL: %v", longURL)
-		short, err := sa.Logic().Short(longURL)
-		log.Printf("handlers::SaveURL -- call Logic::Short, returned -- short: %s, err: %v", short, err)
+		rc, err := readBody(r, sa.L)
 		if err != nil {
-			log.Printf("handlers::SaveURL -- call Logic::Short isn't success, returning 400 err")
+			sa.L.Error("read body err", zap.Error(err))
+			http.Error(w, "400 page not found", http.StatusBadRequest)
+			return
+		}
+		defer rc.Close()
+
+		short, err := createShort(sa, rc, false)
+		if err != nil {
+			sa.L.Error("creating short isn't success", zap.Error(err))
 			http.Error(w, "400 page not found", http.StatusBadRequest)
 			return
 		}
 
-		log.Print("handlers::SaveURL -- checking sa.BaseURL is inited")
 		if sa.BaseURL == "" {
 			sa.BaseURL = fmt.Sprintf("http://%s", r.Host)
-			log.Print("handlers::SaveURL -- sa.BaseURL isn't inited")
-			log.Printf("handlers::SaveURL -- sa.BaseURL init with host value -- sa.BaseURL: %s", sa.BaseURL)
 		}
-
-		log.Print("handlers::SaveURL -- write in ResponseWriter")
 
 		hk := "content-type"
 		hv := "text/plain; charset=utf-8"
 		w.Header().Set(hk, hv)
-		log.Printf("handlers::SaveURL -- write in ResponseWriter, header key: %s, header value: %s", hk, hv)
 
 		w.WriteHeader(http.StatusCreated)
-		log.Printf("handlers::SaveURL -- write in ResponseWriter, status: %v", http.StatusCreated)
 
 		body := fmt.Sprintf("%s/%s", sa.BaseURL, short)
 		w.Write([]byte(body))
-		log.Printf("handlers::SaveURL -- write in ResponseWriter, body: %s", body)
 	}
+}
+
+func readBody(r *http.Request, l *zap.Logger) (io.ReadCloser, error) {
+	var readCloser io.ReadCloser
+	if r.Header.Get(`Content-Encoding`) == `gzip` {
+		gz, err := gzip.NewReader(r.Body)
+		if err != nil {
+			l.Error("can't create gzip readCloser", zap.Error(err))
+			return nil, err
+		}
+		readCloser = gz
+		return readCloser, nil
+	}
+	readCloser = r.Body
+
+	return readCloser, nil
 }
 
 type ShortRequest struct {
@@ -96,92 +78,77 @@ type ShortResponse struct {
 	Result string `json:"result"`
 }
 
-func SaveURLJson(sa api.ShortenerAPI) http.HandlerFunc {
+func SaveURLJson(sa *shortener.NaiveShortener) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		log.Printf("handlers::SaveURLJson -- entered, arguments - sa: %v", sa)
-		defer log.Print("handlers::SaveURLJson -- finished")
-
-		req := ShortRequest{}
-
-		var reader io.Reader
-		log.Printf("handlers::SaveURL -- checking supporting gzip in header Content-Encoding")
-		if r.Header.Get(`Content-Encoding`) == `gzip` {
-			log.Printf("handlers::SaveURL -- creating gzip reader")
-			gz, err := gzip.NewReader(r.Body)
-			if err != nil {
-				log.Printf("handlers::SaveURL -- cant create gzip reader: %v", err)
-				http.Error(w, "400 page not found", http.StatusBadRequest)
-				return
-			}
-			reader = gz
-			log.Printf("handlers::SaveURL -- gzip reader created")
-			defer gz.Close()
-		} else {
-			log.Printf("handlers::SaveURL -- gzip isnt supported")
-			reader = r.Body
-			defer r.Body.Close()
-		}
-
-		b, err := io.ReadAll(reader)
-
-		log.Printf("handlers::SaveURLJson -- reading body, body: %v, err: %v", string(b), err)
-
+		rc, err := readBody(r, sa.L)
 		if err != nil {
-			log.Printf("handlers::SaveURLJson -- checking is body url or err != nil isn't success, returning 400 err")
+			sa.L.Error("read body err", zap.Error(err))
 			http.Error(w, "400 page not found", http.StatusBadRequest)
 			return
 		}
+		defer rc.Close()
 
-		log.Printf("handlers::SaveURLJson -- unmarshaling body")
-		if err := json.Unmarshal(b, &req); err != nil {
-			log.Printf("handlers::SaveURLJson -- unmarshaling isn't success, returning 400 err")
-			http.Error(w, "400 page not found", http.StatusBadRequest)
-			return
-		}
-		log.Printf("handlers::SaveURLJson -- unmarshaling is success, req: %v", req)
-
-		log.Printf("handlers::SaveURLJson -- call Logic::Short, params -- longURL: %v", req.URL)
-		short, err := sa.Logic().Short(req.URL)
-		log.Printf("handlers::SaveURLJson -- call Logic::Short, returned -- short: %s, err: %v", short, err)
+		short, err := createShort(sa, rc, true)
 		if err != nil {
-			log.Printf("handlers::SaveURLJson -- call Logic::Short isn't success, returning 400 err")
+			sa.L.Error("creating short isn't success", zap.Error(err))
 			http.Error(w, "400 page not found", http.StatusBadRequest)
 			return
 		}
 
-		log.Print("handlers::SaveURLJson -- checking sa.BaseURL is inited")
 		if sa.BaseURL == "" {
 			sa.BaseURL = fmt.Sprintf("http://%s", r.Host)
-			log.Print("handlers::SaveURLJson -- sa.BaseURL isn't inited")
-			log.Printf("handlers::SaveURLJson -- sa.BaseURL init with host value -- sa.BaseURL: %s", sa.BaseURL)
 		}
 
-		log.Printf("handlers::SaveURLJson -- creating response struct")
 		fullEncodedURL := fmt.Sprintf("%s/%s", sa.BaseURL, short)
 		resp := ShortResponse{Result: fullEncodedURL}
-		log.Printf("handlers::SaveURLJson -- creating response struct, resp: %v", resp)
 
-		log.Printf("handlers::SaveURLJson -- marshalling response struct")
 		respBody, err := json.Marshal(resp)
-		log.Printf("handlers::SaveURLJson -- marshalling response struct, "+
-			"respBody: %v, err: %v", string(respBody), err)
 		if err != nil {
-			log.Printf("handlers::SaveURLJson -- marshalling response struct isn't success, returning 400 err")
+			sa.L.Error("marshalling response struct isn't success", zap.Error(err))
 			http.Error(w, "400 page not found", http.StatusBadRequest)
 			return
 		}
-
-		log.Print("handlers::SaveURLJson -- write in ResponseWriter")
 
 		hk := "content-type"
 		hv := "application/json"
 		w.Header().Set(hk, hv)
-		log.Printf("handlers::SaveURLJson -- write in ResponseWriter, header key: %s, header value: %s", hk, hv)
-
 		w.WriteHeader(http.StatusCreated)
-		log.Printf("handlers::SaveURLJson -- write in ResponseWriter, status: %v", http.StatusCreated)
-
 		w.Write(respBody)
-		log.Printf("handlers::SaveURLJson -- write in ResponseWriter, body: %s", string(respBody))
 	}
+}
+
+func createShort(sa *shortener.NaiveShortener, r io.Reader, isJSON bool) (short string, err error) {
+
+	req := ShortRequest{}
+	b, err := io.ReadAll(r)
+	if err != nil {
+		sa.L.Error("reading body isn't success", zap.Error(err))
+		return "", err
+	}
+
+	var long string
+	switch isJSON {
+	case true:
+		err = json.Unmarshal(b, &req)
+		if err != nil {
+			sa.L.Error("unmarshalling isn't success", zap.Error(err))
+			return "", err
+		}
+		long = req.URL
+	case false:
+		long = string(b)
+	}
+
+	if !url.Valid(long) {
+		sa.L.Error("url in body isn't valid")
+		return "", url.ErrInvalidURL
+	}
+
+	short, err = sa.Encoder().Short(long)
+	if err != nil {
+		sa.L.Error("creating short isn't success", zap.Error(err))
+		return "", err
+	}
+
+	return short, nil
 }

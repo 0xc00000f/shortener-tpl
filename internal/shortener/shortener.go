@@ -1,4 +1,4 @@
-package api
+package shortener
 
 type Shortener interface {
 	Short(long string) (short string, err error)

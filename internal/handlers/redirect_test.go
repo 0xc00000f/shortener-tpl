@@ -1,14 +1,15 @@
 package handlers
 
 import (
+	"github.com/0xc00000f/shortener-tpl/internal/rand"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
 
-	"github.com/0xc00000f/shortener-tpl/internal/api"
-	"github.com/0xc00000f/shortener-tpl/internal/logic"
+	"github.com/0xc00000f/shortener-tpl/internal/encoder"
+	"github.com/0xc00000f/shortener-tpl/internal/shortener"
 	"github.com/0xc00000f/shortener-tpl/internal/storage"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -38,13 +39,14 @@ func testRequest(t *testing.T, ts *httptest.Server, method, path string, body io
 }
 
 func TestRedirect(t *testing.T) {
-	storage := storage.NewMemoryStorage()
-	logic := logic.NewURLEncoder(
-		logic.SetStorage(storage),
-		logic.SetLength(7),
+	storage := storage.NewMemoryStorage(nil)
+	encoder := encoder.New(
+		encoder.SetStorage(storage),
+		encoder.SetLength(7),
+		encoder.SetRandom(rand.New(true)),
 	)
 
-	sa := api.NewShortenerAPI(api.SetLogic(logic))
+	sa := shortener.New(shortener.SetEncoder(encoder))
 	apiInstance := NewRouter(sa)
 	ts := httptest.NewServer(apiInstance)
 	defer ts.Close()
