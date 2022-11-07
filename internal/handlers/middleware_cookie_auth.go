@@ -7,7 +7,7 @@ import (
 	"github.com/0xc00000f/shortener-tpl/internal/user"
 )
 
-const CookieAuthName = "USER_ID"
+const CookieAuthName = "Authorization"
 
 func CookieAuth(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
