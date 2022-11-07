@@ -40,6 +40,7 @@ func CookieAuth(next http.Handler) http.Handler {
 
 		ck.Value = eu
 
+		req.AddCookie(&ck)
 		http.SetCookie(w, &ck)
 		next.ServeHTTP(w, req)
 	})
