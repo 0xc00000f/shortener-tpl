@@ -30,7 +30,7 @@ func NewFileStorage(filename string, logger *zap.Logger) (FileStorage, error) {
 
 	return FileStorage{
 		file:   file,
-		memory: NewMemoryStorage(nil),
+		memory: NewMemoryStorage(logger),
 		l:      logger,
 	}, nil
 }

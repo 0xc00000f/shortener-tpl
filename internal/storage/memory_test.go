@@ -2,6 +2,7 @@ package storage
 
 import (
 	"github.com/google/uuid"
+	"go.uber.org/zap"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -9,7 +10,7 @@ import (
 
 func TestMemoryStorage_Get(t *testing.T) {
 
-	var storage = NewMemoryStorage(nil)
+	var storage = NewMemoryStorage(zap.L())
 	storage.Store(uuid.Nil, "ytAA2Z", "https://google.com")
 	storage.Store(uuid.Nil, "hNaU8l", "https://dzen.ru/")
 
@@ -56,7 +57,7 @@ func TestMemoryStorage_Get(t *testing.T) {
 
 func TestMemoryStorage_Set(t *testing.T) {
 
-	var storage = NewMemoryStorage(nil)
+	var storage = NewMemoryStorage(zap.L())
 
 	tests := []struct {
 		name     string
