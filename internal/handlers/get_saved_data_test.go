@@ -32,17 +32,12 @@ func TestGetSavedData_Positive_201(t *testing.T) {
 
 	exp := map[string]string{
 		"5ZytxbC": "https://dzen.ru/",
-		"RmOSY54": "https://ya.ru/",
 	}
 	encoder.EXPECT().GetAll(user.Nil.UserID).Return(exp, nil)
 	prepareMap := []result{
 		{
 			Short: fmt.Sprintf("%s/%s", baseURL, "5ZytxbC"),
 			Long:  "https://dzen.ru/",
-		},
-		{
-			Short: fmt.Sprintf("%s/%s", baseURL, "RmOSY54"),
-			Long:  "https://ya.ru/",
 		},
 	}
 	expectedResult, err := json.MarshalIndent(prepareMap, "", " ")
