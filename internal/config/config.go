@@ -2,6 +2,7 @@ package config
 
 import (
 	"flag"
+	"fmt"
 	"os"
 
 	"go.uber.org/zap"
@@ -10,7 +11,8 @@ import (
 const (
 	FileStorageKey   = "FILE_STORAGE_PATH" // file storage path key -- environment variable
 	SystemAddressKey = "SERVER_ADDRESS"    // address key -- environment variable
-	DefaultAddress   = ":8080"
+	SystemBaseURLKey = "BASE_URL"          // base url key -- environment variable
+	DefaultAddress   = "127.0.0.1:8080"
 )
 
 type Cfg struct {
@@ -34,6 +36,7 @@ func New(logger *zap.Logger) (Cfg, error) {
 
 	cfg.chooseFilepath()
 	cfg.chooseAddress()
+	cfg.chooseBaseURL()
 
 	return cfg, nil
 }
@@ -73,4 +76,24 @@ func (cfg *Cfg) chooseAddress() {
 	}
 
 	cfg.Address = address
+}
+
+func (cfg *Cfg) chooseBaseURL() {
+	// if is set by flags
+	if cfg.BaseURL != "" {
+		cfg.L.Info("choose base url from flag", zap.String("BaseURL", cfg.BaseURL))
+		return
+	}
+
+	var ok bool
+	// try to set value from system environment variable
+	bu, ok := os.LookupEnv(SystemBaseURLKey)
+	if !ok {
+		// set default value
+		cfg.L.Info("choose default base url")
+		bu = fmt.Sprintf("http://%s", DefaultAddress)
+	}
+
+	cfg.BaseURL = bu
+	cfg.L.Info("base url chosen", zap.String("BaseURL", cfg.BaseURL))
 }

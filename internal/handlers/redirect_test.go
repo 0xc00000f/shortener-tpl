@@ -1,60 +1,104 @@
 package handlers
 
 import (
-	"github.com/0xc00000f/shortener-tpl/internal/rand"
+	"context"
+	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
-	"strings"
 	"testing"
 
-	"github.com/0xc00000f/shortener-tpl/internal/encoder"
 	"github.com/0xc00000f/shortener-tpl/internal/shortener"
-	"github.com/0xc00000f/shortener-tpl/internal/storage"
+	shortenerMock "github.com/0xc00000f/shortener-tpl/internal/shortener/mocks"
+	"github.com/go-chi/chi/v5"
+	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"go.uber.org/zap"
 )
 
-func testRequest(t *testing.T, ts *httptest.Server, method, path string, body io.Reader, isFullPath bool) (int, string) {
-	var url string
-	if isFullPath {
-		url = ts.URL + path
-	} else {
-		url = path
-	}
+func TestRedirect_Positive(t *testing.T) {
+	ctl := gomock.NewController(t)
+	defer ctl.Finish()
 
-	req, err := http.NewRequest(method, url, body)
-	require.NoError(t, err)
+	baseURL := "http://example.com"
+	short := "5ZytxbC"
+	expectedLong := "https://dzen.ru/"
 
-	transport := http.Transport{}
-	resp, err := transport.RoundTrip(req)
-	require.NoError(t, err)
-
-	respBody, err := io.ReadAll(resp.Body)
-	require.NoError(t, err)
-
-	defer resp.Body.Close()
-
-	return resp.StatusCode, string(respBody)
-}
-
-func TestRedirect(t *testing.T) {
-	storage := storage.NewMemoryStorage(nil)
-	encoder := encoder.New(
-		encoder.SetStorage(storage),
-		encoder.SetLength(7),
-		encoder.SetRandom(rand.New(true)),
+	encoder := shortenerMock.NewMockShortener(ctl)
+	ns := shortener.New(
+		shortener.SetEncoder(encoder),
+		shortener.InitBaseURL(baseURL),
+		shortener.SetLogger(zap.L()),
 	)
 
-	sa := shortener.New(shortener.SetEncoder(encoder))
-	apiInstance := NewRouter(sa)
-	ts := httptest.NewServer(apiInstance)
-	defer ts.Close()
+	encoder.EXPECT().Get(short).Return(expectedLong, nil)
+	serverFunc := Redirect(ns).ServeHTTP
 
-	statusCode, body := testRequest(t, ts, "POST", "/", strings.NewReader("https://vk.com"), true)
-	assert.Equal(t, http.StatusCreated, statusCode)
+	rec := httptest.NewRecorder()
 
-	statusCode, body = testRequest(t, ts, "GET", body, nil, false)
-	assert.Equal(t, http.StatusTemporaryRedirect, statusCode)
-	assert.Empty(t, body)
+	req := httptest.NewRequest(
+		http.MethodGet,
+		fmt.Sprintf("/%s", short),
+		nil,
+	)
+	req.Header.Set("content-type", "application/json")
+
+	routeContext := chi.NewRouteContext()
+	routeContext.URLParams.Add("url", short)
+
+	req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, routeContext))
+
+	serverFunc(rec, req)
+	res := rec.Result()
+	defer res.Body.Close()
+
+	result, err := io.ReadAll(res.Body)
+	require.NoError(t, err)
+
+	assert.Equal(t, http.StatusTemporaryRedirect, res.StatusCode)
+	assert.Equal(t, "text/plain; charset=utf-8", res.Header.Get("content-type"))
+	assert.Equal(t, expectedLong, res.Header.Get("Location"))
+	assert.Empty(t, result)
+}
+
+func TestRedirect_EncoderGetError(t *testing.T) {
+	ctl := gomock.NewController(t)
+	defer ctl.Finish()
+
+	baseURL := "http://example.com"
+	short := "5ZytxbC"
+
+	encoder := shortenerMock.NewMockShortener(ctl)
+	ns := shortener.New(
+		shortener.SetEncoder(encoder),
+		shortener.InitBaseURL(baseURL),
+		shortener.SetLogger(zap.L()),
+	)
+
+	getErr := errors.New("db is down")
+	encoder.EXPECT().Get(short).Return("", getErr)
+	serverFunc := Redirect(ns).ServeHTTP
+
+	rec := httptest.NewRecorder()
+
+	req := httptest.NewRequest(
+		http.MethodGet,
+		fmt.Sprintf("/%s", short),
+		nil,
+	)
+	req.Header.Set("content-type", "application/json")
+
+	routeContext := chi.NewRouteContext()
+	routeContext.URLParams.Add("url", short)
+
+	req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, routeContext))
+
+	serverFunc(rec, req)
+	res := rec.Result()
+	defer res.Body.Close()
+
+	assert.Equal(t, http.StatusBadRequest, res.StatusCode)
+	assert.Equal(t, "text/plain; charset=utf-8", res.Header.Get("content-type"))
 }

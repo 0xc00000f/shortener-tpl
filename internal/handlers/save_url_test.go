@@ -1,60 +1,103 @@
 package handlers
 
 import (
-	"encoding/json"
+	"context"
 	"fmt"
-	"github.com/0xc00000f/shortener-tpl/internal/rand"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
 
-	"github.com/0xc00000f/shortener-tpl/internal/encoder"
 	"github.com/0xc00000f/shortener-tpl/internal/shortener"
-	"github.com/0xc00000f/shortener-tpl/internal/storage"
-	"github.com/0xc00000f/shortener-tpl/internal/url"
-
+	shortenerMock "github.com/0xc00000f/shortener-tpl/internal/shortener/mocks"
+	"github.com/go-chi/chi/v5"
+	"github.com/golang/mock/gomock"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"go.uber.org/zap"
 )
 
-func TestSaveURL(t *testing.T) {
-	storage := storage.NewMemoryStorage(nil)
-	encoder := encoder.New(
-		encoder.SetStorage(storage),
-		encoder.SetLength(7),
-		encoder.SetRandom(rand.New(true)),
-	)
-	sa := shortener.New(shortener.SetEncoder(encoder))
-	apiInstance := NewRouter(sa)
-	ts := httptest.NewServer(apiInstance)
-	defer ts.Close()
+func TestSaveURL_UserNil_Positive(t *testing.T) {
+	ctl := gomock.NewController(t)
+	defer ctl.Finish()
 
-	statusCode, body := testRequest(t, ts, "POST", "/", strings.NewReader("https://vk.com"), true)
-	assert.Equal(t, http.StatusCreated, statusCode)
-	assert.True(t, url.Valid(body))
+	baseURL := "http://example.com"
+	expectedShort := "5ZytxbC"
+	long := "https://dzen.ru/"
+
+	encoder := shortenerMock.NewMockShortener(ctl)
+	ns := shortener.New(
+		shortener.SetEncoder(encoder),
+		shortener.InitBaseURL(baseURL),
+		shortener.SetLogger(zap.L()),
+	)
+
+	encoder.EXPECT().Short(uuid.Nil, long).Return(expectedShort, nil)
+	serverFunc := SaveURL(ns).ServeHTTP
+
+	rec := httptest.NewRecorder()
+
+	req := httptest.NewRequest(
+		http.MethodPost,
+		"/",
+		strings.NewReader(long),
+	)
+	req.Header.Set("content-type", "text/html")
+
+	routeContext := chi.NewRouteContext()
+	routeContext.URLParams.Add("url", "")
+
+	req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, routeContext))
+
+	serverFunc(rec, req)
+	res := rec.Result()
+	defer res.Body.Close()
+
+	result, err := io.ReadAll(res.Body)
+	require.NoError(t, err)
+
+	assert.Equal(t, http.StatusCreated, res.StatusCode)
+	assert.Equal(t, "text/plain; charset=utf-8", res.Header.Get("content-type"))
+	assert.Equal(t, fmt.Sprintf("%s/%s", baseURL, expectedShort), string(result))
 }
 
-func TestSaveURLJson(t *testing.T) {
-	shortLength := 7
+func TestSaveURLJson_UserNil_Positive(t *testing.T) {
+	ctl := gomock.NewController(t)
+	defer ctl.Finish()
 
-	storage := storage.NewMemoryStorage(nil)
-	encoder := encoder.New(
-		encoder.SetStorage(storage),
-		encoder.SetLength(shortLength),
-		encoder.SetRandom(rand.New(true)),
+	baseURL := "http://example.com"
+	expectedShort := "5ZytxbC"
+	long := "https://dzen.ru/"
+
+	encoder := shortenerMock.NewMockShortener(ctl)
+	ns := shortener.New(
+		shortener.SetEncoder(encoder),
+		shortener.InitBaseURL(baseURL),
+		shortener.SetLogger(zap.L()),
 	)
-	sa := shortener.New(shortener.SetEncoder(encoder))
-	apiInstance := NewRouter(sa)
-	ts := httptest.NewServer(apiInstance)
-	defer ts.Close()
 
-	statusCode, body := testRequest(t, ts, "POST", "/api/shorten",
-		strings.NewReader(fmt.Sprintf("{\"%v\":\"%v\"}", "url", "https://vk.com")), true)
-	assert.Equal(t, http.StatusCreated, statusCode)
+	encoder.EXPECT().Short(uuid.Nil, long).Return(expectedShort, nil)
+	serverFunc := SaveURLJson(ns).ServeHTTP
 
-	resp := ShortResponse{}
-	err := json.Unmarshal([]byte(body), &resp)
+	rec := httptest.NewRecorder()
+
+	req := httptest.NewRequest(
+		http.MethodPost,
+		"/api/shorten",
+		strings.NewReader(fmt.Sprintf(`{"url": "%s"}`, long)),
+	)
+	req.Header.Set("content-type", "application/json")
+
+	serverFunc(rec, req)
+	res := rec.Result()
+	defer res.Body.Close()
+
+	result, err := io.ReadAll(res.Body)
 	require.NoError(t, err)
-	assert.True(t, url.Valid(resp.Result))
+
+	assert.Equal(t, http.StatusCreated, res.StatusCode)
+	assert.Equal(t, "application/json", res.Header.Get("content-type"))
+	assert.Equal(t, fmt.Sprintf(`{"result":"%s/%s"}`, baseURL, expectedShort), string(result))
 }

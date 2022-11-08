@@ -1,8 +1,6 @@
 package shortener
 
 import (
-	"os"
-
 	"go.uber.org/zap"
 )
 
@@ -36,12 +34,7 @@ func SetEncoder(encoder Shortener) Option {
 
 func InitBaseURL(baseURL string) Option {
 	return func(ns *NaiveShortener) {
-		if len(baseURL) > 0 {
-			ns.BaseURL = baseURL
-			return
-		}
-
-		ns.BaseURL = os.Getenv("BASE_URL")
+		ns.BaseURL = baseURL
 	}
 }
 

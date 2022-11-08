@@ -46,10 +46,6 @@ func SaveURL(sa *shortener.NaiveShortener) http.HandlerFunc {
 			return
 		}
 
-		if sa.BaseURL == "" {
-			sa.BaseURL = fmt.Sprintf("http://%s", r.Host)
-		}
-
 		hk := "content-type"
 		hv := "text/plain; charset=utf-8"
 		w.Header().Set(hk, hv)
@@ -105,10 +101,6 @@ func SaveURLJson(sa *shortener.NaiveShortener) http.HandlerFunc {
 			sa.L.Error("creating short isn't success", zap.Error(err))
 			http.Error(w, "400 page not found", http.StatusBadRequest)
 			return
-		}
-
-		if sa.BaseURL == "" {
-			sa.BaseURL = fmt.Sprintf("http://%s", r.Host)
 		}
 
 		fullEncodedURL := fmt.Sprintf("%s/%s", sa.BaseURL, short)
