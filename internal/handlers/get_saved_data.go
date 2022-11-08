@@ -37,7 +37,8 @@ func GetSavedData(sa *shortener.NaiveShortener) http.HandlerFunc {
 		}
 
 		w.Header().Set("content-type", "application/json")
-		w.WriteHeader(http.StatusCreated)
+		w.WriteHeader(http.StatusOK)
+		sa.L.Info("function result", zap.String("result", string(result)))
 		w.Write(result)
 	}
 }
@@ -48,7 +49,6 @@ type result struct {
 }
 
 func prepareResult(all map[string]string, baseURL string, l *zap.Logger) (b []byte, err error) {
-	defer l.Debug("result", zap.String("byte (as string)", string(b)), zap.Error(err))
 	var res []result
 	for short, long := range all {
 		res = append(res, result{
