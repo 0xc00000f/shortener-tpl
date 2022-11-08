@@ -2,6 +2,7 @@ package storage
 
 import (
 	"errors"
+	"github.com/0xc00000f/shortener-tpl/internal/log"
 	"github.com/google/uuid"
 	"go.uber.org/zap"
 )
@@ -27,6 +28,9 @@ func NewMemoryStorage(logger *zap.Logger) MemoryStorage {
 }
 
 func (ms MemoryStorage) Get(short string) (long string, err error) {
+	ms.l.Info("input", zap.String("short", short))
+	defer ms.l.Info("function result", zap.String("long", long), zap.Error(err))
+
 	if len(short) == 0 {
 		err = ErrEmptyKey
 		return "", err
@@ -38,7 +42,16 @@ func (ms MemoryStorage) Get(short string) (long string, err error) {
 	return long, nil
 }
 
-func (ms MemoryStorage) Store(userID uuid.UUID, short, long string) error {
+func (ms MemoryStorage) Store(userID uuid.UUID, short, long string) (err error) {
+	defer ms.l.Info("function result history map", log.MapToFields(ms.history[userID])...)
+	defer ms.l.Info("function result storage map", log.MapToFields(ms.storage)...)
+	defer ms.l.Info("input + function result error",
+		zap.String("userID", userID.String()),
+		zap.String("short", short),
+		zap.String("long", long),
+		zap.Error(err),
+	)
+
 	if len(short) == 0 {
 		return ErrEmptyKey
 	}
@@ -61,5 +74,7 @@ func (ms MemoryStorage) IsKeyExist(short string) (bool, error) {
 }
 
 func (ms MemoryStorage) GetAll(uuid uuid.UUID) (result map[string]string, err error) {
+	ms.l.Info("function input", zap.String("uuid", uuid.String()))
+	defer ms.l.Info("function result", log.MapToFields(result)...)
 	return ms.history[uuid], nil
 }

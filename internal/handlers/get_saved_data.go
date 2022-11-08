@@ -47,7 +47,8 @@ type result struct {
 	Long  string `json:"long_url"`
 }
 
-func prepareResult(all map[string]string, baseURL string, l *zap.Logger) ([]byte, error) {
+func prepareResult(all map[string]string, baseURL string, l *zap.Logger) (b []byte, err error) {
+	defer l.Debug("result", zap.String("byte (as string)", string(b)), zap.Error(err))
 	var res []result
 	for short, long := range all {
 		res = append(res, result{
@@ -56,9 +57,9 @@ func prepareResult(all map[string]string, baseURL string, l *zap.Logger) ([]byte
 		})
 	}
 
-	b, err := json.MarshalIndent(res, "", " ")
+	b, err = json.MarshalIndent(res, "", " ")
 	if err != nil {
-		l.Error("writing url in file marshaling error", zap.Error(err))
+		l.Error("marshal indent error", zap.Error(err))
 		return nil, err
 	}
 	b = append(b, '\n')
