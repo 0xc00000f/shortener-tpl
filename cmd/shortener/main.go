@@ -37,6 +37,7 @@ func main() {
 	shortener := shortener.New(
 		shortener.SetEncoder(encoder),
 		shortener.InitBaseURL(cfg.BaseURL),
+		shortener.SetDatabaseAddress(cfg.DatabaseAddress),
 		shortener.SetLogger(l),
 	)
 

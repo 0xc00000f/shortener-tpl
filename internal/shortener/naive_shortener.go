@@ -5,9 +5,11 @@ import (
 )
 
 type NaiveShortener struct {
-	encoder Shortener
-	BaseURL string
-	L       *zap.Logger
+	encoder         Shortener
+	BaseURL         string
+	DatabaseAddress string
+
+	L *zap.Logger
 }
 
 type Option func(ns *NaiveShortener)
@@ -35,6 +37,12 @@ func SetEncoder(encoder Shortener) Option {
 func InitBaseURL(baseURL string) Option {
 	return func(ns *NaiveShortener) {
 		ns.BaseURL = baseURL
+	}
+}
+
+func SetDatabaseAddress(address string) Option {
+	return func(ns *NaiveShortener) {
+		ns.DatabaseAddress = address
 	}
 }
 

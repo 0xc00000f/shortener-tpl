@@ -9,16 +9,19 @@ import (
 )
 
 const (
-	FileStorageKey   = "FILE_STORAGE_PATH" // file storage path key -- environment variable
-	SystemAddressKey = "SERVER_ADDRESS"    // address key -- environment variable
-	SystemBaseURLKey = "BASE_URL"          // base url key -- environment variable
-	DefaultAddress   = "127.0.0.1:8080"
+	FileStorageKey     = "FILE_STORAGE_PATH" // file storage path key -- environment variable
+	SystemAddressKey   = "SERVER_ADDRESS"    // address key -- environment variable
+	SystemBaseURLKey   = "BASE_URL"          // base url key -- environment variable
+	SystemDbAddressKey = "DATABASE_DSN"      // database address key -- environment variable
+	DefaultAddress     = "127.0.0.1:8080"
+	DefaultAddressDB   = "127.0.0.1:8080"
 )
 
 type Cfg struct {
-	Filepath string // path to the file with shortened URLs
-	Address  string // address of the HTTP server
-	BaseURL  string // base URL of the resulting shortened URL
+	Filepath        string // path to the file with shortened URLs
+	Address         string // address of the HTTP server
+	BaseURL         string // base URL of the resulting shortened URL
+	DatabaseAddress string // address of the database
 
 	L *zap.Logger // logger
 }
@@ -28,6 +31,7 @@ func New(logger *zap.Logger) (Cfg, error) {
 
 	flag.StringVar(&cfg.Filepath, "f", "", "responsible for the path to the file with shortened URLs")
 	flag.StringVar(&cfg.Address, "a", "", "responsible for the start Address of the HTTP server")
+	flag.StringVar(&cfg.DatabaseAddress, "d", "", "responsible for the database address")
 	flag.StringVar(&cfg.BaseURL,
 		"b",
 		"",
@@ -96,4 +100,16 @@ func (cfg *Cfg) chooseBaseURL() {
 
 	cfg.BaseURL = bu
 	cfg.L.Info("base url chosen", zap.String("BaseURL", cfg.BaseURL))
+}
+
+func (cfg *Cfg) chooseDatabaseAddress() {
+	// if is set by flags
+	if cfg.DatabaseAddress != "" {
+		cfg.L.Info("choose database address from flag", zap.String("DatabaseAddress", cfg.DatabaseAddress))
+		return
+	}
+
+	// try to set value from system environment variable
+	cfg.DatabaseAddress = os.Getenv(SystemDbAddressKey)
+	cfg.L.Info("database address chosen", zap.String("Database Address", cfg.DatabaseAddress))
 }
