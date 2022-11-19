@@ -26,11 +26,12 @@ func Ping(sa *shortener.NaiveShortener) http.HandlerFunc {
 		defer pgxConnPool.Close()
 
 		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+		defer cancel()
+		
 		if err := pgxConnPool.Ping(ctx); err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		defer cancel()
 
 		w.Header().Set("content-type", "application/json")
 		w.WriteHeader(http.StatusOK)
