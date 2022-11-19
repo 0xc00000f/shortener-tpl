@@ -2,25 +2,31 @@ package handlers
 
 import (
 	"context"
-	"database/sql"
+	"github.com/jackc/pgx/v4/pgxpool"
+	"go.uber.org/zap"
 	"net/http"
 	"time"
 
 	"github.com/0xc00000f/shortener-tpl/internal/shortener"
-
-	_ "github.com/jackc/pgx/stdlib"
 )
 
 func Ping(sa *shortener.NaiveShortener) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		db, err := sql.Open("pgx", sa.DatabaseAddress)
+		pgxConfig, err := pgxpool.ParseConfig(sa.DatabaseAddress)
 		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
+			sa.L.Error("unable to parsing config", zap.Error(err))
 			return
 		}
 
+		pgxConnPool, err := pgxpool.ConnectConfig(context.TODO(), pgxConfig)
+		if err != nil {
+			sa.L.Error("Unable to connect to database", zap.Error(err))
+			return
+		}
+		defer pgxConnPool.Close()
+
 		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
-		if err := db.PingContext(ctx); err != nil {
+		if err := pgxConnPool.Ping(ctx); err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}

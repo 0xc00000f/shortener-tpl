@@ -8,6 +8,10 @@ import (
 )
 
 func New(cfg config.Cfg) (encoder.URLStorager, error) {
+	if len(cfg.DatabaseAddress) > 0 {
+		return NewDatabaseStorage(cfg.DatabaseAddress, cfg.L)
+	}
+
 	if len(cfg.Filepath) == 0 {
 		return NewMemoryStorage(cfg.L), nil
 	}
