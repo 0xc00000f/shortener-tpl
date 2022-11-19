@@ -12,7 +12,7 @@ const (
 	FileStorageKey     = "FILE_STORAGE_PATH" // file storage path key -- environment variable
 	SystemAddressKey   = "SERVER_ADDRESS"    // address key -- environment variable
 	SystemBaseURLKey   = "BASE_URL"          // base url key -- environment variable
-	SystemDbAddressKey = "DATABASE_DSN"      // database address key -- environment variable
+	SystemDBAddressKey = "DATABASE_DSN"      // database address key -- environment variable
 	DefaultAddress     = "127.0.0.1:8080"
 	DefaultAddressDB   = "127.0.0.1:8080"
 )
@@ -110,6 +110,6 @@ func (cfg *Cfg) chooseDatabaseAddress() {
 	}
 
 	// try to set value from system environment variable
-	cfg.DatabaseAddress = os.Getenv(SystemDbAddressKey)
+	cfg.DatabaseAddress = os.Getenv(SystemDBAddressKey)
 	cfg.L.Info("database address chosen", zap.String("Database Address", cfg.DatabaseAddress))
 }
