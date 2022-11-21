@@ -36,7 +36,11 @@ func NewRouter(sa *shortener.NaiveShortener) *chi.Mux {
 		r.Get("/ping", Ping(sa))
 
 		r.Route("/api", func(r chi.Router) {
-			r.Post("/shorten", SaveURLJson(sa))
+			r.Route("/shorten", func(r chi.Router) {
+				r.Post("/", SaveURLJson(sa))
+				r.Post("/batch", Batch(sa))
+			})
+
 			r.Get("/user/urls", GetSavedData(sa))
 		})
 

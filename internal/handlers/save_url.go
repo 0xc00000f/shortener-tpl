@@ -27,7 +27,7 @@ func SaveURL(sa *shortener.NaiveShortener) http.HandlerFunc {
 			return
 		}
 
-		rc, err := readBody(r, sa.L)
+		rc, err := unzipBody(r, sa.L)
 		if err != nil {
 			sa.L.Error("read body err", zap.Error(err))
 			http.Error(w, "400 page not found", http.StatusBadRequest)
@@ -68,7 +68,7 @@ func SaveURL(sa *shortener.NaiveShortener) http.HandlerFunc {
 	}
 }
 
-func readBody(r *http.Request, l *zap.Logger) (io.ReadCloser, error) {
+func unzipBody(r *http.Request, l *zap.Logger) (io.ReadCloser, error) {
 	var readCloser io.ReadCloser
 	if r.Header.Get(`Content-Encoding`) == `gzip` {
 		gz, err := gzip.NewReader(r.Body)
@@ -94,7 +94,7 @@ type ShortResponse struct {
 
 func SaveURLJson(sa *shortener.NaiveShortener) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		rc, err := readBody(r, sa.L)
+		rc, err := unzipBody(r, sa.L)
 		if err != nil {
 			sa.L.Error("read body err", zap.Error(err))
 			http.Error(w, "400 page not found", http.StatusBadRequest)
