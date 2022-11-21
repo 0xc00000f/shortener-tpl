@@ -1,9 +1,10 @@
 package encoder
 
 import (
+	"errors"
+
 	"github.com/0xc00000f/shortener-tpl/internal/rand"
 	"github.com/google/uuid"
-
 	"go.uber.org/zap"
 )
 
@@ -70,7 +71,13 @@ func (ue *URLEncoder) Short(userID uuid.UUID, long string) (short string, err er
 		break
 	}
 
+	var uniqueViolationError *UniqueViolationError
 	err = ue.storage.Store(userID, short, long)
+	if errors.As(err, &uniqueViolationError) {
+		if err, ok := err.(*UniqueViolationError); ok {
+			return err.Short, err
+		}
+	}
 	if err != nil {
 		return "", err
 	}

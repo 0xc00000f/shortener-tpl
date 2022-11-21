@@ -1,9 +1,10 @@
 package storage
 
 import (
+	"testing"
+
 	"github.com/google/uuid"
 	"go.uber.org/zap"
-	"testing"
 
 	"github.com/stretchr/testify/assert"
 )

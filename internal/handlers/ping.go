@@ -2,10 +2,11 @@ package handlers
 
 import (
 	"context"
-	"github.com/jackc/pgx/v4/pgxpool"
-	"go.uber.org/zap"
 	"net/http"
 	"time"
+
+	"github.com/jackc/pgx/v4/pgxpool"
+	"go.uber.org/zap"
 
 	"github.com/0xc00000f/shortener-tpl/internal/shortener"
 )

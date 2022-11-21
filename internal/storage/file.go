@@ -3,8 +3,9 @@ package storage
 import (
 	"bufio"
 	"encoding/json"
-	"github.com/google/uuid"
 	"os"
+
+	"github.com/google/uuid"
 
 	"go.uber.org/zap"
 )

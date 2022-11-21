@@ -2,12 +2,13 @@ package encoder
 
 import (
 	"errors"
+	"testing"
+
 	storageMock "github.com/0xc00000f/shortener-tpl/internal/encoder/mocks"
 	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
-	"testing"
 
 	"github.com/0xc00000f/shortener-tpl/internal/rand"
 	"github.com/stretchr/testify/assert"
