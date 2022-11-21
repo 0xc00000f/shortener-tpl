@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/0xc00000f/shortener-tpl/internal/encoder"
 	"github.com/0xc00000f/shortener-tpl/internal/shortener"
 	"github.com/0xc00000f/shortener-tpl/internal/url"
 	"github.com/0xc00000f/shortener-tpl/internal/user"
@@ -39,21 +40,31 @@ func SaveURL(sa *shortener.NaiveShortener) http.HandlerFunc {
 			u = user.Nil
 		}
 
-		short, err := createShort(sa, rc, u.UserID, false)
-		if err != nil {
-			sa.L.Error("creating short isn't success", zap.Error(err))
-			http.Error(w, "400 page not found", http.StatusBadRequest)
-			return
+		var writeBody = func(b []byte) {
+			w.Header().Set("content-type", "application/json")
+			w.WriteHeader(http.StatusCreated)
+			w.Write(b)
 		}
 
-		hk := "content-type"
-		hv := "text/plain; charset=utf-8"
-		w.Header().Set(hk, hv)
-
-		w.WriteHeader(http.StatusCreated)
+		short, err := createShort(sa, rc, u.UserID, false)
+		if err != nil {
+			switch err.(type) {
+			case *encoder.UniqueViolationError:
+				sa.L.Error("short for this long exist", zap.Error(err))
+				writeBody = func(b []byte) {
+					w.Header().Set("content-type", "application/json")
+					w.WriteHeader(http.StatusConflict)
+					w.Write(b)
+				}
+			default:
+				sa.L.Error("creating short isn't success", zap.Error(err))
+				http.Error(w, "400 page not found", http.StatusBadRequest)
+				return
+			}
+		}
 
 		body := fmt.Sprintf("%s/%s", sa.BaseURL, short)
-		w.Write([]byte(body))
+		writeBody([]byte(body))
 	}
 }
 
@@ -96,11 +107,27 @@ func SaveURLJson(sa *shortener.NaiveShortener) http.HandlerFunc {
 			u = user.Nil
 		}
 
+		var writeBody = func(b []byte) {
+			w.Header().Set("content-type", "application/json")
+			w.WriteHeader(http.StatusCreated)
+			w.Write(b)
+		}
+
 		short, err := createShort(sa, rc, u.UserID, true)
 		if err != nil {
-			sa.L.Error("creating short isn't success", zap.Error(err))
-			http.Error(w, "400 page not found", http.StatusBadRequest)
-			return
+			switch err.(type) {
+			case *encoder.UniqueViolationError:
+				sa.L.Error("short for this long exist", zap.Error(err))
+				writeBody = func(b []byte) {
+					w.Header().Set("content-type", "application/json")
+					w.WriteHeader(http.StatusConflict)
+					w.Write(b)
+				}
+			default:
+				sa.L.Error("creating short isn't success", zap.Error(err))
+				http.Error(w, "400 page not found", http.StatusBadRequest)
+				return
+			}
 		}
 
 		fullEncodedURL := fmt.Sprintf("%s/%s", sa.BaseURL, short)
@@ -113,11 +140,7 @@ func SaveURLJson(sa *shortener.NaiveShortener) http.HandlerFunc {
 			return
 		}
 
-		hk := "content-type"
-		hv := "application/json"
-		w.Header().Set(hk, hv)
-		w.WriteHeader(http.StatusCreated)
-		w.Write(respBody)
+		writeBody(respBody)
 	}
 }
 
@@ -151,7 +174,7 @@ func createShort(sa *shortener.NaiveShortener, r io.Reader, userID uuid.UUID, is
 	short, err = sa.Encoder().Short(userID, long)
 	if err != nil {
 		sa.L.Error("creating short isn't success", zap.Error(err))
-		return "", err
+		return short, err
 	}
 
 	return short, nil

@@ -59,7 +59,7 @@ func TestSaveURL_UserNil_Positive(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.Equal(t, http.StatusCreated, res.StatusCode)
-	assert.Equal(t, "text/plain; charset=utf-8", res.Header.Get("content-type"))
+	assert.Equal(t, "application/json", res.Header.Get("content-type"))
 	assert.Equal(t, fmt.Sprintf("%s/%s", baseURL, expectedShort), string(result))
 }
 

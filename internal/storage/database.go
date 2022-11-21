@@ -2,7 +2,11 @@ package storage
 
 import (
 	"context"
+
+	"github.com/0xc00000f/shortener-tpl/internal/encoder"
 	"github.com/google/uuid"
+	"github.com/jackc/pgconn"
+	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"go.uber.org/zap"
 )
@@ -38,7 +42,8 @@ func NewDatabaseStorage(connStr string, l *zap.Logger) (DatabaseStorage, error) 
 		user_id uuid NOT NULL,
 		short_url text NOT NULL,
 		long_url text NOT NULL,
-		PRIMARY KEY (id));`
+		PRIMARY KEY (id));
+		CREATE UNIQUE INDEX IF NOT EXISTS long_unique_idx on url_mapping (long_url);`
 
 	_, err = pgxConnPool.Exec(context.TODO(), query)
 	if err != nil {
@@ -87,12 +92,23 @@ func (ds DatabaseStorage) GetAll(userID uuid.UUID) (result map[string]string, er
 
 func (ds DatabaseStorage) Store(userID uuid.UUID, short string, long string) error {
 	query := `INSERT INTO url_mapping(user_id, short_url, long_url) VALUES ($1::uuid, $2::text, $3::text)`
-
 	_, err := ds.db.Exec(context.TODO(), query, userID, short, long)
-	if err != nil {
+
+	if pqErr, ok := err.(*pgconn.PgError); ok {
+		if pqErr.Code == pgerrcode.UniqueViolation {
+			var m urlMapping
+			if err := ds.db.QueryRow(context.TODO(), "SELECT user_id, short_url, long_url FROM url_mapping WHERE long_url = $1::text", long).Scan(&m.userID, &m.short, &m.long); err != nil {
+				return err
+			}
+			return &encoder.UniqueViolationError{
+				Err:    err,
+				UserID: m.userID,
+				Short:  m.short,
+				Long:   m.long,
+			}
+		}
 		return err
 	}
-
 	return nil
 }
 
