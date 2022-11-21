@@ -47,7 +47,7 @@ func Batch(sa *shortener.NaiveShortener) http.HandlerFunc {
 		}
 
 		w.Header().Set("content-type", "application/json")
-		w.WriteHeader(http.StatusOK)
+		w.WriteHeader(http.StatusCreated)
 		sa.L.Info("function result", zap.String("result", string(result)))
 		w.Write(result)
 	}

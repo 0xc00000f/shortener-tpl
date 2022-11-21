@@ -81,7 +81,7 @@ func TestBatch_UserNil_Positive(t *testing.T) {
 	result, err := io.ReadAll(res.Body)
 	require.NoError(t, err)
 
-	assert.Equal(t, http.StatusOK, res.StatusCode)
+	assert.Equal(t, http.StatusCreated, res.StatusCode)
 	assert.Equal(t, "application/json", res.Header.Get("content-type"))
 
 	require.JSONEq(t, string(expectedResult), string(result))
