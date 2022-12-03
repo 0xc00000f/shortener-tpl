@@ -95,6 +95,7 @@ func (cfg *Cfg) chooseBaseURL() {
 	if !ok {
 		// set default value
 		cfg.L.Info("choose default base url")
+
 		bu = fmt.Sprintf("http://%s", DefaultAddress)
 	}
 

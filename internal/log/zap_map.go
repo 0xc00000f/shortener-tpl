@@ -7,5 +7,6 @@ func MapToFields(m map[string]string) []zap.Field {
 	for k, v := range m {
 		fields = append(fields, zap.String(k, v))
 	}
+
 	return fields
 }

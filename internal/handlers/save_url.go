@@ -24,6 +24,7 @@ func SaveURL(sa *shortener.NaiveShortener) http.HandlerFunc { //revive:disable-l
 		if len(urlPart) > 0 {
 			sa.L.Error("checking url param isn't success")
 			http.Error(w, "400 page not found", http.StatusBadRequest)
+
 			return
 		}
 
@@ -31,6 +32,7 @@ func SaveURL(sa *shortener.NaiveShortener) http.HandlerFunc { //revive:disable-l
 		if err != nil {
 			sa.L.Error("read body err", zap.Error(err))
 			http.Error(w, "400 page not found", http.StatusBadRequest)
+
 			return
 		}
 		defer rc.Close()
@@ -53,16 +55,20 @@ func SaveURL(sa *shortener.NaiveShortener) http.HandlerFunc { //revive:disable-l
 			switch err.(type) {
 			case *encoder.UniqueViolationError:
 				sa.L.Error("short for this long exist", zap.Error(err))
+
 				writeBody = func(b []byte) {
 					w.Header().Set("content-type", "application/json")
 					w.WriteHeader(http.StatusConflict)
+
 					if _, err := w.Write(b); err != nil {
 						sa.L.Error("writing body failure", zap.Error(err))
 					}
 				}
+
 			default:
 				sa.L.Error("creating short isn't success", zap.Error(err))
 				http.Error(w, "400 page not found", http.StatusBadRequest)
+
 				return
 			}
 		}
@@ -74,15 +80,19 @@ func SaveURL(sa *shortener.NaiveShortener) http.HandlerFunc { //revive:disable-l
 
 func unzipBody(r *http.Request, l *zap.Logger) (io.ReadCloser, error) {
 	var readCloser io.ReadCloser
+
 	if r.Header.Get(`Content-Encoding`) == `gzip` {
 		gz, err := gzip.NewReader(r.Body)
 		if err != nil {
 			l.Error("can't create gzip readCloser", zap.Error(err))
 			return nil, err
 		}
+
 		readCloser = gz
+
 		return readCloser, nil
 	}
+
 	readCloser = r.Body
 
 	return readCloser, nil
@@ -102,6 +112,7 @@ func SaveURLJson(sa *shortener.NaiveShortener) http.HandlerFunc { //revive:disab
 		if err != nil {
 			sa.L.Error("read body err", zap.Error(err))
 			http.Error(w, "400 page not found", http.StatusBadRequest)
+
 			return
 		}
 		defer rc.Close()
@@ -124,16 +135,20 @@ func SaveURLJson(sa *shortener.NaiveShortener) http.HandlerFunc { //revive:disab
 			switch err.(type) {
 			case *encoder.UniqueViolationError:
 				sa.L.Error("short for this long exist", zap.Error(err))
+
 				writeBody = func(b []byte) {
 					w.Header().Set("content-type", "application/json")
 					w.WriteHeader(http.StatusConflict)
+
 					if _, err := w.Write(b); err != nil {
 						sa.L.Error("writing body failure", zap.Error(err))
 					}
 				}
+
 			default:
 				sa.L.Error("creating short isn't success", zap.Error(err))
 				http.Error(w, "400 page not found", http.StatusBadRequest)
+
 				return
 			}
 		}
@@ -145,6 +160,7 @@ func SaveURLJson(sa *shortener.NaiveShortener) http.HandlerFunc { //revive:disab
 		if err != nil {
 			sa.L.Error("marshalling response struct isn't success", zap.Error(err))
 			http.Error(w, "400 page not found", http.StatusBadRequest)
+
 			return
 		}
 
@@ -159,6 +175,7 @@ func createShort(
 	isJSON bool,
 ) (short string, err error) {
 	req := ShortRequest{}
+
 	b, err := io.ReadAll(r)
 	if err != nil {
 		sa.L.Error("reading body isn't success", zap.Error(err))
@@ -166,6 +183,7 @@ func createShort(
 	}
 
 	var long string
+
 	switch isJSON {
 	case true:
 		err = json.Unmarshal(b, &req)
@@ -173,7 +191,9 @@ func createShort(
 			sa.L.Error("unmarshalling isn't success", zap.Error(err))
 			return "", err
 		}
+
 		long = req.URL
+
 	case false:
 		long = string(b)
 	}

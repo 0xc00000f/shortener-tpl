@@ -36,12 +36,14 @@ func (ms MemoryStorage) Get(short string) (long string, err error) {
 		err = ErrEmptyKey
 		return "", err
 	}
+
 	long, ok := ms.storage[short]
 	if !ok {
 		return "", ErrNoKeyFound
 	}
 
 	ms.l.Info("function result", zap.String("long", long), zap.Error(err))
+
 	return long, nil
 }
 
@@ -56,19 +58,24 @@ func (ms MemoryStorage) Store(userID uuid.UUID, short, long string) (err error) 
 	if len(short) == 0 {
 		return ErrEmptyKey
 	}
+
 	if len(long) == 0 {
 		return ErrEmptyValue
 	}
+
 	if userID != uuid.Nil {
 		if _, ok := ms.history[userID]; !ok {
 			ms.history[userID] = map[string]string{}
 		}
+
 		ms.history[userID][short] = long
 	}
+
 	ms.storage[short] = long
 
 	ms.l.Info("function result history map", log.MapToFields(ms.history[userID])...)
 	ms.l.Info("function result storage map", log.MapToFields(ms.storage)...)
+
 	return nil
 }
 
@@ -81,5 +88,6 @@ func (ms MemoryStorage) GetAll(userID uuid.UUID) (result map[string]string, err 
 	ms.l.Info("function input", zap.String("userID", userID.String()))
 	result = ms.history[userID]
 	ms.l.Info("function result", log.MapToFields(result)...)
+
 	return result, nil
 }

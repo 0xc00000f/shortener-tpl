@@ -3,9 +3,10 @@ package encoder
 import (
 	"errors"
 
-	"github.com/0xc00000f/shortener-tpl/internal/rand"
 	"github.com/google/uuid"
 	"go.uber.org/zap"
+
+	"github.com/0xc00000f/shortener-tpl/internal/rand"
 )
 
 const PreferredLength = 6
@@ -61,26 +62,31 @@ func (ue *URLEncoder) encode() string {
 func (ue *URLEncoder) Short(userID uuid.UUID, long string) (short string, err error) {
 	for {
 		short = ue.encode()
+
 		exist, err := ue.storage.IsKeyExist(short)
 		if err != nil {
 			return "", err
 		}
+
 		if exist {
 			continue
 		}
+
 		break
 	}
 
 	var uniqueViolationError *UniqueViolationError
+
 	err = ue.storage.Store(userID, short, long)
 	if errors.As(err, &uniqueViolationError) {
 		if err, ok := err.(*UniqueViolationError); ok {
 			return err.Short, err
 		}
 	}
-	if err != nil {
+	if err != nil { //nolint:wsl
 		return "", err
 	}
+
 	return short, nil
 }
 

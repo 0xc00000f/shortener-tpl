@@ -23,6 +23,7 @@ func Batch(sa *shortener.NaiveShortener) http.HandlerFunc {
 		if err != nil {
 			sa.L.Error("read body err", zap.Error(err))
 			http.Error(w, "400 page not found", http.StatusBadRequest)
+
 			return
 		}
 		defer rc.Close()
@@ -31,6 +32,7 @@ func Batch(sa *shortener.NaiveShortener) http.HandlerFunc {
 		if err != nil {
 			sa.L.Error("reading body isn't success", zap.Error(err))
 			http.Error(w, "400 page not found", http.StatusBadRequest)
+
 			return
 		}
 
@@ -38,6 +40,7 @@ func Batch(sa *shortener.NaiveShortener) http.HandlerFunc {
 		if err != nil {
 			sa.L.Error("unmarshalling isn't success", zap.Error(err))
 			http.Error(w, "400 page not found", http.StatusBadRequest)
+
 			return
 		}
 
@@ -50,6 +53,7 @@ func Batch(sa *shortener.NaiveShortener) http.HandlerFunc {
 		w.Header().Set("content-type", "application/json")
 		w.WriteHeader(http.StatusCreated)
 		sa.L.Info("function result", zap.String("result", string(result)))
+
 		if _, err := w.Write(result); err != nil {
 			sa.L.Error("writing body failure", zap.Error(err))
 		}
@@ -77,6 +81,7 @@ func prepareOutputBatchResult(
 	u user.User,
 ) (result []byte, err error) {
 	var ob []outputBatch
+
 	for _, batch := range ib {
 		short, err := sa.Encoder().Short(u.UserID, batch.OriginalURL)
 		if err != nil {
@@ -94,5 +99,6 @@ func prepareOutputBatchResult(
 	if err != nil {
 		sa.L.Error("batch marshalling isn't success", zap.Error(err))
 	}
+
 	return result, err
 }

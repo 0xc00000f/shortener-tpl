@@ -29,6 +29,7 @@ func TestString(t *testing.T) {
 			predictableText: "",
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			randString := rand.String(tt.letters)

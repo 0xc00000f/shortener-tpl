@@ -56,5 +56,6 @@ func GetUserFromRequest(r *http.Request) (u user.User, ok bool) {
 	if err != nil {
 		return user.User{}, false
 	}
+
 	return u, true
 }

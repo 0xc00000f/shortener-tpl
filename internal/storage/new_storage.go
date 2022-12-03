@@ -27,5 +27,6 @@ func New(cfg config.Cfg) (encoder.URLStorager, error) {
 		cfg.L.Error("init file storage memory err", zap.Error(err))
 		return nil, err
 	}
+
 	return storage, nil
 }

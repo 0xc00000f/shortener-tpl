@@ -35,6 +35,7 @@ func TestURLEncoder_Encode(t *testing.T) {
 			letters: 0,
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			ue := URLEncoder{length: tt.letters, rand: r}
@@ -101,6 +102,7 @@ func TestURLEncoder_Short_IsKeyExist_Error(t *testing.T) {
 	storageErr := errors.New("db is down")
 
 	storage.EXPECT().IsKeyExist(expectedShort).Return(false, storageErr)
+
 	short, err := ue.Short(uuid.Nil, long)
 
 	require.ErrorIs(t, err, storageErr)

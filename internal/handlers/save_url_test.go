@@ -9,14 +9,15 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/0xc00000f/shortener-tpl/internal/shortener"
-	shortenerMock "github.com/0xc00000f/shortener-tpl/internal/shortener/mocks"
 	"github.com/go-chi/chi/v5"
 	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
+
+	"github.com/0xc00000f/shortener-tpl/internal/shortener"
+	shortenerMock "github.com/0xc00000f/shortener-tpl/internal/shortener/mocks"
 )
 
 func TestSaveURL_UserNil_Positive(t *testing.T) {
@@ -35,10 +36,9 @@ func TestSaveURL_UserNil_Positive(t *testing.T) {
 	)
 
 	encoder.EXPECT().Short(uuid.Nil, long).Return(expectedShort, nil)
+
 	serverFunc := SaveURL(ns).ServeHTTP
-
 	rec := httptest.NewRecorder()
-
 	req := httptest.NewRequest(
 		http.MethodPost,
 		"/",
@@ -52,6 +52,7 @@ func TestSaveURL_UserNil_Positive(t *testing.T) {
 	req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, routeContext))
 
 	serverFunc(rec, req)
+
 	res := rec.Result()
 	defer res.Body.Close()
 
@@ -79,18 +80,19 @@ func TestSaveURLJson_UserNil_Positive(t *testing.T) {
 	)
 
 	encoder.EXPECT().Short(uuid.Nil, long).Return(expectedShort, nil)
+
 	serverFunc := SaveURLJson(ns).ServeHTTP
-
 	rec := httptest.NewRecorder()
-
 	req := httptest.NewRequest(
 		http.MethodPost,
 		"/api/shorten",
 		strings.NewReader(fmt.Sprintf(`{"url": "%s"}`, long)),
 	)
+
 	req.Header.Set("content-type", "application/json")
 
 	serverFunc(rec, req)
+
 	res := rec.Result()
 	defer res.Body.Close()
 

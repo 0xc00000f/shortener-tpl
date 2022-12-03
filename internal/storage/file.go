@@ -46,13 +46,14 @@ func (fs FileStorage) InitMemory() error {
 		fs.l.Error("getting file info error", zap.Error(err))
 		return err
 	}
+
 	if fi.Size() == 0 {
 		return nil
 	}
 
-	scanner := bufio.NewScanner(fs.file)
 	var url url
 
+	scanner := bufio.NewScanner(fs.file)
 	for scanner.Scan() {
 		data := scanner.Bytes()
 
@@ -63,13 +64,16 @@ func (fs FileStorage) InitMemory() error {
 		}
 
 		fs.memory.storage[url.Short] = url.Long
+
 		if url.UserID != uuid.Nil {
 			if _, ok := fs.memory.history[url.UserID]; !ok {
 				fs.memory.history[url.UserID] = map[string]string{}
 			}
+
 			fs.memory.history[url.UserID][url.Short] = url.Long
 		}
 	}
+
 	return nil
 }
 
@@ -87,6 +91,7 @@ func (fs FileStorage) Store(userID uuid.UUID, short, long string) error {
 		fs.l.Error("in-memory store error", zap.Error(err))
 		return err
 	}
+
 	err = fs.writeURL(userID, short, long)
 	if err != nil {
 		fs.l.Error("writing url in file error", zap.Error(err))
@@ -102,11 +107,13 @@ func (fs FileStorage) writeURL(userID uuid.UUID, short, long string) error {
 		Short:  short,
 		Long:   long,
 	}
+
 	b, err := json.Marshal(s)
 	if err != nil {
 		fs.l.Error("writing url in file marshaling error", zap.Error(err))
 		return err
 	}
+
 	b = append(b, '\n')
 
 	_, err = fs.file.Write(b)
@@ -114,6 +121,7 @@ func (fs FileStorage) writeURL(userID uuid.UUID, short, long string) error {
 		fs.l.Error("writing in file error: %v", zap.Error(err))
 		return err
 	}
+
 	return nil
 }
 

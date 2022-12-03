@@ -9,13 +9,14 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/0xc00000f/shortener-tpl/internal/shortener"
-	shortenerMock "github.com/0xc00000f/shortener-tpl/internal/shortener/mocks"
 	"github.com/go-chi/chi/v5"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
+
+	"github.com/0xc00000f/shortener-tpl/internal/shortener"
+	shortenerMock "github.com/0xc00000f/shortener-tpl/internal/shortener/mocks"
 )
 
 func TestRedirect_Positive(t *testing.T) {
@@ -34,10 +35,9 @@ func TestRedirect_Positive(t *testing.T) {
 	)
 
 	encoder.EXPECT().Get(short).Return(expectedLong, nil)
+
 	serverFunc := Redirect(ns).ServeHTTP
-
 	rec := httptest.NewRecorder()
-
 	req := httptest.NewRequest(
 		http.MethodGet,
 		fmt.Sprintf("/%s", short),
@@ -51,6 +51,7 @@ func TestRedirect_Positive(t *testing.T) {
 	req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, routeContext))
 
 	serverFunc(rec, req)
+
 	res := rec.Result()
 	defer res.Body.Close()
 
@@ -79,10 +80,9 @@ func TestRedirect_EncoderGetError(t *testing.T) {
 
 	getErr := errors.New("db is down")
 	encoder.EXPECT().Get(short).Return("", getErr)
+
 	serverFunc := Redirect(ns).ServeHTTP
-
 	rec := httptest.NewRecorder()
-
 	req := httptest.NewRequest(
 		http.MethodGet,
 		fmt.Sprintf("/%s", short),
@@ -96,6 +96,7 @@ func TestRedirect_EncoderGetError(t *testing.T) {
 	req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, routeContext))
 
 	serverFunc(rec, req)
+
 	res := rec.Result()
 	defer res.Body.Close()
 

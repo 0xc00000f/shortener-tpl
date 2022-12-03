@@ -9,20 +9,21 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/0xc00000f/shortener-tpl/internal/shortener"
-	shortenerMock "github.com/0xc00000f/shortener-tpl/internal/shortener/mocks"
-	"github.com/0xc00000f/shortener-tpl/internal/user"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
+
+	"github.com/0xc00000f/shortener-tpl/internal/shortener"
+	shortenerMock "github.com/0xc00000f/shortener-tpl/internal/shortener/mocks"
+	"github.com/0xc00000f/shortener-tpl/internal/user"
 )
 
 func TestGetSavedData_Positive_201(t *testing.T) {
 	ctl := gomock.NewController(t)
 	defer ctl.Finish()
-	baseURL := "http://example.com"
 
+	baseURL := "http://example.com"
 	encoder := shortenerMock.NewMockShortener(ctl)
 	ns := shortener.New(
 		shortener.SetEncoder(encoder),
@@ -34,6 +35,7 @@ func TestGetSavedData_Positive_201(t *testing.T) {
 		"5ZytxbC": "https://dzen.ru/",
 	}
 	encoder.EXPECT().GetAll(user.Nil.UserID).Return(exp, nil)
+
 	prepareMap := []result{
 		{
 			Short: fmt.Sprintf("%s/%s", baseURL, "5ZytxbC"),
@@ -71,8 +73,8 @@ func TestGetSavedData_Positive_201(t *testing.T) {
 func TestGetSavedData_Positive_204(t *testing.T) {
 	ctl := gomock.NewController(t)
 	defer ctl.Finish()
-	baseURL := "http://example.com"
 
+	baseURL := "http://example.com"
 	encoder := shortenerMock.NewMockShortener(ctl)
 	ns := shortener.New(
 		shortener.SetEncoder(encoder),
@@ -107,8 +109,8 @@ func TestGetSavedData_Positive_204(t *testing.T) {
 func TestGetSavedData_Negative_GetAllError(t *testing.T) {
 	ctl := gomock.NewController(t)
 	defer ctl.Finish()
-	baseURL := "http://example.com"
 
+	baseURL := "http://example.com"
 	encoder := shortenerMock.NewMockShortener(ctl)
 	ns := shortener.New(
 		shortener.SetEncoder(encoder),

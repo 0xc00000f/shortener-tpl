@@ -32,6 +32,7 @@ func (u *User) UserEncrypt() ([]byte, error) {
 
 	encryptedUser := make([]byte, aes.BlockSize)
 	aesBlock.Encrypt(encryptedUser, byteUser)
+
 	return encryptedUser, nil
 }
 
@@ -40,6 +41,7 @@ func (u *User) UserEncryptToString() (string, error) {
 	if err != nil {
 		return "", err
 	}
+
 	return hex.EncodeToString(b), nil
 }
 
@@ -58,6 +60,7 @@ func (u *User) UserDecrypt(b []byte) error {
 	}
 
 	u.UserID = userID
+
 	return nil
 }
 
@@ -66,11 +69,13 @@ func (u *User) UserDecryptFromString(s string) error {
 	if err != nil {
 		return err
 	}
+
 	return u.UserDecrypt(b)
 }
 
 func Valid(ciphertext string) bool {
 	u := User{}
 	err := u.UserDecryptFromString(ciphertext)
+
 	return err == nil
 }

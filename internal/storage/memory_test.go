@@ -12,6 +12,7 @@ import (
 
 func TestMemoryStorage_Get(t *testing.T) {
 	var storage = NewMemoryStorage(zap.L())
+
 	require.NoError(t, storage.Store(uuid.Nil, "ytAA2Z", "https://google.com"))
 	require.NoError(t, storage.Store(uuid.Nil, "hNaU8l", "https://dzen.ru/"))
 

@@ -11,14 +11,18 @@ type Random struct {
 
 func New(predictable bool) Random {
 	var seed int64
+
 	switch predictable {
 	case true:
 		seed = 1
+
 	case false:
 		seed = time.Now().UnixNano()
 	}
+
 	source := rand.NewSource(seed)
 	rand := rand.New(source)
+
 	return Random{rand: rand}
 }
 
@@ -29,5 +33,6 @@ func (r Random) String(n int) string {
 	for i := range b {
 		b[i] = letterRunes[r.rand.Intn(len(letterRunes))]
 	}
+
 	return string(b)
 }

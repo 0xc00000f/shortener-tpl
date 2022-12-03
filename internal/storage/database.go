@@ -56,6 +56,7 @@ func NewDatabaseStorage(connStr string, l *zap.Logger) (DatabaseStorage, error) 
 
 func (ds DatabaseStorage) Get(short string) (string, error) {
 	var m urlMapping
+
 	err := ds.db.QueryRow(
 		context.TODO(),
 		"SELECT user_id, short_url, long_url FROM url_mapping WHERE short_url = $1::text",
@@ -83,6 +84,7 @@ func (ds DatabaseStorage) GetAll(userID uuid.UUID) (result map[string]string, er
 
 	for rows.Next() {
 		var u urlMapping
+
 		err = rows.Scan(&u.userID, &u.short, &u.long)
 		if err != nil {
 			return nil, err
@@ -113,6 +115,7 @@ func (ds DatabaseStorage) Store(userID uuid.UUID, short string, long string) err
 			).Scan(&m.userID, &m.short, &m.long); err != nil {
 				return err
 			}
+
 			return &encoder.UniqueViolationError{
 				Err:    err,
 				UserID: m.userID,
@@ -120,13 +123,16 @@ func (ds DatabaseStorage) Store(userID uuid.UUID, short string, long string) err
 				Long:   m.long,
 			}
 		}
+
 		return err
 	}
+
 	return nil
 }
 
 func (ds DatabaseStorage) IsKeyExist(short string) (bool, error) {
 	var i bool
+
 	row := ds.db.QueryRow(
 		context.TODO(),
 		`SELECT COUNT(1)>0 AS N FROM url_mapping WHERE short_url = $1`,
@@ -137,5 +143,6 @@ func (ds DatabaseStorage) IsKeyExist(short string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
+
 	return i, nil
 }
