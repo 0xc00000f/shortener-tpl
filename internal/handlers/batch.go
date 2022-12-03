@@ -6,9 +6,10 @@ import (
 	"io"
 	"net/http"
 
+	"go.uber.org/zap"
+
 	"github.com/0xc00000f/shortener-tpl/internal/shortener"
 	"github.com/0xc00000f/shortener-tpl/internal/user"
-	"go.uber.org/zap"
 )
 
 func Batch(sa *shortener.NaiveShortener) http.HandlerFunc {
@@ -49,7 +50,9 @@ func Batch(sa *shortener.NaiveShortener) http.HandlerFunc {
 		w.Header().Set("content-type", "application/json")
 		w.WriteHeader(http.StatusCreated)
 		sa.L.Info("function result", zap.String("result", string(result)))
-		w.Write(result)
+		if _, err := w.Write(result); err != nil {
+			sa.L.Error("writing body failure", zap.Error(err))
+		}
 	}
 }
 

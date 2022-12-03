@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
+	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 
 	"github.com/stretchr/testify/assert"
@@ -12,8 +13,8 @@ import (
 func TestMemoryStorage_Get(t *testing.T) {
 
 	var storage = NewMemoryStorage(zap.L())
-	storage.Store(uuid.Nil, "ytAA2Z", "https://google.com")
-	storage.Store(uuid.Nil, "hNaU8l", "https://dzen.ru/")
+	require.NoError(t, storage.Store(uuid.Nil, "ytAA2Z", "https://google.com"))
+	require.NoError(t, storage.Store(uuid.Nil, "hNaU8l", "https://dzen.ru/"))
 
 	tests := []struct {
 		name  string

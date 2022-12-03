@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/0xc00000f/shortener-tpl/internal/config"
@@ -14,8 +15,11 @@ import (
 )
 
 func main() {
-	l, _ := zap.NewProduction()
-	defer l.Sync()
+	l, err := zap.NewProduction()
+	if err != nil {
+		log.Fatalf("can't initialize zap logger: %v", err)
+	}
+	defer l.Sync() //nolint:errcheck
 
 	cfg, err := config.New(l)
 	if err != nil {

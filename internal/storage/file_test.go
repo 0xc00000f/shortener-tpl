@@ -20,8 +20,8 @@ func TestFileStorage_Get(t *testing.T) {
 	storage, err := NewFileStorage(file.Name(), zap.L())
 	require.NoError(t, err)
 
-	storage.Store(uuid.Nil, "ytAA2Z", "https://google.com")
-	storage.Store(uuid.Nil, "hNaU8l", "https://dzen.ru/")
+	require.NoError(t, storage.Store(uuid.Nil, "ytAA2Z", "https://google.com"))
+	require.NoError(t, storage.Store(uuid.Nil, "hNaU8l", "https://dzen.ru/"))
 
 	tests := []struct {
 		userID uuid.UUID

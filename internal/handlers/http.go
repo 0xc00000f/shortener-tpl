@@ -4,6 +4,8 @@ import (
 	"compress/flate"
 	"net/http"
 
+	"go.uber.org/zap"
+
 	"github.com/0xc00000f/shortener-tpl/internal/shortener"
 
 	"github.com/go-chi/chi/v5"
@@ -24,11 +26,15 @@ func NewRouter(sa *shortener.NaiveShortener) *chi.Mux {
 
 	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(400)
-		w.Write([]byte("400 page not found"))
+		if _, err := w.Write([]byte("400 page not found")); err != nil {
+			sa.L.Error("writing body failure", zap.Error(err))
+		}
 	})
 	r.MethodNotAllowed(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(400)
-		w.Write([]byte("400 page not found"))
+		if _, err := w.Write([]byte("400 page not found")); err != nil {
+			sa.L.Error("writing body failure", zap.Error(err))
+		}
 	})
 
 	r.Route("/", func(r chi.Router) {

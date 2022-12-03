@@ -43,7 +43,9 @@ func SaveURL(sa *shortener.NaiveShortener) http.HandlerFunc {
 		var writeBody = func(b []byte) {
 			w.Header().Set("content-type", "application/json")
 			w.WriteHeader(http.StatusCreated)
-			w.Write(b)
+			if _, err := w.Write(b); err != nil {
+				sa.L.Error("writing body failure", zap.Error(err))
+			}
 		}
 
 		short, err := createShort(sa, rc, u.UserID, false)
@@ -54,7 +56,9 @@ func SaveURL(sa *shortener.NaiveShortener) http.HandlerFunc {
 				writeBody = func(b []byte) {
 					w.Header().Set("content-type", "application/json")
 					w.WriteHeader(http.StatusConflict)
-					w.Write(b)
+					if _, err := w.Write(b); err != nil {
+						sa.L.Error("writing body failure", zap.Error(err))
+					}
 				}
 			default:
 				sa.L.Error("creating short isn't success", zap.Error(err))
@@ -110,7 +114,9 @@ func SaveURLJson(sa *shortener.NaiveShortener) http.HandlerFunc {
 		var writeBody = func(b []byte) {
 			w.Header().Set("content-type", "application/json")
 			w.WriteHeader(http.StatusCreated)
-			w.Write(b)
+			if _, err := w.Write(b); err != nil {
+				sa.L.Error("writing body failure", zap.Error(err))
+			}
 		}
 
 		short, err := createShort(sa, rc, u.UserID, true)
@@ -121,7 +127,9 @@ func SaveURLJson(sa *shortener.NaiveShortener) http.HandlerFunc {
 				writeBody = func(b []byte) {
 					w.Header().Set("content-type", "application/json")
 					w.WriteHeader(http.StatusConflict)
-					w.Write(b)
+					if _, err := w.Write(b); err != nil {
+						sa.L.Error("writing body failure", zap.Error(err))
+					}
 				}
 			default:
 				sa.L.Error("creating short isn't success", zap.Error(err))
