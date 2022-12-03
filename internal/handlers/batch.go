@@ -68,10 +68,14 @@ type outputBatch struct {
 
 func parseInputBatch(b []byte) (ib []inputBatch, err error) {
 	err = json.Unmarshal(b, &ib)
-	return
+	return ib, err
 }
 
-func prepareOutputBatchResult(ib []inputBatch, sa *shortener.NaiveShortener, u user.User) (result []byte, err error) {
+func prepareOutputBatchResult(
+	ib []inputBatch,
+	sa *shortener.NaiveShortener,
+	u user.User,
+) (result []byte, err error) {
 	var ob []outputBatch
 	for _, batch := range ib {
 		short, err := sa.Encoder().Short(u.UserID, batch.OriginalURL)
@@ -90,5 +94,5 @@ func prepareOutputBatchResult(ib []inputBatch, sa *shortener.NaiveShortener, u u
 	if err != nil {
 		sa.L.Error("batch marshalling isn't success", zap.Error(err))
 	}
-	return
+	return result, err
 }

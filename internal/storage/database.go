@@ -3,12 +3,13 @@ package storage
 import (
 	"context"
 
-	"github.com/0xc00000f/shortener-tpl/internal/encoder"
 	"github.com/google/uuid"
 	"github.com/jackc/pgconn"
 	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"go.uber.org/zap"
+
+	"github.com/0xc00000f/shortener-tpl/internal/encoder"
 )
 
 type DatabaseStorage struct {
@@ -55,7 +56,11 @@ func NewDatabaseStorage(connStr string, l *zap.Logger) (DatabaseStorage, error) 
 
 func (ds DatabaseStorage) Get(short string) (string, error) {
 	var m urlMapping
-	err := ds.db.QueryRow(context.TODO(), "SELECT user_id, short_url, long_url FROM url_mapping WHERE short_url = $1::text", short).Scan(&m.userID, &m.short, &m.long)
+	err := ds.db.QueryRow(
+		context.TODO(),
+		"SELECT user_id, short_url, long_url FROM url_mapping WHERE short_url = $1::text",
+		short,
+	).Scan(&m.userID, &m.short, &m.long)
 	if err != nil {
 		return "", err
 	}
@@ -66,7 +71,11 @@ func (ds DatabaseStorage) Get(short string) (string, error) {
 func (ds DatabaseStorage) GetAll(userID uuid.UUID) (result map[string]string, err error) {
 	m := make(map[string]string)
 
-	rows, err := ds.db.Query(context.TODO(), "SELECT user_id, short_url, long_url FROM url_mapping WHERE user_id = $1::uuid", userID)
+	rows, err := ds.db.Query(
+		context.TODO(),
+		"SELECT user_id, short_url, long_url FROM url_mapping WHERE user_id = $1::uuid",
+		userID,
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -97,7 +106,11 @@ func (ds DatabaseStorage) Store(userID uuid.UUID, short string, long string) err
 	if pqErr, ok := err.(*pgconn.PgError); ok {
 		if pqErr.Code == pgerrcode.UniqueViolation {
 			var m urlMapping
-			if err := ds.db.QueryRow(context.TODO(), "SELECT user_id, short_url, long_url FROM url_mapping WHERE long_url = $1::text", long).Scan(&m.userID, &m.short, &m.long); err != nil {
+			if err := ds.db.QueryRow(
+				context.TODO(),
+				"SELECT user_id, short_url, long_url FROM url_mapping WHERE long_url = $1::text",
+				long,
+			).Scan(&m.userID, &m.short, &m.long); err != nil {
 				return err
 			}
 			return &encoder.UniqueViolationError{
@@ -114,7 +127,11 @@ func (ds DatabaseStorage) Store(userID uuid.UUID, short string, long string) err
 
 func (ds DatabaseStorage) IsKeyExist(short string) (bool, error) {
 	var i bool
-	row := ds.db.QueryRow(context.TODO(), `SELECT COUNT(1)>0 AS N FROM url_mapping WHERE short_url = $1`, short)
+	row := ds.db.QueryRow(
+		context.TODO(),
+		`SELECT COUNT(1)>0 AS N FROM url_mapping WHERE short_url = $1`,
+		short,
+	)
 
 	err := row.Scan(&i)
 	if err != nil {

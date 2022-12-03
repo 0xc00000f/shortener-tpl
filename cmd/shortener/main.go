@@ -26,26 +26,26 @@ func main() {
 		l.Fatal("creating config error", zap.Error(err))
 	}
 
-	storage, err := storage.New(cfg)
+	urlStorage, err := storage.New(cfg)
 	if err != nil {
 		l.Fatal("creating storage error", zap.Error(err))
 	}
 
-	encoder := encoder.New(
-		encoder.SetStorage(storage),
+	urlEncoder := encoder.New(
+		encoder.SetStorage(urlStorage),
 		encoder.SetLength(7),
 		encoder.SetRandom(rand.New(false)),
 		encoder.SetLogger(l),
 	)
 
-	shortener := shortener.New(
-		shortener.SetEncoder(encoder),
+	urlShortener := shortener.New(
+		shortener.SetEncoder(urlEncoder),
 		shortener.InitBaseURL(cfg.BaseURL),
 		shortener.SetDatabaseAddress(cfg.DatabaseAddress),
 		shortener.SetLogger(l),
 	)
 
-	router := handlers.NewRouter(shortener)
+	router := handlers.NewRouter(urlShortener)
 
 	l.Info("starting server", zap.String("address", cfg.Address))
 	l.Fatal("http server down", zap.Error(http.ListenAndServe(cfg.Address, router)))

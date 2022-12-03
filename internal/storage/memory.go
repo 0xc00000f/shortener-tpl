@@ -3,9 +3,10 @@ package storage
 import (
 	"errors"
 
-	"github.com/0xc00000f/shortener-tpl/internal/log"
 	"github.com/google/uuid"
 	"go.uber.org/zap"
+
+	"github.com/0xc00000f/shortener-tpl/internal/log"
 )
 
 var (
@@ -76,9 +77,9 @@ func (ms MemoryStorage) IsKeyExist(short string) (bool, error) {
 	return ok, nil
 }
 
-func (ms MemoryStorage) GetAll(uuid uuid.UUID) (result map[string]string, err error) {
-	ms.l.Info("function input", zap.String("uuid", uuid.String()))
-	result = ms.history[uuid]
+func (ms MemoryStorage) GetAll(userID uuid.UUID) (result map[string]string, err error) {
+	ms.l.Info("function input", zap.String("userID", userID.String()))
+	result = ms.history[userID]
 	ms.l.Info("function result", log.MapToFields(result)...)
 	return result, nil
 }

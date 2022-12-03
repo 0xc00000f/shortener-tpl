@@ -17,7 +17,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func SaveURL(sa *shortener.NaiveShortener) http.HandlerFunc {
+func SaveURL(sa *shortener.NaiveShortener) http.HandlerFunc { //revive:disable-line:cognitive-complexity
 	return func(w http.ResponseWriter, r *http.Request) {
 		urlPart := chi.URLParam(r, "url")
 
@@ -96,7 +96,7 @@ type ShortResponse struct {
 	Result string `json:"result"`
 }
 
-func SaveURLJson(sa *shortener.NaiveShortener) http.HandlerFunc {
+func SaveURLJson(sa *shortener.NaiveShortener) http.HandlerFunc { //revive:disable-line:cognitive-complexity
 	return func(w http.ResponseWriter, r *http.Request) {
 		rc, err := unzipBody(r, sa.L)
 		if err != nil {
@@ -152,7 +152,12 @@ func SaveURLJson(sa *shortener.NaiveShortener) http.HandlerFunc {
 	}
 }
 
-func createShort(sa *shortener.NaiveShortener, r io.Reader, userID uuid.UUID, isJSON bool) (short string, err error) {
+func createShort(
+	sa *shortener.NaiveShortener,
+	r io.Reader,
+	userID uuid.UUID,
+	isJSON bool,
+) (short string, err error) {
 
 	req := ShortRequest{}
 	b, err := io.ReadAll(r)
