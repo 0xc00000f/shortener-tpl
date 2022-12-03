@@ -4,8 +4,9 @@ import (
 	"crypto/aes"
 	"encoding/hex"
 
-	"github.com/0xc00000f/shortener-tpl/internal/crypto"
 	"github.com/google/uuid"
+
+	"github.com/0xc00000f/shortener-tpl/internal/crypto"
 )
 
 type User struct {
@@ -32,7 +33,6 @@ func (u *User) UserEncrypt() ([]byte, error) {
 	encryptedUser := make([]byte, aes.BlockSize)
 	aesBlock.Encrypt(encryptedUser, byteUser)
 	return encryptedUser, nil
-
 }
 
 func (u *User) UserEncryptToString() (string, error) {

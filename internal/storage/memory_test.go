@@ -11,7 +11,6 @@ import (
 )
 
 func TestMemoryStorage_Get(t *testing.T) {
-
 	var storage = NewMemoryStorage(zap.L())
 	require.NoError(t, storage.Store(uuid.Nil, "ytAA2Z", "https://google.com"))
 	require.NoError(t, storage.Store(uuid.Nil, "hNaU8l", "https://dzen.ru/"))
@@ -58,7 +57,6 @@ func TestMemoryStorage_Get(t *testing.T) {
 }
 
 func TestMemoryStorage_Set(t *testing.T) {
-
 	var storage = NewMemoryStorage(zap.L())
 
 	tests := []struct {
@@ -99,7 +97,6 @@ func TestMemoryStorage_Set(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-
 			err := storage.Store(uuid.Nil, tt.key, tt.value)
 			assert.Equal(t, tt.errStore, err)
 

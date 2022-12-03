@@ -4,14 +4,16 @@ import (
 	"errors"
 	"testing"
 
-	storageMock "github.com/0xc00000f/shortener-tpl/internal/encoder/mocks"
 	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 
-	"github.com/0xc00000f/shortener-tpl/internal/rand"
+	storageMock "github.com/0xc00000f/shortener-tpl/internal/encoder/mocks"
+
 	"github.com/stretchr/testify/assert"
+
+	"github.com/0xc00000f/shortener-tpl/internal/rand"
 )
 
 func TestURLEncoder_Encode(t *testing.T) {
@@ -103,7 +105,6 @@ func TestURLEncoder_Short_IsKeyExist_Error(t *testing.T) {
 
 	require.ErrorIs(t, err, storageErr)
 	assert.Equal(t, "", short)
-
 }
 
 func TestURLEncoder_Short_Positive_IsKeyExist_IfExist(t *testing.T) {
@@ -129,7 +130,6 @@ func TestURLEncoder_Short_Positive_IsKeyExist_IfExist(t *testing.T) {
 
 	require.NoError(t, err)
 	assert.Equal(t, secondShort, short)
-
 }
 
 func TestURLEncoder_Short_Store_Error(t *testing.T) {
@@ -154,7 +154,6 @@ func TestURLEncoder_Short_Store_Error(t *testing.T) {
 	short, err := ue.Short(uuid.Nil, long)
 	require.ErrorIs(t, err, storageErr)
 	assert.Equal(t, "", short)
-
 }
 
 func TestURLEncoder_Get(t *testing.T) {

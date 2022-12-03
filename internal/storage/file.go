@@ -82,7 +82,6 @@ func (fs FileStorage) GetAll(userID uuid.UUID) (result map[string]string, err er
 }
 
 func (fs FileStorage) Store(userID uuid.UUID, short, long string) error {
-
 	err := fs.memory.Store(userID, short, long)
 	if err != nil {
 		fs.l.Error("in-memory store error", zap.Error(err))

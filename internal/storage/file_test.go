@@ -13,7 +13,6 @@ import (
 )
 
 func TestFileStorage_Get(t *testing.T) {
-
 	file, err := os.CreateTemp(os.TempDir(), "testfilestorage*")
 	require.NoError(t, err)
 
@@ -70,7 +69,6 @@ func TestFileStorage_Get(t *testing.T) {
 }
 
 func TestFileStorage_Set(t *testing.T) {
-
 	file, err := os.CreateTemp(os.TempDir(), "testfilestorage*")
 	require.NoError(t, err)
 
@@ -120,7 +118,6 @@ func TestFileStorage_Set(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-
 			err := storage.Store(tt.userID, tt.key, tt.value)
 			assert.Equal(t, tt.errStore, err)
 

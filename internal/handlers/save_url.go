@@ -158,7 +158,6 @@ func createShort(
 	userID uuid.UUID,
 	isJSON bool,
 ) (short string, err error) {
-
 	req := ShortRequest{}
 	b, err := io.ReadAll(r)
 	if err != nil {
