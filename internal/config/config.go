@@ -17,7 +17,7 @@ type Cfg struct {
 	BaseURL string `env:"BASE_URL" envDefault:"http://127.0.0.1:8080"`
 
 	// address of the database
-	DatabaseAddress string `env:"DATABASE_DSN" envDefault:"http://127.0.0.1:5432"`
+	DatabaseAddress string `env:"DATABASE_DSN"`
 }
 
 func New() (Cfg, error) {
