@@ -20,6 +20,8 @@ import (
 	"github.com/0xc00000f/shortener-tpl/internal/user"
 )
 
+var errStorageOutOfReach = errors.New("db is down")
+
 func TestGetSavedData_Positive_201(t *testing.T) {
 	t.Parallel()
 
@@ -128,8 +130,7 @@ func TestGetSavedData_Negative_GetAllError(t *testing.T) {
 		shortener.SetLogger(zap.L()),
 	)
 
-	storageErr := errors.New("db is down")
-	encoder.EXPECT().GetAll(user.Nil.UserID).Return(nil, storageErr)
+	encoder.EXPECT().GetAll(user.Nil.UserID).Return(nil, errStorageOutOfReach)
 
 	serverFunc := handlers.GetSavedData(ns).ServeHTTP
 	rec := httptest.NewRecorder()

@@ -17,6 +17,8 @@ import (
 	"github.com/0xc00000f/shortener-tpl/internal/rand"
 )
 
+var errStorageOutOfReach = errors.New("db is down")
+
 func TestURLEncoder_Short_Positive(t *testing.T) {
 	t.Parallel()
 
@@ -81,13 +83,11 @@ func TestURLEncoder_Short_IsKeyExist_Error(t *testing.T) {
 		long          = "https://dzen.ru/"
 	)
 
-	storageErr := errors.New("db is down")
-
-	storage.EXPECT().IsKeyExist(expectedShort).Return(false, storageErr)
+	storage.EXPECT().IsKeyExist(expectedShort).Return(false, errStorageOutOfReach)
 
 	short, err := ue.Short(uuid.Nil, long)
 
-	require.ErrorIs(t, err, storageErr)
+	require.ErrorIs(t, err, errStorageOutOfReach)
 	assert.Equal(t, "", short)
 }
 
@@ -139,13 +139,11 @@ func TestURLEncoder_Short_Store_Error(t *testing.T) {
 		long          = "https://dzen.ru/"
 	)
 
-	storageErr := errors.New("db is down")
-
 	storage.EXPECT().IsKeyExist(expectedShort).Return(false, nil)
-	storage.EXPECT().Store(uuid.Nil, expectedShort, long).Return(storageErr)
+	storage.EXPECT().Store(uuid.Nil, expectedShort, long).Return(errStorageOutOfReach)
 
 	short, err := ue.Short(uuid.Nil, long)
-	require.ErrorIs(t, err, storageErr)
+	require.ErrorIs(t, err, errStorageOutOfReach)
 	assert.Equal(t, "", short)
 }
 
@@ -188,10 +186,9 @@ func TestURLEncoder_Get_Error(t *testing.T) {
 
 	short := "BpLnfg" // first predictable result of ue.encode()
 	expectedLong := ""
-	storageErr := errors.New("db is down")
-	storage.EXPECT().Get(short).Return("", storageErr)
+	storage.EXPECT().Get(short).Return("", errStorageOutOfReach)
 
 	long, err := ue.Get(short)
-	require.ErrorIs(t, err, storageErr)
+	require.ErrorIs(t, err, errStorageOutOfReach)
 	assert.Equal(t, expectedLong, long)
 }

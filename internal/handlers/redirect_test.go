@@ -2,7 +2,6 @@ package handlers_test
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -87,8 +86,7 @@ func TestRedirect_EncoderGetError(t *testing.T) {
 		shortener.SetLogger(zap.L()),
 	)
 
-	getErr := errors.New("db is down")
-	encoder.EXPECT().Get(short).Return("", getErr)
+	encoder.EXPECT().Get(short).Return("", errStorageOutOfReach)
 
 	serverFunc := handlers.Redirect(ns).ServeHTTP
 	rec := httptest.NewRecorder()
