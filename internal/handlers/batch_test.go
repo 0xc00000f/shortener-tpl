@@ -21,6 +21,8 @@ import (
 )
 
 func TestBatch_UserNil_Positive(t *testing.T) {
+	t.Parallel()
+
 	ctl := gomock.NewController(t)
 	defer ctl.Finish()
 	baseURL := "http://example.com"

@@ -9,6 +9,8 @@ import (
 )
 
 func TestString(t *testing.T) {
+	t.Parallel()
+
 	random := rand.New(true)
 	tests := []struct {
 		name            string
@@ -33,7 +35,10 @@ func TestString(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			randString := random.String(tt.letters)
 			assert.Equal(t, tt.letters, len(randString))
 			assert.Equal(t, tt.predictableText, randString)

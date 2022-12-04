@@ -21,6 +21,8 @@ import (
 )
 
 func TestRedirect_Positive(t *testing.T) {
+	t.Parallel()
+
 	ctl := gomock.NewController(t)
 	defer ctl.Finish()
 
@@ -66,6 +68,8 @@ func TestRedirect_Positive(t *testing.T) {
 }
 
 func TestRedirect_EncoderGetError(t *testing.T) {
+	t.Parallel()
+	
 	ctl := gomock.NewController(t)
 	defer ctl.Finish()
 

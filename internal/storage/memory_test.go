@@ -13,6 +13,8 @@ import (
 )
 
 func TestMemoryStorage_Get(t *testing.T) {
+	t.Parallel()
+	
 	var memoryStorage = storage.NewMemoryStorage(zap.L())
 
 	require.NoError(t, memoryStorage.Store(uuid.Nil, "ytAA2Z", "https://google.com"))
@@ -50,7 +52,9 @@ func TestMemoryStorage_Get(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			value, err := memoryStorage.Get(tt.key)
 
 			assert.Equal(t, err, tt.err)
@@ -60,6 +64,8 @@ func TestMemoryStorage_Get(t *testing.T) {
 }
 
 func TestMemoryStorage_Set(t *testing.T) {
+	t.Parallel()
+
 	var memoryStorage = storage.NewMemoryStorage(zap.L())
 
 	tests := []struct {
@@ -99,7 +105,9 @@ func TestMemoryStorage_Set(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			err := memoryStorage.Store(uuid.Nil, tt.key, tt.value)
 			assert.Equal(t, tt.errStore, err)
 

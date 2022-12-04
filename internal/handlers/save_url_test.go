@@ -22,6 +22,8 @@ import (
 )
 
 func TestSaveURL_UserNil_Positive(t *testing.T) {
+	t.Parallel()
+
 	ctl := gomock.NewController(t)
 	defer ctl.Finish()
 
@@ -66,6 +68,8 @@ func TestSaveURL_UserNil_Positive(t *testing.T) {
 }
 
 func TestSaveURLJson_UserNil_Positive(t *testing.T) {
+	t.Parallel()
+
 	ctl := gomock.NewController(t)
 	defer ctl.Finish()
 

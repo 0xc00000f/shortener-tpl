@@ -18,8 +18,10 @@ import (
 )
 
 func TestURLEncoder_Short_Positive(t *testing.T) {
+	t.Parallel()
+
 	ctl := gomock.NewController(t)
-	defer ctl.Finish()
+	t.Cleanup(func() { ctl.Finish() })
 
 	storage := storageMock.NewMockURLStorager(ctl)
 	ue := encoder.New(
@@ -46,7 +48,10 @@ func TestURLEncoder_Short_Positive(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			storage.EXPECT().IsKeyExist(tt.short).Return(false, nil)
 			storage.EXPECT().Store(uuid.Nil, tt.short, tt.long).Return(nil)
 
@@ -58,6 +63,8 @@ func TestURLEncoder_Short_Positive(t *testing.T) {
 }
 
 func TestURLEncoder_Short_IsKeyExist_Error(t *testing.T) {
+	t.Parallel()
+
 	ctl := gomock.NewController(t)
 	defer ctl.Finish()
 
@@ -82,6 +89,8 @@ func TestURLEncoder_Short_IsKeyExist_Error(t *testing.T) {
 }
 
 func TestURLEncoder_Short_Positive_IsKeyExist_IfExist(t *testing.T) {
+	t.Parallel()
+
 	ctl := gomock.NewController(t)
 	defer ctl.Finish()
 
@@ -107,6 +116,8 @@ func TestURLEncoder_Short_Positive_IsKeyExist_IfExist(t *testing.T) {
 }
 
 func TestURLEncoder_Short_Store_Error(t *testing.T) {
+	t.Parallel()
+
 	ctl := gomock.NewController(t)
 	defer ctl.Finish()
 
@@ -131,6 +142,8 @@ func TestURLEncoder_Short_Store_Error(t *testing.T) {
 }
 
 func TestURLEncoder_Get(t *testing.T) {
+	t.Parallel()
+
 	ctl := gomock.NewController(t)
 	defer ctl.Finish()
 
@@ -152,6 +165,8 @@ func TestURLEncoder_Get(t *testing.T) {
 }
 
 func TestURLEncoder_Get_Error(t *testing.T) {
+	t.Parallel()
+
 	ctl := gomock.NewController(t)
 	defer ctl.Finish()
 

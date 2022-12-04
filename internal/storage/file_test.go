@@ -15,6 +15,8 @@ import (
 )
 
 func TestFileStorage_Get(t *testing.T) {
+	t.Parallel()
+	
 	file, err := os.CreateTemp(os.TempDir(), "testfilestorage*")
 	require.NoError(t, err)
 
@@ -61,7 +63,10 @@ func TestFileStorage_Get(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			value, err := fileStorage.Get(tt.key)
 
 			assert.Equal(t, err, tt.err)
@@ -71,6 +76,8 @@ func TestFileStorage_Get(t *testing.T) {
 }
 
 func TestFileStorage_Set(t *testing.T) {
+	t.Parallel()
+
 	file, err := os.CreateTemp(os.TempDir(), "testfilestorage*")
 	require.NoError(t, err)
 
@@ -119,7 +126,10 @@ func TestFileStorage_Set(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			err := fileStorage.Store(tt.userID, tt.key, tt.value)
 			assert.Equal(t, tt.errStore, err)
 
