@@ -2,6 +2,7 @@ package storage
 
 import (
 	"context"
+	"errors"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgconn"
@@ -103,28 +104,38 @@ func (ds DatabaseStorage) GetAll(userID uuid.UUID) (result map[string]string, er
 
 func (ds DatabaseStorage) Store(userID uuid.UUID, short string, long string) error {
 	query := `INSERT INTO url_mapping(user_id, short_url, long_url) VALUES ($1::uuid, $2::text, $3::text)`
+
 	_, err := ds.db.Exec(context.TODO(), query, userID, short, long)
-
-	if pqErr, ok := err.(*pgconn.PgError); ok {
-		if pqErr.Code == pgerrcode.UniqueViolation {
-			var m urlMapping
-			if err := ds.db.QueryRow(
-				context.TODO(),
-				"SELECT user_id, short_url, long_url FROM url_mapping WHERE long_url = $1::text",
-				long,
-			).Scan(&m.userID, &m.short, &m.long); err != nil {
-				return err
-			}
-
-			return &encoder.UniqueViolationError{
-				Err:    err,
-				UserID: m.userID,
-				Short:  m.short,
-				Long:   m.long,
-			}
+	if err != nil {
+		var pgError *pgconn.PgError
+		if !errors.As(err, &pgError) {
+			return err
 		}
 
-		return err
+		pgErr, ok := err.(*pgconn.PgError) //nolint:errorlint
+		if !ok {
+			return err
+		}
+
+		if pgErr.Code != pgerrcode.UniqueViolation {
+			return err
+		}
+
+		var m urlMapping
+		if err := ds.db.QueryRow(
+			context.TODO(),
+			"SELECT user_id, short_url, long_url FROM url_mapping WHERE long_url = $1::text",
+			long,
+		).Scan(&m.userID, &m.short, &m.long); err != nil {
+			return err
+		}
+
+		return &encoder.UniqueViolationError{
+			Err:    err,
+			UserID: m.userID,
+			Short:  m.short,
+			Long:   m.long,
+		}
 	}
 
 	return nil

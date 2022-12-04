@@ -3,6 +3,7 @@ package handlers
 import (
 	"compress/gzip"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -52,24 +53,24 @@ func SaveURL(sa *shortener.NaiveShortener) http.HandlerFunc { //revive:disable-l
 
 		short, err := createShort(sa, rc, u.UserID, false)
 		if err != nil {
-			switch err.(type) {
-			case *encoder.UniqueViolationError:
-				sa.L.Error("short for this long exist", zap.Error(err))
+			var uve *encoder.UniqueViolationError
 
-				writeBody = func(b []byte) {
-					w.Header().Set("content-type", "application/json")
-					w.WriteHeader(http.StatusConflict)
-
-					if _, err := w.Write(b); err != nil {
-						sa.L.Error("writing body failure", zap.Error(err))
-					}
-				}
-
-			default:
+			if !errors.As(err, &uve) {
 				sa.L.Error("creating short isn't success", zap.Error(err))
 				http.Error(w, "400 page not found", http.StatusBadRequest)
 
 				return
+			}
+
+			sa.L.Info("short for this long exist", zap.Error(err))
+
+			writeBody = func(b []byte) {
+				w.Header().Set("content-type", "application/json")
+				w.WriteHeader(http.StatusConflict)
+
+				if _, err := w.Write(b); err != nil {
+					sa.L.Error("writing body failure", zap.Error(err))
+				}
 			}
 		}
 
@@ -132,24 +133,23 @@ func SaveURLJson(sa *shortener.NaiveShortener) http.HandlerFunc { //revive:disab
 
 		short, err := createShort(sa, rc, u.UserID, true)
 		if err != nil {
-			switch err.(type) {
-			case *encoder.UniqueViolationError:
-				sa.L.Error("short for this long exist", zap.Error(err))
-
-				writeBody = func(b []byte) {
-					w.Header().Set("content-type", "application/json")
-					w.WriteHeader(http.StatusConflict)
-
-					if _, err := w.Write(b); err != nil {
-						sa.L.Error("writing body failure", zap.Error(err))
-					}
-				}
-
-			default:
+			var uve *encoder.UniqueViolationError
+			if !errors.As(err, &uve) {
 				sa.L.Error("creating short isn't success", zap.Error(err))
 				http.Error(w, "400 page not found", http.StatusBadRequest)
 
 				return
+			}
+
+			sa.L.Info("short for this long exist", zap.Error(err))
+
+			writeBody = func(b []byte) {
+				w.Header().Set("content-type", "application/json")
+				w.WriteHeader(http.StatusConflict)
+
+				if _, err := w.Write(b); err != nil {
+					sa.L.Error("writing body failure", zap.Error(err))
+				}
 			}
 		}
 

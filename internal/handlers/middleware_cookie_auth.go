@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"errors"
 	"net/http"
 	"time"
 
@@ -13,7 +14,7 @@ func CookieAuth(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		expires := time.Now().AddDate(0, 1, 0)
 		reqCk, err := req.Cookie(CookieAuthName)
-		if err != nil && err != http.ErrNoCookie {
+		if err != nil && !errors.Is(err, http.ErrNoCookie) {
 			http.Error(w, "400 page not found", http.StatusBadRequest)
 			return
 		}
