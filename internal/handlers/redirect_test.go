@@ -26,9 +26,11 @@ func TestRedirect_Positive(t *testing.T) {
 	ctl := gomock.NewController(t)
 	defer ctl.Finish()
 
-	baseURL := "http://example.com"
-	short := "5ZytxbC"
-	expectedLong := "https://dzen.ru/"
+	const (
+		baseURL      = "http://example.com"
+		short        = "5ZytxbC"
+		expectedLong = "https://dzen.ru/"
+	)
 
 	encoder := shortenerMock.NewMockShortener(ctl)
 	ns := shortener.New(
@@ -69,12 +71,14 @@ func TestRedirect_Positive(t *testing.T) {
 
 func TestRedirect_EncoderGetError(t *testing.T) {
 	t.Parallel()
-	
+
 	ctl := gomock.NewController(t)
 	defer ctl.Finish()
 
-	baseURL := "http://example.com"
-	short := "5ZytxbC"
+	const (
+		baseURL = "http://example.com"
+		short   = "5ZytxbC"
+	)
 
 	encoder := shortenerMock.NewMockShortener(ctl)
 	ns := shortener.New(

@@ -25,7 +25,8 @@ func TestBatch_UserNil_Positive(t *testing.T) {
 
 	ctl := gomock.NewController(t)
 	defer ctl.Finish()
-	baseURL := "http://example.com"
+
+	const baseURL = "http://example.com"
 
 	encoder := shortenerMock.NewMockShortener(ctl)
 	ns := shortener.New(

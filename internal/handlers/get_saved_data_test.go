@@ -26,7 +26,8 @@ func TestGetSavedData_Positive_201(t *testing.T) {
 	ctl := gomock.NewController(t)
 	defer ctl.Finish()
 
-	baseURL := "http://example.com"
+	const baseURL = "http://example.com"
+
 	encoder := shortenerMock.NewMockShortener(ctl)
 	ns := shortener.New(
 		shortener.SetEncoder(encoder),
@@ -79,7 +80,8 @@ func TestGetSavedData_Positive_204(t *testing.T) {
 	ctl := gomock.NewController(t)
 	defer ctl.Finish()
 
-	baseURL := "http://example.com"
+	const baseURL = "http://example.com"
+
 	encoder := shortenerMock.NewMockShortener(ctl)
 	ns := shortener.New(
 		shortener.SetEncoder(encoder),
@@ -113,11 +115,12 @@ func TestGetSavedData_Positive_204(t *testing.T) {
 
 func TestGetSavedData_Negative_GetAllError(t *testing.T) {
 	t.Parallel()
-	
+
 	ctl := gomock.NewController(t)
 	defer ctl.Finish()
 
-	baseURL := "http://example.com"
+	const baseURL = "http://example.com"
+
 	encoder := shortenerMock.NewMockShortener(ctl)
 	ns := shortener.New(
 		shortener.SetEncoder(encoder),

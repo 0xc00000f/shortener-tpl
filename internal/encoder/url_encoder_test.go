@@ -76,8 +76,11 @@ func TestURLEncoder_Short_IsKeyExist_Error(t *testing.T) {
 		encoder.SetRandom(rand.New(true)),
 	)
 
-	expectedShort := "BpLnfg" // first predictable result of ue.encode()
-	long := "https://dzen.ru/"
+	const (
+		expectedShort = "BpLnfg" // first predictable result of ue.encode()
+		long          = "https://dzen.ru/"
+	)
+
 	storageErr := errors.New("db is down")
 
 	storage.EXPECT().IsKeyExist(expectedShort).Return(false, storageErr)
@@ -102,9 +105,11 @@ func TestURLEncoder_Short_Positive_IsKeyExist_IfExist(t *testing.T) {
 		encoder.SetRandom(rand.New(true)),
 	)
 
-	firstShort := "BpLnfg"  // first predictable result of ue.encode()
-	secondShort := "Dsc2WD" // second predictable result of ue.encode()
-	long := "https://dzen.ru/"
+	const (
+		firstShort  = "BpLnfg" // first predictable result of ue.encode()
+		secondShort = "Dsc2WD" // second predictable result of ue.encode()
+		long        = "https://dzen.ru/"
+	)
 
 	storage.EXPECT().IsKeyExist(firstShort).Return(true, nil)
 	storage.EXPECT().IsKeyExist(secondShort).Return(false, nil)
@@ -129,8 +134,11 @@ func TestURLEncoder_Short_Store_Error(t *testing.T) {
 		encoder.SetRandom(rand.New(true)),
 	)
 
-	expectedShort := "BpLnfg" // first predictable result of ue.encode()
-	long := "https://dzen.ru/"
+	const (
+		expectedShort = "BpLnfg" // first predictable result of ue.encode()
+		long          = "https://dzen.ru/"
+	)
+
 	storageErr := errors.New("db is down")
 
 	storage.EXPECT().IsKeyExist(expectedShort).Return(false, nil)
