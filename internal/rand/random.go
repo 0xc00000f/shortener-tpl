@@ -21,9 +21,9 @@ func New(predictable bool) Random {
 	}
 
 	source := rand.NewSource(seed)
-	rand := rand.New(source)
+	random := rand.New(source) //nolint:gosec
 
-	return Random{rand: rand}
+	return Random{rand: random}
 }
 
 func (r Random) String(n int) string {

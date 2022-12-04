@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/0xc00000f/shortener-tpl/internal/config"
 	"github.com/0xc00000f/shortener-tpl/internal/encoder"
@@ -14,7 +15,10 @@ import (
 	"go.uber.org/zap"
 )
 
-const ShortLength = 7
+const (
+	ShortLength              = 7
+	defaultReadHeaderTimeout = 3 * time.Second
+)
 
 func main() {
 	l, err := zap.NewProduction()
@@ -48,7 +52,12 @@ func main() {
 	)
 
 	router := handlers.NewRouter(urlShortener)
+	server := &http.Server{
+		Addr:              cfg.Address,
+		Handler:           router,
+		ReadHeaderTimeout: defaultReadHeaderTimeout,
+	}
 
 	l.Info("starting server", zap.String("address", cfg.Address))
-	l.Fatal("http server down", zap.Error(http.ListenAndServe(cfg.Address, router)))
+	l.Fatal("http server down", zap.Error(server.ListenAndServe()))
 }
