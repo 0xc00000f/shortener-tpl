@@ -41,6 +41,7 @@ func New(logger *zap.Logger) (Cfg, error) {
 	cfg.chooseFilepath()
 	cfg.chooseAddress()
 	cfg.chooseBaseURL()
+	cfg.chooseDatabaseAddress()
 
 	return cfg, nil
 }
