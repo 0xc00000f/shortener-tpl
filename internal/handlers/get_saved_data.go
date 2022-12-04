@@ -54,7 +54,7 @@ type Result struct {
 }
 
 func prepareResult(all map[string]string, baseURL string, l *zap.Logger) (b []byte, err error) {
-	var res []Result
+	res := make([]Result, 0, len(all))
 	for short, long := range all {
 		res = append(res, Result{
 			Short: fmt.Sprintf("%s/%s", baseURL, short),

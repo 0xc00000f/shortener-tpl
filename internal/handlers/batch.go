@@ -80,7 +80,7 @@ func prepareOutputBatchResult(
 	sa *shortener.NaiveShortener,
 	u user.User,
 ) (result []byte, err error) {
-	var ob []OutputBatch
+	ob := make([]OutputBatch, 0, len(ib))
 
 	for _, batch := range ib {
 		short, err := sa.Encoder().Short(u.UserID, batch.OriginalURL)
