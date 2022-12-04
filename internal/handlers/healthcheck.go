@@ -11,7 +11,7 @@ import (
 	"github.com/0xc00000f/shortener-tpl/internal/shortener"
 )
 
-func Ping(sa *shortener.NaiveShortener) http.HandlerFunc {
+func HealthCheck(sa *shortener.NaiveShortener) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		pgxConfig, err := pgxpool.ParseConfig(sa.DatabaseAddress)
 		if err != nil {

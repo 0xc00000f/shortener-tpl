@@ -39,7 +39,7 @@ func NewRouter(sa *shortener.NaiveShortener) *chi.Mux {
 
 	r.Route("/", func(r chi.Router) {
 		r.Post("/", SaveURL(sa))
-		r.Get("/ping", Ping(sa))
+		r.Get("/ping", HealthCheck(sa))
 
 		r.Route("/api", func(r chi.Router) {
 			r.Route("/shorten", func(r chi.Router) {
