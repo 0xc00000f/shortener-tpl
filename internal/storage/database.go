@@ -25,14 +25,14 @@ type urlMapping struct {
 	long   string    `db:"long_url"`
 }
 
-func NewDatabaseStorage(connStr string, l *zap.Logger) (DatabaseStorage, error) {
+func NewDatabaseStorage(ctx context.Context, connStr string, l *zap.Logger) (DatabaseStorage, error) {
 	pgxConfig, err := pgxpool.ParseConfig(connStr)
 	if err != nil {
 		l.Error("unable to parsing config", zap.Error(err))
 		return DatabaseStorage{}, err
 	}
 
-	pgxConnPool, err := pgxpool.ConnectConfig(context.TODO(), pgxConfig)
+	pgxConnPool, err := pgxpool.ConnectConfig(ctx, pgxConfig)
 	if err != nil {
 		l.Error("Unable to connect to database", zap.Error(err))
 		return DatabaseStorage{}, err
@@ -47,7 +47,7 @@ func NewDatabaseStorage(connStr string, l *zap.Logger) (DatabaseStorage, error) 
 		PRIMARY KEY (id));
 		CREATE UNIQUE INDEX IF NOT EXISTS long_unique_idx on url_mapping (long_url);`
 
-	_, err = pgxConnPool.Exec(context.TODO(), query)
+	_, err = pgxConnPool.Exec(ctx, query)
 	if err != nil {
 		return DatabaseStorage{}, err
 	}
@@ -55,11 +55,11 @@ func NewDatabaseStorage(connStr string, l *zap.Logger) (DatabaseStorage, error) 
 	return DatabaseStorage{db: pgxConnPool, l: l}, nil
 }
 
-func (ds DatabaseStorage) Get(short string) (string, error) {
+func (ds DatabaseStorage) Get(ctx context.Context, short string) (string, error) {
 	var m urlMapping
 
 	err := ds.db.QueryRow(
-		context.TODO(),
+		ctx,
 		"SELECT user_id, short_url, long_url FROM url_mapping WHERE short_url = $1::text",
 		short,
 	).Scan(&m.userID, &m.short, &m.long)
@@ -70,11 +70,14 @@ func (ds DatabaseStorage) Get(short string) (string, error) {
 	return m.long, nil
 }
 
-func (ds DatabaseStorage) GetAll(userID uuid.UUID) (result map[string]string, err error) {
+func (ds DatabaseStorage) GetAll(
+	ctx context.Context,
+	userID uuid.UUID,
+) (result map[string]string, err error) {
 	m := make(map[string]string)
 
 	rows, err := ds.db.Query(
-		context.TODO(),
+		ctx,
 		"SELECT user_id, short_url, long_url FROM url_mapping WHERE user_id = $1::uuid",
 		userID,
 	)
@@ -102,10 +105,10 @@ func (ds DatabaseStorage) GetAll(userID uuid.UUID) (result map[string]string, er
 	return m, nil
 }
 
-func (ds DatabaseStorage) Store(userID uuid.UUID, short string, long string) error {
+func (ds DatabaseStorage) Store(ctx context.Context, userID uuid.UUID, short string, long string) error {
 	query := `INSERT INTO url_mapping(user_id, short_url, long_url) VALUES ($1::uuid, $2::text, $3::text)`
 
-	_, err := ds.db.Exec(context.TODO(), query, userID, short, long)
+	_, err := ds.db.Exec(ctx, query, userID, short, long)
 	if err != nil {
 		var pgError *pgconn.PgError
 		if !errors.As(err, &pgError) {
@@ -123,7 +126,7 @@ func (ds DatabaseStorage) Store(userID uuid.UUID, short string, long string) err
 
 		var m urlMapping
 		if err := ds.db.QueryRow(
-			context.TODO(),
+			ctx,
 			"SELECT user_id, short_url, long_url FROM url_mapping WHERE long_url = $1::text",
 			long,
 		).Scan(&m.userID, &m.short, &m.long); err != nil {
@@ -141,11 +144,11 @@ func (ds DatabaseStorage) Store(userID uuid.UUID, short string, long string) err
 	return nil
 }
 
-func (ds DatabaseStorage) IsKeyExist(short string) (bool, error) {
+func (ds DatabaseStorage) IsKeyExist(ctx context.Context, short string) (bool, error) {
 	var i bool
 
 	row := ds.db.QueryRow(
-		context.TODO(),
+		ctx,
 		`SELECT COUNT(1)>0 AS N FROM url_mapping WHERE short_url = $1`,
 		short,
 	)

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net/http"
 	"time"
@@ -32,7 +33,7 @@ func main() {
 		l.Fatal("creating config error", zap.Error(err))
 	}
 
-	urlStorage, err := storage.New(cfg)
+	urlStorage, err := storage.New(context.Background(), cfg)
 	if err != nil {
 		l.Fatal("creating storage error", zap.Error(err))
 	}

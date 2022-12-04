@@ -1,15 +1,17 @@
 package storage
 
 import (
+	"context"
+
 	"github.com/0xc00000f/shortener-tpl/internal/config"
 	"github.com/0xc00000f/shortener-tpl/internal/encoder"
 
 	"go.uber.org/zap"
 )
 
-func New(cfg config.Cfg) (encoder.URLStorager, error) {
+func New(ctx context.Context, cfg config.Cfg) (encoder.URLStorager, error) {
 	if len(cfg.DatabaseAddress) > 0 {
-		return NewDatabaseStorage(cfg.DatabaseAddress, cfg.L)
+		return NewDatabaseStorage(ctx, cfg.DatabaseAddress, cfg.L)
 	}
 
 	if len(cfg.Filepath) == 0 {

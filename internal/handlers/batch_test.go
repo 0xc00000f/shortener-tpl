@@ -1,6 +1,7 @@
 package handlers_test
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -34,9 +35,18 @@ func TestBatch_UserNil_Positive(t *testing.T) {
 		shortener.InitBaseURL(baseURL),
 		shortener.SetLogger(zap.L()),
 	)
+	ctx := context.Background()
 
-	first := encoder.EXPECT().Short(user.Nil.UserID, "https://dzen.ru/").Return("5ZytxbC", nil)
-	second := encoder.EXPECT().Short(user.Nil.UserID, "https://ya.ru/").Return("RmOSY54", nil)
+	first := encoder.EXPECT().Short(
+		ctx,
+		user.Nil.UserID,
+		"https://dzen.ru/",
+	).Return("5ZytxbC", nil)
+	second := encoder.EXPECT().Short(
+		ctx,
+		user.Nil.UserID,
+		"https://ya.ru/",
+	).Return("RmOSY54", nil)
 
 	gomock.InOrder(
 		first,

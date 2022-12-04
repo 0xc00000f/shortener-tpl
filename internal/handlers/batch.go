@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -44,7 +45,7 @@ func Batch(sa *shortener.NaiveShortener) http.HandlerFunc {
 			return
 		}
 
-		result, err := prepareOutputBatchResult(ib, sa, u)
+		result, err := prepareOutputBatchResult(r.Context(), ib, sa, u)
 		if err != nil {
 			http.Error(w, "400 page not found", http.StatusBadRequest)
 			return
@@ -76,6 +77,7 @@ func parseInputBatch(b []byte) (ib []inputBatch, err error) {
 }
 
 func prepareOutputBatchResult(
+	ctx context.Context,
 	ib []inputBatch,
 	sa *shortener.NaiveShortener,
 	u user.User,
@@ -83,7 +85,7 @@ func prepareOutputBatchResult(
 	ob := make([]OutputBatch, 0, len(ib))
 
 	for _, batch := range ib {
-		short, err := sa.Encoder().Short(u.UserID, batch.OriginalURL)
+		short, err := sa.Encoder().Short(ctx, u.UserID, batch.OriginalURL)
 		if err != nil {
 			sa.L.Error("batch creating short isn't success", zap.Error(err))
 			return nil, err

@@ -2,6 +2,7 @@ package storage
 
 import (
 	"bufio"
+	"context"
 	"encoding/json"
 	"os"
 
@@ -77,16 +78,17 @@ func (fs FileStorage) InitMemory() error {
 	return nil
 }
 
-func (fs FileStorage) Get(short string) (long string, err error) {
-	return fs.memory.Get(short)
+func (fs FileStorage) Get(ctx context.Context, short string) (long string, err error) {
+	return fs.memory.Get(ctx, short)
 }
 
-func (fs FileStorage) GetAll(userID uuid.UUID) (result map[string]string, err error) {
+//revive:disable-next-line
+func (fs FileStorage) GetAll(ctx context.Context, userID uuid.UUID) (result map[string]string, err error) {
 	return fs.memory.history[userID], nil
 }
 
-func (fs FileStorage) Store(userID uuid.UUID, short, long string) error {
-	err := fs.memory.Store(userID, short, long)
+func (fs FileStorage) Store(ctx context.Context, userID uuid.UUID, short, long string) error {
+	err := fs.memory.Store(ctx, userID, short, long)
 	if err != nil {
 		fs.l.Error("in-memory store error", zap.Error(err))
 		return err
@@ -125,6 +127,6 @@ func (fs FileStorage) writeURL(userID uuid.UUID, short, long string) error {
 	return nil
 }
 
-func (fs FileStorage) IsKeyExist(short string) (bool, error) {
-	return fs.memory.IsKeyExist(short)
+func (fs FileStorage) IsKeyExist(ctx context.Context, short string) (bool, error) {
+	return fs.memory.IsKeyExist(ctx, short)
 }

@@ -1,6 +1,7 @@
 package storage_test
 
 import (
+	"context"
 	"testing"
 
 	"github.com/google/uuid"
@@ -14,11 +15,13 @@ import (
 
 func TestMemoryStorage_Get(t *testing.T) {
 	t.Parallel()
-	
+
 	var memoryStorage = storage.NewMemoryStorage(zap.L())
 
-	require.NoError(t, memoryStorage.Store(uuid.Nil, "ytAA2Z", "https://google.com"))
-	require.NoError(t, memoryStorage.Store(uuid.Nil, "hNaU8l", "https://dzen.ru/"))
+	ctx := context.Background()
+
+	require.NoError(t, memoryStorage.Store(ctx, uuid.Nil, "ytAA2Z", "https://google.com"))
+	require.NoError(t, memoryStorage.Store(ctx, uuid.Nil, "hNaU8l", "https://dzen.ru/"))
 
 	tests := []struct {
 		name  string
@@ -55,7 +58,7 @@ func TestMemoryStorage_Get(t *testing.T) {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			value, err := memoryStorage.Get(tt.key)
+			value, err := memoryStorage.Get(ctx, tt.key)
 
 			assert.Equal(t, err, tt.err)
 			assert.Equal(t, value, tt.value)
@@ -67,6 +70,8 @@ func TestMemoryStorage_Set(t *testing.T) {
 	t.Parallel()
 
 	var memoryStorage = storage.NewMemoryStorage(zap.L())
+
+	ctx := context.Background()
 
 	tests := []struct {
 		name     string
@@ -108,10 +113,10 @@ func TestMemoryStorage_Set(t *testing.T) {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			err := memoryStorage.Store(uuid.Nil, tt.key, tt.value)
+			err := memoryStorage.Store(ctx, uuid.Nil, tt.key, tt.value)
 			assert.Equal(t, tt.errStore, err)
 
-			value, err := memoryStorage.Get(tt.key)
+			value, err := memoryStorage.Get(ctx, tt.key)
 
 			assert.Equal(t, tt.value, value)
 			assert.Equal(t, tt.errGet, err)

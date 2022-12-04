@@ -38,8 +38,6 @@ func TestRedirect_Positive(t *testing.T) {
 		shortener.SetLogger(zap.L()),
 	)
 
-	encoder.EXPECT().Get(short).Return(expectedLong, nil)
-
 	serverFunc := handlers.Redirect(ns).ServeHTTP
 	rec := httptest.NewRecorder()
 	req := httptest.NewRequest(
@@ -53,6 +51,8 @@ func TestRedirect_Positive(t *testing.T) {
 	routeContext.URLParams.Add("url", short)
 
 	req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, routeContext))
+
+	encoder.EXPECT().Get(req.Context(), short).Return(expectedLong, nil)
 
 	serverFunc(rec, req)
 
@@ -86,8 +86,6 @@ func TestRedirect_EncoderGetError(t *testing.T) {
 		shortener.SetLogger(zap.L()),
 	)
 
-	encoder.EXPECT().Get(short).Return("", errStorageOutOfReach)
-
 	serverFunc := handlers.Redirect(ns).ServeHTTP
 	rec := httptest.NewRecorder()
 	req := httptest.NewRequest(
@@ -101,6 +99,8 @@ func TestRedirect_EncoderGetError(t *testing.T) {
 	routeContext.URLParams.Add("url", short)
 
 	req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, routeContext))
+
+	encoder.EXPECT().Get(req.Context(), short).Return("", errStorageOutOfReach)
 
 	serverFunc(rec, req)
 

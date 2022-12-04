@@ -1,6 +1,7 @@
 package encoder_test
 
 import (
+	"context"
 	"errors"
 	"testing"
 
@@ -32,6 +33,7 @@ func TestURLEncoder_Short_Positive(t *testing.T) {
 		encoder.SetLogger(zap.L()),
 		encoder.SetRandom(rand.New(true)),
 	)
+	ctx := context.Background()
 
 	tests := []struct {
 		name  string
@@ -54,10 +56,10 @@ func TestURLEncoder_Short_Positive(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			storage.EXPECT().IsKeyExist(tt.short).Return(false, nil)
-			storage.EXPECT().Store(uuid.Nil, tt.short, tt.long).Return(nil)
+			storage.EXPECT().IsKeyExist(ctx, tt.short).Return(false, nil)
+			storage.EXPECT().Store(ctx, uuid.Nil, tt.short, tt.long).Return(nil)
 
-			short, err := ue.Short(uuid.Nil, tt.long)
+			short, err := ue.Short(ctx, uuid.Nil, tt.long)
 			require.NoError(t, err)
 			assert.Equal(t, tt.short, short)
 		})
@@ -77,15 +79,16 @@ func TestURLEncoder_Short_IsKeyExist_Error(t *testing.T) {
 		encoder.SetLogger(zap.L()),
 		encoder.SetRandom(rand.New(true)),
 	)
+	ctx := context.Background()
 
 	const (
 		expectedShort = "BpLnfg" // first predictable result of ue.encode()
 		long          = "https://dzen.ru/"
 	)
 
-	storage.EXPECT().IsKeyExist(expectedShort).Return(false, errStorageOutOfReach)
+	storage.EXPECT().IsKeyExist(ctx, expectedShort).Return(false, errStorageOutOfReach)
 
-	short, err := ue.Short(uuid.Nil, long)
+	short, err := ue.Short(ctx, uuid.Nil, long)
 
 	require.ErrorIs(t, err, errStorageOutOfReach)
 	assert.Equal(t, "", short)
@@ -111,10 +114,12 @@ func TestURLEncoder_Short_Positive_IsKeyExist_IfExist(t *testing.T) {
 		long        = "https://dzen.ru/"
 	)
 
-	storage.EXPECT().IsKeyExist(firstShort).Return(true, nil)
-	storage.EXPECT().IsKeyExist(secondShort).Return(false, nil)
-	storage.EXPECT().Store(uuid.Nil, secondShort, long).Return(nil)
-	short, err := ue.Short(uuid.Nil, long)
+	ctx := context.Background()
+
+	storage.EXPECT().IsKeyExist(ctx, firstShort).Return(true, nil)
+	storage.EXPECT().IsKeyExist(ctx, secondShort).Return(false, nil)
+	storage.EXPECT().Store(ctx, uuid.Nil, secondShort, long).Return(nil)
+	short, err := ue.Short(ctx, uuid.Nil, long)
 
 	require.NoError(t, err)
 	assert.Equal(t, secondShort, short)
@@ -133,16 +138,17 @@ func TestURLEncoder_Short_Store_Error(t *testing.T) {
 		encoder.SetLogger(zap.L()),
 		encoder.SetRandom(rand.New(true)),
 	)
+	ctx := context.Background()
 
 	const (
 		expectedShort = "BpLnfg" // first predictable result of ue.encode()
 		long          = "https://dzen.ru/"
 	)
 
-	storage.EXPECT().IsKeyExist(expectedShort).Return(false, nil)
-	storage.EXPECT().Store(uuid.Nil, expectedShort, long).Return(errStorageOutOfReach)
+	storage.EXPECT().IsKeyExist(ctx, expectedShort).Return(false, nil)
+	storage.EXPECT().Store(ctx, uuid.Nil, expectedShort, long).Return(errStorageOutOfReach)
 
-	short, err := ue.Short(uuid.Nil, long)
+	short, err := ue.Short(ctx, uuid.Nil, long)
 	require.ErrorIs(t, err, errStorageOutOfReach)
 	assert.Equal(t, "", short)
 }
@@ -160,12 +166,13 @@ func TestURLEncoder_Get(t *testing.T) {
 		encoder.SetLogger(zap.L()),
 		encoder.SetRandom(rand.New(true)),
 	)
+	ctx := context.Background()
 
 	short := "BpLnfg" // first predictable result of ue.encode()
 	expectedLong := "https://dzen.ru/"
-	storage.EXPECT().Get(short).Return(expectedLong, nil)
+	storage.EXPECT().Get(ctx, short).Return(expectedLong, nil)
 
-	long, err := ue.Get(short)
+	long, err := ue.Get(ctx, short)
 	require.NoError(t, err)
 	assert.Equal(t, expectedLong, long)
 }
@@ -183,13 +190,14 @@ func TestURLEncoder_Get_Error(t *testing.T) {
 		encoder.SetLogger(zap.L()),
 		encoder.SetRandom(rand.New(true)),
 	)
+	ctx := context.Background()
 
 	short := "BpLnfg" // first predictable result of ue.encode()
 	expectedLong := ""
 
-	storage.EXPECT().Get(short).Return("", errStorageOutOfReach)
+	storage.EXPECT().Get(ctx, short).Return("", errStorageOutOfReach)
 
-	long, err := ue.Get(short)
+	long, err := ue.Get(ctx, short)
 	require.ErrorIs(t, err, errStorageOutOfReach)
 	assert.Equal(t, expectedLong, long)
 }

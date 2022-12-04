@@ -1,6 +1,7 @@
 package storage_test
 
 import (
+	"context"
 	"os"
 	"testing"
 
@@ -16,15 +17,17 @@ import (
 
 func TestFileStorage_Get(t *testing.T) {
 	t.Parallel()
-	
+
 	file, err := os.CreateTemp(os.TempDir(), "testfilestorage*")
 	require.NoError(t, err)
 
 	fileStorage, err := storage.NewFileStorage(file.Name(), zap.L())
 	require.NoError(t, err)
 
-	require.NoError(t, fileStorage.Store(uuid.Nil, "ytAA2Z", "https://google.com"))
-	require.NoError(t, fileStorage.Store(uuid.Nil, "hNaU8l", "https://dzen.ru/"))
+	ctx := context.Background()
+
+	require.NoError(t, fileStorage.Store(ctx, uuid.Nil, "ytAA2Z", "https://google.com"))
+	require.NoError(t, fileStorage.Store(ctx, uuid.Nil, "hNaU8l", "https://dzen.ru/"))
 
 	tests := []struct {
 		userID uuid.UUID
@@ -67,7 +70,7 @@ func TestFileStorage_Get(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			value, err := fileStorage.Get(tt.key)
+			value, err := fileStorage.Get(ctx, tt.key)
 
 			assert.Equal(t, err, tt.err)
 			assert.Equal(t, value, tt.value)
@@ -77,6 +80,8 @@ func TestFileStorage_Get(t *testing.T) {
 
 func TestFileStorage_Set(t *testing.T) {
 	t.Parallel()
+
+	ctx := context.Background()
 
 	file, err := os.CreateTemp(os.TempDir(), "testfilestorage*")
 	require.NoError(t, err)
@@ -130,10 +135,10 @@ func TestFileStorage_Set(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			err := fileStorage.Store(tt.userID, tt.key, tt.value)
+			err := fileStorage.Store(ctx, tt.userID, tt.key, tt.value)
 			assert.Equal(t, tt.errStore, err)
 
-			value, err := fileStorage.Get(tt.key)
+			value, err := fileStorage.Get(ctx, tt.key)
 
 			assert.Equal(t, tt.value, value)
 			assert.Equal(t, tt.errGet, err)

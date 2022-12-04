@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"context"
 	"errors"
 
 	"github.com/google/uuid"
@@ -29,7 +30,8 @@ func NewMemoryStorage(logger *zap.Logger) MemoryStorage {
 	}
 }
 
-func (ms MemoryStorage) Get(short string) (long string, err error) {
+//revive:disable-next-line
+func (ms MemoryStorage) Get(ctx context.Context, short string) (long string, err error) {
 	ms.l.Info("input", zap.String("short", short))
 
 	if len(short) == 0 {
@@ -47,7 +49,8 @@ func (ms MemoryStorage) Get(short string) (long string, err error) {
 	return long, nil
 }
 
-func (ms MemoryStorage) Store(userID uuid.UUID, short, long string) (err error) {
+//revive:disable-next-line
+func (ms MemoryStorage) Store(ctx context.Context, userID uuid.UUID, short, long string) (err error) {
 	ms.l.Info("input",
 		zap.String("userID", userID.String()),
 		zap.String("short", short),
@@ -79,12 +82,14 @@ func (ms MemoryStorage) Store(userID uuid.UUID, short, long string) (err error) 
 	return nil
 }
 
-func (ms MemoryStorage) IsKeyExist(short string) (bool, error) {
+//revive:disable-next-line
+func (ms MemoryStorage) IsKeyExist(ctx context.Context, short string) (bool, error) {
 	_, ok := ms.storage[short]
 	return ok, nil
 }
 
-func (ms MemoryStorage) GetAll(userID uuid.UUID) (result map[string]string, err error) {
+//revive:disable-next-line
+func (ms MemoryStorage) GetAll(ctx context.Context, userID uuid.UUID) (result map[string]string, err error) {
 	ms.l.Info("function input", zap.String("userID", userID.String()))
 	result = ms.history[userID]
 	ms.l.Info("function result", log.MapToFields(result)...)

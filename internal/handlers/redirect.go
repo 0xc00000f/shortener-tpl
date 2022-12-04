@@ -12,7 +12,7 @@ func Redirect(sa *shortener.NaiveShortener) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		short := chi.URLParam(r, "url")
 
-		long, err := sa.Encoder().Get(short)
+		long, err := sa.Encoder().Get(r.Context(), short)
 		if err != nil {
 			http.Error(w, "400 page not found", http.StatusBadRequest)
 			return

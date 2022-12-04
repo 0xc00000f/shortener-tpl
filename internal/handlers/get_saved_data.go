@@ -19,7 +19,7 @@ func GetSavedData(sa *shortener.NaiveShortener) http.HandlerFunc {
 			u = user.Nil
 		}
 
-		all, err := sa.Encoder().GetAll(u.UserID)
+		all, err := sa.Encoder().GetAll(r.Context(), u.UserID)
 		if err != nil {
 			http.Error(w, "400 page not found", http.StatusBadRequest)
 			return

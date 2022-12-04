@@ -1,6 +1,7 @@
 package handlers_test
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -36,11 +37,12 @@ func TestGetSavedData_Positive_201(t *testing.T) {
 		shortener.InitBaseURL(baseURL),
 		shortener.SetLogger(zap.L()),
 	)
+	ctx := context.Background()
 
 	exp := map[string]string{
 		"5ZytxbC": "https://dzen.ru/",
 	}
-	encoder.EXPECT().GetAll(user.Nil.UserID).Return(exp, nil)
+	encoder.EXPECT().GetAll(ctx, user.Nil.UserID).Return(exp, nil)
 
 	prepareMap := []handlers.Result{
 		{
@@ -90,9 +92,10 @@ func TestGetSavedData_Positive_204(t *testing.T) {
 		shortener.InitBaseURL(baseURL),
 		shortener.SetLogger(zap.L()),
 	)
+	ctx := context.Background()
 
 	exp := map[string]string{}
-	encoder.EXPECT().GetAll(user.Nil.UserID).Return(exp, nil)
+	encoder.EXPECT().GetAll(ctx, user.Nil.UserID).Return(exp, nil)
 
 	serverFunc := handlers.GetSavedData(ns).ServeHTTP
 	rec := httptest.NewRecorder()
@@ -129,8 +132,9 @@ func TestGetSavedData_Negative_GetAllError(t *testing.T) {
 		shortener.InitBaseURL(baseURL),
 		shortener.SetLogger(zap.L()),
 	)
+	ctx := context.Background()
 
-	encoder.EXPECT().GetAll(user.Nil.UserID).Return(nil, errStorageOutOfReach)
+	encoder.EXPECT().GetAll(ctx, user.Nil.UserID).Return(nil, errStorageOutOfReach)
 
 	serverFunc := handlers.GetSavedData(ns).ServeHTTP
 	rec := httptest.NewRecorder()

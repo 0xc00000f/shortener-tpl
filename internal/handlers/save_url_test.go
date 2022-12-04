@@ -38,8 +38,6 @@ func TestSaveURL_UserNil_Positive(t *testing.T) {
 		shortener.SetLogger(zap.L()),
 	)
 
-	encoder.EXPECT().Short(uuid.Nil, long).Return(expectedShort, nil)
-
 	serverFunc := handlers.SaveURL(ns).ServeHTTP
 	rec := httptest.NewRecorder()
 	req := httptest.NewRequest(
@@ -53,6 +51,8 @@ func TestSaveURL_UserNil_Positive(t *testing.T) {
 	routeContext.URLParams.Add("url", "")
 
 	req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, routeContext))
+
+	encoder.EXPECT().Short(req.Context(), uuid.Nil, long).Return(expectedShort, nil)
 
 	serverFunc(rec, req)
 
@@ -83,8 +83,9 @@ func TestSaveURLJson_UserNil_Positive(t *testing.T) {
 		shortener.InitBaseURL(baseURL),
 		shortener.SetLogger(zap.L()),
 	)
+	ctx := context.Background()
 
-	encoder.EXPECT().Short(uuid.Nil, long).Return(expectedShort, nil)
+	encoder.EXPECT().Short(ctx, uuid.Nil, long).Return(expectedShort, nil)
 
 	serverFunc := handlers.SaveURLJson(ns).ServeHTTP
 	rec := httptest.NewRecorder()

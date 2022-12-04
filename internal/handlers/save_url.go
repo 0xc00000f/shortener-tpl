@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"compress/gzip"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -51,7 +52,7 @@ func SaveURL(sa *shortener.NaiveShortener) http.HandlerFunc { //revive:disable-l
 			}
 		}
 
-		short, err := createShort(sa, rc, u.UserID, false)
+		short, err := createShort(r.Context(), sa, rc, u.UserID, false)
 		if err != nil {
 			var uve *encoder.UniqueViolationError
 
@@ -131,7 +132,7 @@ func SaveURLJson(sa *shortener.NaiveShortener) http.HandlerFunc { //revive:disab
 			}
 		}
 
-		short, err := createShort(sa, rc, u.UserID, true)
+		short, err := createShort(r.Context(), sa, rc, u.UserID, true)
 		if err != nil {
 			var uve *encoder.UniqueViolationError
 			if !errors.As(err, &uve) {
@@ -169,6 +170,7 @@ func SaveURLJson(sa *shortener.NaiveShortener) http.HandlerFunc { //revive:disab
 }
 
 func createShort(
+	ctx context.Context,
 	sa *shortener.NaiveShortener,
 	r io.Reader,
 	userID uuid.UUID,
@@ -203,7 +205,7 @@ func createShort(
 		return "", url.ErrInvalidURL
 	}
 
-	short, err = sa.Encoder().Short(userID, long)
+	short, err = sa.Encoder().Short(ctx, userID, long)
 	if err != nil {
 		sa.L.Error("creating short isn't success", zap.Error(err))
 		return short, err
