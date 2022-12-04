@@ -27,6 +27,7 @@ func Ping(sa *shortener.NaiveShortener) http.HandlerFunc {
 		defer pgxConnPool.Close()
 
 		const defaultTimeout = 2 * time.Second
+
 		ctx, cancel := context.WithTimeout(context.Background(), defaultTimeout)
 		defer cancel()
 

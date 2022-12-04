@@ -186,6 +186,7 @@ func TestURLEncoder_Get_Error(t *testing.T) {
 
 	short := "BpLnfg" // first predictable result of ue.encode()
 	expectedLong := ""
+
 	storage.EXPECT().Get(short).Return("", errStorageOutOfReach)
 
 	long, err := ue.Get(short)
