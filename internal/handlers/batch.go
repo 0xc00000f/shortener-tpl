@@ -72,7 +72,7 @@ type outputBatch struct {
 
 func parseInputBatch(b []byte) (ib []inputBatch, err error) {
 	err = json.Unmarshal(b, &ib)
-	return ib, err
+	return ib, fmt.Errorf("failed creating batch: %w", err)
 }
 
 func prepareOutputBatchResult(
@@ -86,7 +86,7 @@ func prepareOutputBatchResult(
 		short, err := sa.Encoder().Short(u.UserID, batch.OriginalURL)
 		if err != nil {
 			sa.L.Error("batch creating short isn't success", zap.Error(err))
-			return nil, err
+			return nil, fmt.Errorf("failed creating batch: %w", err)
 		}
 
 		ob = append(ob, outputBatch{
@@ -98,7 +98,8 @@ func prepareOutputBatchResult(
 	result, err = json.MarshalIndent(ob, "", " ")
 	if err != nil {
 		sa.L.Error("batch marshalling isn't success", zap.Error(err))
+		return nil, fmt.Errorf("failed creating batch: %w", err)
 	}
 
-	return result, err
+	return result, nil
 }

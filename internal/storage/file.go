@@ -3,6 +3,7 @@ package storage
 import (
 	"bufio"
 	"encoding/json"
+	"fmt"
 	"os"
 
 	"github.com/google/uuid"
@@ -26,7 +27,7 @@ type url struct {
 func NewFileStorage(filename string, logger *zap.Logger) (FileStorage, error) {
 	file, err := os.OpenFile(filename, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0777)
 	if err != nil {
-		return FileStorage{}, err
+		return FileStorage{}, fmt.Errorf("open file storage failed: %w", err)
 	}
 
 	return FileStorage{
@@ -37,14 +38,17 @@ func NewFileStorage(filename string, logger *zap.Logger) (FileStorage, error) {
 }
 
 func (fs FileStorage) Close() error {
-	return fs.file.Close()
+	if err := fs.file.Close(); err != nil {
+		return fmt.Errorf("closing file storage failed: %w", err)
+	}
+
+	return nil
 }
 
 func (fs FileStorage) InitMemory() error {
 	fi, err := fs.file.Stat()
 	if err != nil {
-		fs.l.Error("getting file info error", zap.Error(err))
-		return err
+		return fmt.Errorf("getting file info error: %w", err)
 	}
 
 	if fi.Size() == 0 {
@@ -59,8 +63,7 @@ func (fs FileStorage) InitMemory() error {
 
 		err = json.Unmarshal(data, &url)
 		if err != nil {
-			fs.l.Error("init memory unmarshal error", zap.Error(err))
-			return err
+			return fmt.Errorf("init memory unmarshal error: %w", err)
 		}
 
 		fs.memory.storage[url.Short] = url.Long
@@ -110,16 +113,14 @@ func (fs FileStorage) writeURL(userID uuid.UUID, short, long string) error {
 
 	b, err := json.Marshal(s)
 	if err != nil {
-		fs.l.Error("writing url in file marshaling error", zap.Error(err))
-		return err
+		return fmt.Errorf("writing url in file marshaling error: %w", err)
 	}
 
 	b = append(b, '\n')
 
 	_, err = fs.file.Write(b)
 	if err != nil {
-		fs.l.Error("writing in file error: %v", zap.Error(err))
-		return err
+		return fmt.Errorf("writing result in file error: %w", err)
 	}
 
 	return nil
