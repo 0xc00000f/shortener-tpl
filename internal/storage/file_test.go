@@ -1,4 +1,4 @@
-package storage
+package storage_test
 
 import (
 	"os"
@@ -10,17 +10,19 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"go.uber.org/zap"
+
+	"github.com/0xc00000f/shortener-tpl/internal/storage"
 )
 
 func TestFileStorage_Get(t *testing.T) {
 	file, err := os.CreateTemp(os.TempDir(), "testfilestorage*")
 	require.NoError(t, err)
 
-	storage, err := NewFileStorage(file.Name(), zap.L())
+	fileStorage, err := storage.NewFileStorage(file.Name(), zap.L())
 	require.NoError(t, err)
 
-	require.NoError(t, storage.Store(uuid.Nil, "ytAA2Z", "https://google.com"))
-	require.NoError(t, storage.Store(uuid.Nil, "hNaU8l", "https://dzen.ru/"))
+	require.NoError(t, fileStorage.Store(uuid.Nil, "ytAA2Z", "https://google.com"))
+	require.NoError(t, fileStorage.Store(uuid.Nil, "hNaU8l", "https://dzen.ru/"))
 
 	tests := []struct {
 		userID uuid.UUID
@@ -48,19 +50,19 @@ func TestFileStorage_Get(t *testing.T) {
 			name:   "negative #1",
 			key:    "4qwpBs",
 			value:  "",
-			err:    ErrNoKeyFound,
+			err:    storage.ErrNoKeyFound,
 		},
 		{
 			userID: uuid.Nil,
 			name:   "negative #2",
 			key:    "",
 			value:  "",
-			err:    ErrEmptyKey,
+			err:    storage.ErrEmptyKey,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			value, err := storage.Get(tt.key)
+			value, err := fileStorage.Get(tt.key)
 
 			assert.Equal(t, err, tt.err)
 			assert.Equal(t, value, tt.value)
@@ -72,7 +74,7 @@ func TestFileStorage_Set(t *testing.T) {
 	file, err := os.CreateTemp(os.TempDir(), "testfilestorage*")
 	require.NoError(t, err)
 
-	storage, err := NewFileStorage(file.Name(), zap.L())
+	fileStorage, err := storage.NewFileStorage(file.Name(), zap.L())
 	require.NoError(t, err)
 
 	tests := []struct {
@@ -104,24 +106,24 @@ func TestFileStorage_Set(t *testing.T) {
 			name:     "empty value #1",
 			key:      "hNaU8l",
 			value:    "",
-			errStore: ErrEmptyValue,
-			errGet:   ErrNoKeyFound,
+			errStore: storage.ErrEmptyValue,
+			errGet:   storage.ErrNoKeyFound,
 		},
 		{
 			userID:   uuid.Nil,
 			name:     "empty key #1",
 			key:      "",
 			value:    "",
-			errStore: ErrEmptyKey,
-			errGet:   ErrEmptyKey,
+			errStore: storage.ErrEmptyKey,
+			errGet:   storage.ErrEmptyKey,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := storage.Store(tt.userID, tt.key, tt.value)
+			err := fileStorage.Store(tt.userID, tt.key, tt.value)
 			assert.Equal(t, tt.errStore, err)
 
-			value, err := storage.Get(tt.key)
+			value, err := fileStorage.Get(tt.key)
 
 			assert.Equal(t, tt.value, value)
 			assert.Equal(t, tt.errGet, err)

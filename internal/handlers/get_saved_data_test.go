@@ -1,4 +1,4 @@
-package handlers
+package handlers_test
 
 import (
 	"encoding/json"
@@ -14,6 +14,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 
+	"github.com/0xc00000f/shortener-tpl/internal/handlers"
 	"github.com/0xc00000f/shortener-tpl/internal/shortener"
 	shortenerMock "github.com/0xc00000f/shortener-tpl/internal/shortener/mocks"
 	"github.com/0xc00000f/shortener-tpl/internal/user"
@@ -36,7 +37,7 @@ func TestGetSavedData_Positive_201(t *testing.T) {
 	}
 	encoder.EXPECT().GetAll(user.Nil.UserID).Return(exp, nil)
 
-	prepareMap := []result{
+	prepareMap := []handlers.Result{
 		{
 			Short: fmt.Sprintf("%s/%s", baseURL, "5ZytxbC"),
 			Long:  "https://dzen.ru/",
@@ -45,7 +46,7 @@ func TestGetSavedData_Positive_201(t *testing.T) {
 	expectedResult, err := json.MarshalIndent(prepareMap, "", " ")
 	require.NoError(t, err)
 
-	serverFunc := GetSavedData(ns).ServeHTTP
+	serverFunc := handlers.GetSavedData(ns).ServeHTTP
 
 	rec := httptest.NewRecorder()
 
@@ -85,7 +86,7 @@ func TestGetSavedData_Positive_204(t *testing.T) {
 	exp := map[string]string{}
 	encoder.EXPECT().GetAll(user.Nil.UserID).Return(exp, nil)
 
-	serverFunc := GetSavedData(ns).ServeHTTP
+	serverFunc := handlers.GetSavedData(ns).ServeHTTP
 	rec := httptest.NewRecorder()
 	req := httptest.NewRequest(
 		http.MethodGet,
@@ -121,7 +122,7 @@ func TestGetSavedData_Negative_GetAllError(t *testing.T) {
 	storageErr := errors.New("db is down")
 	encoder.EXPECT().GetAll(user.Nil.UserID).Return(nil, storageErr)
 
-	serverFunc := GetSavedData(ns).ServeHTTP
+	serverFunc := handlers.GetSavedData(ns).ServeHTTP
 	rec := httptest.NewRecorder()
 	req := httptest.NewRequest(
 		http.MethodGet,

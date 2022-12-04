@@ -1,4 +1,4 @@
-package handlers
+package handlers_test
 
 import (
 	"context"
@@ -16,6 +16,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 
+	"github.com/0xc00000f/shortener-tpl/internal/handlers"
 	"github.com/0xc00000f/shortener-tpl/internal/shortener"
 	shortenerMock "github.com/0xc00000f/shortener-tpl/internal/shortener/mocks"
 )
@@ -37,7 +38,7 @@ func TestSaveURL_UserNil_Positive(t *testing.T) {
 
 	encoder.EXPECT().Short(uuid.Nil, long).Return(expectedShort, nil)
 
-	serverFunc := SaveURL(ns).ServeHTTP
+	serverFunc := handlers.SaveURL(ns).ServeHTTP
 	rec := httptest.NewRecorder()
 	req := httptest.NewRequest(
 		http.MethodPost,
@@ -81,7 +82,7 @@ func TestSaveURLJson_UserNil_Positive(t *testing.T) {
 
 	encoder.EXPECT().Short(uuid.Nil, long).Return(expectedShort, nil)
 
-	serverFunc := SaveURLJson(ns).ServeHTTP
+	serverFunc := handlers.SaveURLJson(ns).ServeHTTP
 	rec := httptest.NewRecorder()
 	req := httptest.NewRequest(
 		http.MethodPost,

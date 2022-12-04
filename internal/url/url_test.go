@@ -1,9 +1,11 @@
-package url
+package url_test
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+
+	"github.com/0xc00000f/shortener-tpl/internal/url"
 )
 
 func TestValid(t *testing.T) {
@@ -50,7 +52,7 @@ func TestValid(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			v := Valid(tt.url)
+			v := url.Valid(tt.url)
 			assert.Equal(t, tt.isValid, v)
 		})
 	}

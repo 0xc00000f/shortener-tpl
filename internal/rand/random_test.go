@@ -1,13 +1,15 @@
-package rand
+package rand_test
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+
+	"github.com/0xc00000f/shortener-tpl/internal/rand"
 )
 
 func TestString(t *testing.T) {
-	rand := New(true)
+	random := rand.New(true)
 	tests := []struct {
 		name            string
 		letters         int
@@ -32,7 +34,7 @@ func TestString(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			randString := rand.String(tt.letters)
+			randString := random.String(tt.letters)
 			assert.Equal(t, tt.letters, len(randString))
 			assert.Equal(t, tt.predictableText, randString)
 		})

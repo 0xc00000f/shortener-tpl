@@ -65,7 +65,7 @@ type inputBatch struct {
 	OriginalURL   string `json:"original_url"`
 }
 
-type outputBatch struct {
+type OutputBatch struct {
 	CorrelationID string `json:"correlation_id"`
 	ShortURL      string `json:"short_url"`
 }
@@ -80,7 +80,7 @@ func prepareOutputBatchResult(
 	sa *shortener.NaiveShortener,
 	u user.User,
 ) (result []byte, err error) {
-	var ob []outputBatch
+	var ob []OutputBatch
 
 	for _, batch := range ib {
 		short, err := sa.Encoder().Short(u.UserID, batch.OriginalURL)
@@ -89,7 +89,7 @@ func prepareOutputBatchResult(
 			return nil, err
 		}
 
-		ob = append(ob, outputBatch{
+		ob = append(ob, OutputBatch{
 			CorrelationID: batch.CorrelationID,
 			ShortURL:      fmt.Sprintf("%s/%s", sa.BaseURL, short),
 		})

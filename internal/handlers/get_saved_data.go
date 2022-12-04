@@ -48,15 +48,15 @@ func GetSavedData(sa *shortener.NaiveShortener) http.HandlerFunc {
 	}
 }
 
-type result struct {
+type Result struct {
 	Short string `json:"short_url"`
 	Long  string `json:"original_url"`
 }
 
 func prepareResult(all map[string]string, baseURL string, l *zap.Logger) (b []byte, err error) {
-	var res []result
+	var res []Result
 	for short, long := range all {
-		res = append(res, result{
+		res = append(res, Result{
 			Short: fmt.Sprintf("%s/%s", baseURL, short),
 			Long:  long,
 		})

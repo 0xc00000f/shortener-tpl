@@ -1,4 +1,4 @@
-package encoder
+package encoder_test
 
 import (
 	"errors"
@@ -9,6 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 
+	"github.com/0xc00000f/shortener-tpl/internal/encoder"
 	storageMock "github.com/0xc00000f/shortener-tpl/internal/encoder/mocks"
 
 	"github.com/stretchr/testify/assert"
@@ -16,45 +17,16 @@ import (
 	"github.com/0xc00000f/shortener-tpl/internal/rand"
 )
 
-func TestURLEncoder_Encode(t *testing.T) {
-	r := rand.New(false)
-	tests := []struct {
-		name    string
-		letters int
-	}{
-		{
-			name:    "6 letters url",
-			letters: 6,
-		},
-		{
-			name:    "72 letters url",
-			letters: 72,
-		},
-		{
-			name:    "0 letters url",
-			letters: 0,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			ue := URLEncoder{length: tt.letters, rand: r}
-			url := ue.encode()
-			assert.Equal(t, len(url), tt.letters)
-		})
-	}
-}
-
 func TestURLEncoder_Short_Positive(t *testing.T) {
 	ctl := gomock.NewController(t)
 	defer ctl.Finish()
 
 	storage := storageMock.NewMockURLStorager(ctl)
-	ue := New(
-		SetLength(PreferredLength),
-		SetStorage(storage),
-		SetLogger(zap.L()),
-		SetRandom(rand.New(true)),
+	ue := encoder.New(
+		encoder.SetLength(encoder.PreferredLength),
+		encoder.SetStorage(storage),
+		encoder.SetLogger(zap.L()),
+		encoder.SetRandom(rand.New(true)),
 	)
 
 	tests := []struct {
@@ -90,11 +62,11 @@ func TestURLEncoder_Short_IsKeyExist_Error(t *testing.T) {
 	defer ctl.Finish()
 
 	storage := storageMock.NewMockURLStorager(ctl)
-	ue := New(
-		SetLength(PreferredLength),
-		SetStorage(storage),
-		SetLogger(zap.L()),
-		SetRandom(rand.New(true)),
+	ue := encoder.New(
+		encoder.SetLength(encoder.PreferredLength),
+		encoder.SetStorage(storage),
+		encoder.SetLogger(zap.L()),
+		encoder.SetRandom(rand.New(true)),
 	)
 
 	expectedShort := "BpLnfg" // first predictable result of ue.encode()
@@ -114,11 +86,11 @@ func TestURLEncoder_Short_Positive_IsKeyExist_IfExist(t *testing.T) {
 	defer ctl.Finish()
 
 	storage := storageMock.NewMockURLStorager(ctl)
-	ue := New(
-		SetLength(PreferredLength),
-		SetStorage(storage),
-		SetLogger(zap.L()),
-		SetRandom(rand.New(true)),
+	ue := encoder.New(
+		encoder.SetLength(encoder.PreferredLength),
+		encoder.SetStorage(storage),
+		encoder.SetLogger(zap.L()),
+		encoder.SetRandom(rand.New(true)),
 	)
 
 	firstShort := "BpLnfg"  // first predictable result of ue.encode()
@@ -139,11 +111,11 @@ func TestURLEncoder_Short_Store_Error(t *testing.T) {
 	defer ctl.Finish()
 
 	storage := storageMock.NewMockURLStorager(ctl)
-	ue := New(
-		SetLength(PreferredLength),
-		SetStorage(storage),
-		SetLogger(zap.L()),
-		SetRandom(rand.New(true)),
+	ue := encoder.New(
+		encoder.SetLength(encoder.PreferredLength),
+		encoder.SetStorage(storage),
+		encoder.SetLogger(zap.L()),
+		encoder.SetRandom(rand.New(true)),
 	)
 
 	expectedShort := "BpLnfg" // first predictable result of ue.encode()
@@ -163,11 +135,11 @@ func TestURLEncoder_Get(t *testing.T) {
 	defer ctl.Finish()
 
 	storage := storageMock.NewMockURLStorager(ctl)
-	ue := New(
-		SetLength(PreferredLength),
-		SetStorage(storage),
-		SetLogger(zap.L()),
-		SetRandom(rand.New(true)),
+	ue := encoder.New(
+		encoder.SetLength(encoder.PreferredLength),
+		encoder.SetStorage(storage),
+		encoder.SetLogger(zap.L()),
+		encoder.SetRandom(rand.New(true)),
 	)
 
 	short := "BpLnfg" // first predictable result of ue.encode()
@@ -184,11 +156,11 @@ func TestURLEncoder_Get_Error(t *testing.T) {
 	defer ctl.Finish()
 
 	storage := storageMock.NewMockURLStorager(ctl)
-	ue := New(
-		SetLength(PreferredLength),
-		SetStorage(storage),
-		SetLogger(zap.L()),
-		SetRandom(rand.New(true)),
+	ue := encoder.New(
+		encoder.SetLength(encoder.PreferredLength),
+		encoder.SetStorage(storage),
+		encoder.SetLogger(zap.L()),
+		encoder.SetRandom(rand.New(true)),
 	)
 
 	short := "BpLnfg" // first predictable result of ue.encode()

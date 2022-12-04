@@ -1,4 +1,4 @@
-package handlers
+package handlers_test
 
 import (
 	"encoding/json"
@@ -9,13 +9,15 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/0xc00000f/shortener-tpl/internal/shortener"
-	shortenerMock "github.com/0xc00000f/shortener-tpl/internal/shortener/mocks"
-	"github.com/0xc00000f/shortener-tpl/internal/user"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
+
+	"github.com/0xc00000f/shortener-tpl/internal/handlers"
+	"github.com/0xc00000f/shortener-tpl/internal/shortener"
+	shortenerMock "github.com/0xc00000f/shortener-tpl/internal/shortener/mocks"
+	"github.com/0xc00000f/shortener-tpl/internal/user"
 )
 
 func TestBatch_UserNil_Positive(t *testing.T) {
@@ -38,7 +40,7 @@ func TestBatch_UserNil_Positive(t *testing.T) {
 		second,
 	)
 
-	prepareMap := []outputBatch{
+	prepareMap := []handlers.OutputBatch{
 		{
 			CorrelationID: "1",
 			ShortURL:      fmt.Sprintf("%s/%s", ns.BaseURL, "5ZytxbC"),
@@ -51,7 +53,7 @@ func TestBatch_UserNil_Positive(t *testing.T) {
 	expectedResult, err := json.MarshalIndent(prepareMap, "", " ")
 	require.NoError(t, err)
 
-	serverFunc := Batch(ns).ServeHTTP
+	serverFunc := handlers.Batch(ns).ServeHTTP
 
 	rec := httptest.NewRecorder()
 

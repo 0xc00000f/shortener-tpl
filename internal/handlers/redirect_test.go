@@ -1,4 +1,4 @@
-package handlers
+package handlers_test
 
 import (
 	"context"
@@ -15,6 +15,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 
+	"github.com/0xc00000f/shortener-tpl/internal/handlers"
 	"github.com/0xc00000f/shortener-tpl/internal/shortener"
 	shortenerMock "github.com/0xc00000f/shortener-tpl/internal/shortener/mocks"
 )
@@ -36,7 +37,7 @@ func TestRedirect_Positive(t *testing.T) {
 
 	encoder.EXPECT().Get(short).Return(expectedLong, nil)
 
-	serverFunc := Redirect(ns).ServeHTTP
+	serverFunc := handlers.Redirect(ns).ServeHTTP
 	rec := httptest.NewRecorder()
 	req := httptest.NewRequest(
 		http.MethodGet,
@@ -81,7 +82,7 @@ func TestRedirect_EncoderGetError(t *testing.T) {
 	getErr := errors.New("db is down")
 	encoder.EXPECT().Get(short).Return("", getErr)
 
-	serverFunc := Redirect(ns).ServeHTTP
+	serverFunc := handlers.Redirect(ns).ServeHTTP
 	rec := httptest.NewRecorder()
 	req := httptest.NewRequest(
 		http.MethodGet,
