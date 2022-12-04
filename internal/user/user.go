@@ -13,7 +13,7 @@ type User struct {
 	UserID uuid.UUID
 }
 
-var Nil = User{UserID: uuid.Nil}
+var Nil = User{UserID: uuid.Nil} //nolint:gochecknoglobals
 
 func New() User {
 	return User{UserID: uuid.New()}
