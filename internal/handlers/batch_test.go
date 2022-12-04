@@ -1,7 +1,6 @@
 package handlers_test
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -35,25 +34,8 @@ func TestBatch_UserNil_Positive(t *testing.T) {
 		shortener.InitBaseURL(baseURL),
 		shortener.SetLogger(zap.L()),
 	)
-	ctx := context.Background()
 
-	first := encoder.EXPECT().Short(
-		ctx,
-		user.Nil.UserID,
-		"https://dzen.ru/",
-	).Return("5ZytxbC", nil)
-	second := encoder.EXPECT().Short(
-		ctx,
-		user.Nil.UserID,
-		"https://ya.ru/",
-	).Return("RmOSY54", nil)
-
-	gomock.InOrder(
-		first,
-		second,
-	)
-
-	prepareMap := []handlers.OutputBatch{
+	prepareMap := []handlers.IOBatch{
 		{
 			CorrelationID: "1",
 			ShortURL:      fmt.Sprintf("%s/%s", ns.BaseURL, "5ZytxbC"),
@@ -87,6 +69,22 @@ func TestBatch_UserNil_Positive(t *testing.T) {
 		`),
 	)
 	req.Header.Set("content-type", "application/json")
+
+	first := encoder.EXPECT().Short(
+		req.Context(),
+		user.Nil.UserID,
+		"https://dzen.ru/",
+	).Return("5ZytxbC", nil)
+	second := encoder.EXPECT().Short(
+		req.Context(),
+		user.Nil.UserID,
+		"https://ya.ru/",
+	).Return("RmOSY54", nil)
+
+	gomock.InOrder(
+		first,
+		second,
+	)
 
 	serverFunc(rec, req)
 
