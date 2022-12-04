@@ -2,7 +2,6 @@ package storage
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgconn"
@@ -29,13 +28,13 @@ func NewDatabaseStorage(connStr string, l *zap.Logger) (DatabaseStorage, error) 
 	pgxConfig, err := pgxpool.ParseConfig(connStr)
 	if err != nil {
 		l.Error("unable to parsing config", zap.Error(err))
-		return DatabaseStorage{}, fmt.Errorf("connecting db failure: %w", err)
+		return DatabaseStorage{}, err
 	}
 
 	pgxConnPool, err := pgxpool.ConnectConfig(context.TODO(), pgxConfig)
 	if err != nil {
 		l.Error("Unable to connect to database", zap.Error(err))
-		return DatabaseStorage{}, fmt.Errorf("connecting db failure: %w", err)
+		return DatabaseStorage{}, err
 	}
 
 	query := `CREATE TABLE IF NOT EXISTS url_mapping
@@ -49,7 +48,7 @@ func NewDatabaseStorage(connStr string, l *zap.Logger) (DatabaseStorage, error) 
 
 	_, err = pgxConnPool.Exec(context.TODO(), query)
 	if err != nil {
-		return DatabaseStorage{}, fmt.Errorf("db creating table failure: %w", err)
+		return DatabaseStorage{}, err
 	}
 
 	return DatabaseStorage{db: pgxConnPool, l: l}, nil
@@ -64,7 +63,7 @@ func (ds DatabaseStorage) Get(short string) (string, error) {
 		short,
 	).Scan(&m.userID, &m.short, &m.long)
 	if err != nil {
-		return "", fmt.Errorf("db get data failure: %w", err)
+		return "", err
 	}
 
 	return m.long, nil
@@ -79,7 +78,7 @@ func (ds DatabaseStorage) GetAll(userID uuid.UUID) (result map[string]string, er
 		userID,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("db get all data failure: %w", err)
+		return nil, err
 	}
 	defer rows.Close()
 
@@ -88,7 +87,7 @@ func (ds DatabaseStorage) GetAll(userID uuid.UUID) (result map[string]string, er
 
 		err = rows.Scan(&u.userID, &u.short, &u.long)
 		if err != nil {
-			return nil, fmt.Errorf("db get all data failure: %w", err)
+			return nil, err
 		}
 
 		m[u.short] = u.long
@@ -96,7 +95,7 @@ func (ds DatabaseStorage) GetAll(userID uuid.UUID) (result map[string]string, er
 
 	err = rows.Err()
 	if err != nil {
-		return nil, fmt.Errorf("db get all data failure: %w", err)
+		return nil, err
 	}
 
 	return m, nil
@@ -114,7 +113,7 @@ func (ds DatabaseStorage) Store(userID uuid.UUID, short string, long string) err
 				"SELECT user_id, short_url, long_url FROM url_mapping WHERE long_url = $1::text",
 				long,
 			).Scan(&m.userID, &m.short, &m.long); err != nil {
-				return fmt.Errorf("db get data failure: %w", err)
+				return err
 			}
 
 			return &encoder.UniqueViolationError{
@@ -125,7 +124,7 @@ func (ds DatabaseStorage) Store(userID uuid.UUID, short string, long string) err
 			}
 		}
 
-		return fmt.Errorf("db store data failure: %w", err)
+		return err
 	}
 
 	return nil
@@ -142,7 +141,7 @@ func (ds DatabaseStorage) IsKeyExist(short string) (bool, error) {
 
 	err := row.Scan(&i)
 	if err != nil {
-		return false, fmt.Errorf("getting db result failed: %w", err)
+		return false, err
 	}
 
 	return i, nil

@@ -65,7 +65,7 @@ func prepareResult(all map[string]string, baseURL string, l *zap.Logger) (b []by
 	b, err = json.MarshalIndent(res, "", " ")
 	if err != nil {
 		l.Error("marshal indent error", zap.Error(err))
-		return nil, fmt.Errorf("failed getting all data: %w", err)
+		return nil, err
 	}
 
 	b = append(b, '\n')

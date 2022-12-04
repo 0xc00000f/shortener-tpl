@@ -85,7 +85,7 @@ func unzipBody(r *http.Request, l *zap.Logger) (io.ReadCloser, error) {
 		gz, err := gzip.NewReader(r.Body)
 		if err != nil {
 			l.Error("can't create gzip readCloser", zap.Error(err))
-			return nil, fmt.Errorf("failed unzip: %w", err)
+			return nil, err
 		}
 
 		readCloser = gz
@@ -179,7 +179,7 @@ func createShort(
 	b, err := io.ReadAll(r)
 	if err != nil {
 		sa.L.Error("reading body isn't success", zap.Error(err))
-		return "", fmt.Errorf("failed creating short: %w", err)
+		return "", err
 	}
 
 	var long string
@@ -189,7 +189,7 @@ func createShort(
 		err = json.Unmarshal(b, &req)
 		if err != nil {
 			sa.L.Error("unmarshalling isn't success", zap.Error(err))
-			return "", fmt.Errorf("failed creating short: %w", err)
+			return "", err
 		}
 
 		long = req.URL
@@ -205,7 +205,8 @@ func createShort(
 
 	short, err = sa.Encoder().Short(userID, long)
 	if err != nil {
-		return short, fmt.Errorf("failed creating short: %w", err)
+		sa.L.Error("creating short isn't success", zap.Error(err))
+		return short, err
 	}
 
 	return short, nil

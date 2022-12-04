@@ -3,7 +3,6 @@ package user
 import (
 	"crypto/aes"
 	"encoding/hex"
-	"fmt"
 
 	"github.com/google/uuid"
 
@@ -23,12 +22,12 @@ func New() User {
 func (u *User) UserEncrypt() ([]byte, error) {
 	aesBlock, err := crypto.NewAESBlock()
 	if err != nil {
-		return nil, fmt.Errorf("failed user decrypting: %w", err)
+		return nil, err
 	}
 
 	byteUser, err := u.UserID.MarshalBinary()
 	if err != nil {
-		return nil, fmt.Errorf("failed user encrypting: %w", err)
+		return nil, err
 	}
 
 	encryptedUser := make([]byte, aes.BlockSize)
@@ -49,7 +48,7 @@ func (u *User) UserEncryptToString() (string, error) {
 func (u *User) UserDecrypt(b []byte) error {
 	aesBlock, err := crypto.NewAESBlock()
 	if err != nil {
-		return fmt.Errorf("failed user decrypting: %w", err)
+		return err
 	}
 
 	dst := make([]byte, len(uuid.UUID{}))
@@ -57,7 +56,7 @@ func (u *User) UserDecrypt(b []byte) error {
 
 	userID := uuid.New()
 	if err = userID.UnmarshalBinary(dst); err != nil {
-		return fmt.Errorf("failed user decrypting: %w", err)
+		return err
 	}
 
 	u.UserID = userID
@@ -68,7 +67,7 @@ func (u *User) UserDecrypt(b []byte) error {
 func (u *User) UserDecryptFromString(s string) error {
 	b, err := hex.DecodeString(s)
 	if err != nil {
-		return fmt.Errorf("failed user decrypting: %w", err)
+		return err
 	}
 
 	return u.UserDecrypt(b)

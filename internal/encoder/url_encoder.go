@@ -2,7 +2,6 @@ package encoder
 
 import (
 	"errors"
-	"fmt"
 
 	"github.com/google/uuid"
 	"go.uber.org/zap"
@@ -66,7 +65,7 @@ func (ue *URLEncoder) Short(userID uuid.UUID, long string) (short string, err er
 
 		exist, err := ue.storage.IsKeyExist(short)
 		if err != nil {
-			return "", fmt.Errorf("storage creating short failure: %w", err)
+			return "", err
 		}
 
 		if exist {
@@ -85,26 +84,16 @@ func (ue *URLEncoder) Short(userID uuid.UUID, long string) (short string, err er
 		}
 	}
 	if err != nil { //nolint:wsl
-		return "", fmt.Errorf("storage creating short failure: %w", err)
+		return "", err
 	}
 
 	return short, nil
 }
 
 func (ue *URLEncoder) Get(short string) (long string, err error) {
-	long, err = ue.storage.Get(short)
-	if err != nil {
-		return "", fmt.Errorf("storage get failure: %w", err)
-	}
-
-	return long, nil
+	return ue.storage.Get(short)
 }
 
 func (ue *URLEncoder) GetAll(userID uuid.UUID) (result map[string]string, err error) {
-	result, err = ue.storage.GetAll(userID)
-	if err != nil {
-		return nil, fmt.Errorf("storage get all failure: %w", err)
-	}
-
-	return result, nil
+	return ue.storage.GetAll(userID)
 }
