@@ -28,12 +28,12 @@ func main() {
 	}
 	defer l.Sync() //nolint:errcheck,wsl
 
-	cfg, err := config.New(l)
+	cfg, err := config.New()
 	if err != nil {
 		l.Fatal("creating config error", zap.Error(err))
 	}
 
-	urlStorage, err := storage.New(context.Background(), cfg)
+	urlStorage, err := storage.New(context.Background(), cfg, l)
 	if err != nil {
 		l.Fatal("creating storage error", zap.Error(err))
 	}

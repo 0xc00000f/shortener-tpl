@@ -9,24 +9,24 @@ import (
 	"go.uber.org/zap"
 )
 
-func New(ctx context.Context, cfg config.Cfg) (encoder.URLStorager, error) {
+func New(ctx context.Context, cfg config.Cfg, l *zap.Logger) (encoder.URLStorager, error) {
 	if len(cfg.DatabaseAddress) > 0 {
-		return NewDatabaseStorage(ctx, cfg.DatabaseAddress, cfg.L)
+		return NewDatabaseStorage(ctx, cfg.DatabaseAddress, l)
 	}
 
 	if len(cfg.Filepath) == 0 {
-		return NewMemoryStorage(cfg.L), nil
+		return NewMemoryStorage(l), nil
 	}
 
-	storage, err := NewFileStorage(cfg.Filepath, cfg.L)
+	storage, err := NewFileStorage(cfg.Filepath, l)
 	if err != nil {
-		cfg.L.Error("creating file storage err", zap.Error(err))
+		l.Error("creating file storage err", zap.Error(err))
 		return nil, err
 	}
 
 	err = storage.InitMemory()
 	if err != nil {
-		cfg.L.Error("init file storage memory err", zap.Error(err))
+		l.Error("init file storage memory err", zap.Error(err))
 		return nil, err
 	}
 
