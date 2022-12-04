@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"compress/gzip"
 	"context"
 	"encoding/json"
 	"errors"
@@ -30,13 +29,7 @@ func SaveURL(sa *shortener.NaiveShortener) http.HandlerFunc { //revive:disable-l
 			return
 		}
 
-		rc, err := unzipBody(r, sa.L)
-		if err != nil {
-			sa.L.Error("read body err", zap.Error(err))
-			http.Error(w, "400 page not found", http.StatusBadRequest)
-
-			return
-		}
+		rc := r.Body
 		defer rc.Close()
 
 		u, ok := GetUserFromRequest(r)
@@ -80,26 +73,6 @@ func SaveURL(sa *shortener.NaiveShortener) http.HandlerFunc { //revive:disable-l
 	}
 }
 
-func unzipBody(r *http.Request, l *zap.Logger) (io.ReadCloser, error) {
-	var readCloser io.ReadCloser
-
-	if r.Header.Get(`Content-Encoding`) == `gzip` {
-		gz, err := gzip.NewReader(r.Body)
-		if err != nil {
-			l.Error("can't create gzip readCloser", zap.Error(err))
-			return nil, err
-		}
-
-		readCloser = gz
-
-		return readCloser, nil
-	}
-
-	readCloser = r.Body
-
-	return readCloser, nil
-}
-
 type ShortRequest struct {
 	URL string `json:"url"`
 }
@@ -110,13 +83,7 @@ type ShortResponse struct {
 
 func SaveURLJson(sa *shortener.NaiveShortener) http.HandlerFunc { //revive:disable-line:cognitive-complexity
 	return func(w http.ResponseWriter, r *http.Request) {
-		rc, err := unzipBody(r, sa.L)
-		if err != nil {
-			sa.L.Error("read body err", zap.Error(err))
-			http.Error(w, "400 page not found", http.StatusBadRequest)
-
-			return
-		}
+		rc := r.Body
 		defer rc.Close()
 
 		u, ok := GetUserFromRequest(r)

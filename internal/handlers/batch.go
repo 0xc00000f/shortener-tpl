@@ -20,13 +20,7 @@ func Batch(sa *shortener.NaiveShortener) http.HandlerFunc {
 			u = user.Nil
 		}
 
-		rc, err := unzipBody(r, sa.L)
-		if err != nil {
-			sa.L.Error("read body err", zap.Error(err))
-			http.Error(w, "400 page not found", http.StatusBadRequest)
-
-			return
-		}
+		rc := r.Body
 		defer rc.Close()
 
 		b, err := io.ReadAll(rc)
