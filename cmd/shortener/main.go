@@ -14,6 +14,8 @@ import (
 	"go.uber.org/zap"
 )
 
+const ShortLength = 7
+
 func main() {
 	l, err := zap.NewProduction()
 	if err != nil {
@@ -33,7 +35,7 @@ func main() {
 
 	urlEncoder := encoder.New(
 		encoder.SetStorage(urlStorage),
-		encoder.SetLength(7),
+		encoder.SetLength(ShortLength),
 		encoder.SetRandom(rand.New(false)),
 		encoder.SetLogger(l),
 	)

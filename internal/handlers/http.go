@@ -25,13 +25,13 @@ func NewRouter(sa *shortener.NaiveShortener) *chi.Mux {
 	r.Use(CookieAuth)
 
 	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(400)
+		w.WriteHeader(http.StatusBadRequest)
 		if _, err := w.Write([]byte("400 page not found")); err != nil {
 			sa.L.Error("writing body failure", zap.Error(err))
 		}
 	})
 	r.MethodNotAllowed(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(400)
+		w.WriteHeader(http.StatusBadRequest)
 		if _, err := w.Write([]byte("400 page not found")); err != nil {
 			sa.L.Error("writing body failure", zap.Error(err))
 		}
