@@ -25,8 +25,8 @@ type MemoryStorage struct {
 	l  *zap.Logger
 }
 
-func NewMemoryStorage(logger *zap.Logger) MemoryStorage {
-	return MemoryStorage{
+func NewMemoryStorage(logger *zap.Logger) *MemoryStorage {
+	return &MemoryStorage{
 		storage: make(map[string]string),
 		history: make(map[uuid.UUID]map[string]string),
 		l:       logger,
@@ -34,7 +34,7 @@ func NewMemoryStorage(logger *zap.Logger) MemoryStorage {
 }
 
 //revive:disable-next-line
-func (ms MemoryStorage) Get(ctx context.Context, short string) (long string, err error) {
+func (ms *MemoryStorage) Get(ctx context.Context, short string) (long string, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
 
@@ -56,7 +56,7 @@ func (ms MemoryStorage) Get(ctx context.Context, short string) (long string, err
 }
 
 //revive:disable-next-line
-func (ms MemoryStorage) Store(ctx context.Context, userID uuid.UUID, short, long string) (err error) {
+func (ms *MemoryStorage) Store(ctx context.Context, userID uuid.UUID, short, long string) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 
@@ -92,7 +92,7 @@ func (ms MemoryStorage) Store(ctx context.Context, userID uuid.UUID, short, long
 }
 
 //revive:disable-next-line
-func (ms MemoryStorage) IsKeyExist(ctx context.Context, short string) (bool, error) {
+func (ms *MemoryStorage) IsKeyExist(ctx context.Context, short string) (bool, error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
 
@@ -102,7 +102,7 @@ func (ms MemoryStorage) IsKeyExist(ctx context.Context, short string) (bool, err
 }
 
 //revive:disable-next-line
-func (ms MemoryStorage) GetAll(ctx context.Context, userID uuid.UUID) (result map[string]string, err error) {
+func (ms *MemoryStorage) GetAll(ctx context.Context, userID uuid.UUID) (result map[string]string, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
 

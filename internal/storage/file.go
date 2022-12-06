@@ -26,24 +26,24 @@ type url struct {
 	Long   string    `json:"long"`
 }
 
-func NewFileStorage(filename string, logger *zap.Logger) (FileStorage, error) {
+func NewFileStorage(filename string, logger *zap.Logger) (*FileStorage, error) {
 	file, err := os.OpenFile(filename, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0777)
 	if err != nil {
-		return FileStorage{}, err
+		return nil, err
 	}
 
-	return FileStorage{
+	return &FileStorage{
 		file:   file,
-		memory: NewMemoryStorage(logger),
+		memory: *NewMemoryStorage(logger),
 		l:      logger,
 	}, nil
 }
 
-func (fs FileStorage) Close() error {
+func (fs *FileStorage) Close() error {
 	return fs.file.Close()
 }
 
-func (fs FileStorage) InitMemory() error {
+func (fs *FileStorage) InitMemory() error {
 	fi, err := fs.file.Stat()
 	if err != nil {
 		fs.l.Error("getting file info error", zap.Error(err))
@@ -80,7 +80,7 @@ func (fs FileStorage) InitMemory() error {
 	return nil
 }
 
-func (fs FileStorage) Get(ctx context.Context, short string) (long string, err error) {
+func (fs *FileStorage) Get(ctx context.Context, short string) (long string, err error) {
 	fs.mu.RLock()
 	defer fs.mu.RUnlock()
 
@@ -88,14 +88,14 @@ func (fs FileStorage) Get(ctx context.Context, short string) (long string, err e
 }
 
 //revive:disable-next-line
-func (fs FileStorage) GetAll(ctx context.Context, userID uuid.UUID) (result map[string]string, err error) {
+func (fs *FileStorage) GetAll(ctx context.Context, userID uuid.UUID) (result map[string]string, err error) {
 	fs.mu.RLock()
 	defer fs.mu.RUnlock()
 
 	return fs.memory.history[userID], nil
 }
 
-func (fs FileStorage) Store(ctx context.Context, userID uuid.UUID, short, long string) error {
+func (fs *FileStorage) Store(ctx context.Context, userID uuid.UUID, short, long string) error {
 	fs.mu.Lock()
 	defer fs.mu.Unlock()
 
@@ -114,7 +114,7 @@ func (fs FileStorage) Store(ctx context.Context, userID uuid.UUID, short, long s
 	return nil
 }
 
-func (fs FileStorage) writeURL(userID uuid.UUID, short, long string) error {
+func (fs *FileStorage) writeURL(userID uuid.UUID, short, long string) error {
 	s := url{
 		UserID: userID,
 		Short:  short,
@@ -138,7 +138,7 @@ func (fs FileStorage) writeURL(userID uuid.UUID, short, long string) error {
 	return nil
 }
 
-func (fs FileStorage) IsKeyExist(ctx context.Context, short string) (bool, error) {
+func (fs *FileStorage) IsKeyExist(ctx context.Context, short string) (bool, error) {
 	fs.mu.RLock()
 	defer fs.mu.RUnlock()
 
