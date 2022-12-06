@@ -25,19 +25,11 @@ type urlMapping struct {
 	long   string    `db:"long_url"`
 }
 
-func NewDatabaseStorage(ctx context.Context, connStr string, l *zap.Logger) (DatabaseStorage, error) {
-	pgxConfig, err := pgxpool.ParseConfig(connStr)
-	if err != nil {
-		l.Error("unable to parsing config", zap.Error(err))
-		return DatabaseStorage{}, err
-	}
-
-	pgxConnPool, err := pgxpool.ConnectConfig(ctx, pgxConfig)
-	if err != nil {
-		l.Error("Unable to connect to database", zap.Error(err))
-		return DatabaseStorage{}, err
-	}
-
+func NewDatabaseStorage(
+	ctx context.Context,
+	pgxConnPool *pgxpool.Pool,
+	l *zap.Logger,
+) (DatabaseStorage, error) {
 	query := `CREATE TABLE IF NOT EXISTS url_mapping
 		(
 		id integer NOT NULL GENERATED ALWAYS AS IDENTITY,
@@ -47,7 +39,7 @@ func NewDatabaseStorage(ctx context.Context, connStr string, l *zap.Logger) (Dat
 		PRIMARY KEY (id));
 		CREATE UNIQUE INDEX IF NOT EXISTS long_unique_idx on url_mapping (long_url);`
 
-	_, err = pgxConnPool.Exec(ctx, query)
+	_, err := pgxConnPool.Exec(ctx, query)
 	if err != nil {
 		return DatabaseStorage{}, err
 	}

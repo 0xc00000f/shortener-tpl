@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/jackc/pgx/v4/pgxpool"
+
 	"github.com/0xc00000f/shortener-tpl/internal/config"
 	"github.com/0xc00000f/shortener-tpl/internal/encoder"
 	"github.com/0xc00000f/shortener-tpl/internal/handlers"
@@ -33,7 +35,10 @@ func main() {
 		l.Fatal("creating config error", zap.Error(err))
 	}
 
-	urlStorage, err := storage.New(context.Background(), cfg, l)
+	ctx := context.Background()
+	pgxConnPool := getPgxConnPool(ctx, cfg.DatabaseAddress)
+
+	urlStorage, err := storage.New(ctx, cfg, pgxConnPool, l)
 	if err != nil {
 		l.Fatal("creating storage error", zap.Error(err))
 	}
@@ -48,7 +53,7 @@ func main() {
 	urlShortener := shortener.New(
 		shortener.SetEncoder(urlEncoder),
 		shortener.InitBaseURL(cfg.BaseURL),
-		shortener.SetDatabaseAddress(cfg.DatabaseAddress),
+		shortener.SetPgxConnPool(pgxConnPool),
 		shortener.SetLogger(l),
 	)
 
@@ -61,4 +66,18 @@ func main() {
 
 	l.Info("starting server", zap.String("address", cfg.Address))
 	l.Fatal("http server down", zap.Error(server.ListenAndServe()))
+}
+
+func getPgxConnPool(ctx context.Context, connString string) *pgxpool.Pool {
+	pgxConfig, err := pgxpool.ParseConfig(connString)
+	if err != nil {
+		return nil
+	}
+
+	pgxConnPool, err := pgxpool.ConnectConfig(ctx, pgxConfig)
+	if err != nil {
+		return nil
+	}
+
+	return pgxConnPool
 }

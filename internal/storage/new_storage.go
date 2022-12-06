@@ -3,15 +3,22 @@ package storage
 import (
 	"context"
 
+	"github.com/jackc/pgx/v4/pgxpool"
+
 	"github.com/0xc00000f/shortener-tpl/internal/config"
 	"github.com/0xc00000f/shortener-tpl/internal/encoder"
 
 	"go.uber.org/zap"
 )
 
-func New(ctx context.Context, cfg config.Cfg, l *zap.Logger) (encoder.URLStorager, error) {
-	if len(cfg.DatabaseAddress) > 0 {
-		return NewDatabaseStorage(ctx, cfg.DatabaseAddress, l)
+func New(
+	ctx context.Context,
+	cfg config.Cfg,
+	pgxConnPool *pgxpool.Pool,
+	l *zap.Logger,
+) (encoder.URLStorager, error) {
+	if pgxConnPool != nil {
+		return NewDatabaseStorage(ctx, pgxConnPool, l)
 	}
 
 	if len(cfg.Filepath) == 0 {

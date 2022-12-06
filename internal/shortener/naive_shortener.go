@@ -1,13 +1,14 @@
 package shortener
 
 import (
+	"github.com/jackc/pgx/v4/pgxpool"
 	"go.uber.org/zap"
 )
 
 type NaiveShortener struct {
-	encoder         Shortener
-	BaseURL         string
-	DatabaseAddress string
+	encoder     Shortener
+	BaseURL     string
+	PgxConnPool *pgxpool.Pool
 
 	L *zap.Logger
 }
@@ -40,9 +41,9 @@ func InitBaseURL(baseURL string) Option {
 	}
 }
 
-func SetDatabaseAddress(address string) Option {
+func SetPgxConnPool(pool *pgxpool.Pool) Option {
 	return func(ns *NaiveShortener) {
-		ns.DatabaseAddress = address
+		ns.PgxConnPool = pool
 	}
 }
 
