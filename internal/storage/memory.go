@@ -3,6 +3,7 @@ package storage
 import (
 	"context"
 	"errors"
+	"sync"
 
 	"github.com/google/uuid"
 	"go.uber.org/zap"
@@ -19,7 +20,9 @@ var (
 type MemoryStorage struct {
 	storage map[string]string
 	history map[uuid.UUID]map[string]string
-	l       *zap.Logger
+
+	mu sync.RWMutex
+	l  *zap.Logger
 }
 
 func NewMemoryStorage(logger *zap.Logger) MemoryStorage {
@@ -32,6 +35,9 @@ func NewMemoryStorage(logger *zap.Logger) MemoryStorage {
 
 //revive:disable-next-line
 func (ms MemoryStorage) Get(ctx context.Context, short string) (long string, err error) {
+	ms.mu.RLock()
+	defer ms.mu.RUnlock()
+
 	ms.l.Info("input", zap.String("short", short))
 
 	if len(short) == 0 {
@@ -51,6 +57,9 @@ func (ms MemoryStorage) Get(ctx context.Context, short string) (long string, err
 
 //revive:disable-next-line
 func (ms MemoryStorage) Store(ctx context.Context, userID uuid.UUID, short, long string) (err error) {
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
+
 	ms.l.Info("input",
 		zap.String("userID", userID.String()),
 		zap.String("short", short),
@@ -84,12 +93,19 @@ func (ms MemoryStorage) Store(ctx context.Context, userID uuid.UUID, short, long
 
 //revive:disable-next-line
 func (ms MemoryStorage) IsKeyExist(ctx context.Context, short string) (bool, error) {
+	ms.mu.RLock()
+	defer ms.mu.RUnlock()
+
 	_, ok := ms.storage[short]
+
 	return ok, nil
 }
 
 //revive:disable-next-line
 func (ms MemoryStorage) GetAll(ctx context.Context, userID uuid.UUID) (result map[string]string, err error) {
+	ms.mu.RLock()
+	defer ms.mu.RUnlock()
+
 	ms.l.Info("function input", zap.String("userID", userID.String()))
 	result = ms.history[userID]
 	ms.l.Info("function result", log.MapToFields(result)...)

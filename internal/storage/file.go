@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"os"
+	"sync"
 
 	"github.com/google/uuid"
 
@@ -15,7 +16,8 @@ type FileStorage struct {
 	file   *os.File
 	memory MemoryStorage
 
-	l *zap.Logger
+	mu sync.RWMutex
+	l  *zap.Logger
 }
 
 type url struct {
@@ -79,15 +81,24 @@ func (fs FileStorage) InitMemory() error {
 }
 
 func (fs FileStorage) Get(ctx context.Context, short string) (long string, err error) {
+	fs.mu.RLock()
+	defer fs.mu.RUnlock()
+
 	return fs.memory.Get(ctx, short)
 }
 
 //revive:disable-next-line
 func (fs FileStorage) GetAll(ctx context.Context, userID uuid.UUID) (result map[string]string, err error) {
+	fs.mu.RLock()
+	defer fs.mu.RUnlock()
+
 	return fs.memory.history[userID], nil
 }
 
 func (fs FileStorage) Store(ctx context.Context, userID uuid.UUID, short, long string) error {
+	fs.mu.Lock()
+	defer fs.mu.Unlock()
+
 	err := fs.memory.Store(ctx, userID, short, long)
 	if err != nil {
 		fs.l.Error("in-memory store error", zap.Error(err))
@@ -128,5 +139,8 @@ func (fs FileStorage) writeURL(userID uuid.UUID, short, long string) error {
 }
 
 func (fs FileStorage) IsKeyExist(ctx context.Context, short string) (bool, error) {
+	fs.mu.RLock()
+	defer fs.mu.RUnlock()
+
 	return fs.memory.IsKeyExist(ctx, short)
 }
