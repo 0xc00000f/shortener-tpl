@@ -4,6 +4,8 @@ import (
 	"compress/flate"
 	"net/http"
 
+	"go.uber.org/zap"
+
 	"github.com/0xc00000f/shortener-tpl/internal/shortener"
 
 	"github.com/go-chi/chi/v5"
@@ -20,19 +22,34 @@ func NewRouter(sa *shortener.NaiveShortener) *chi.Mux {
 	r.Use(middleware.AllowContentEncoding("gzip"))
 	compressor := middleware.NewCompressor(flate.DefaultCompression)
 	r.Use(compressor.Handler)
+	r.Use(CookieAuth)
+	r.Use(UnzipBody)
 
 	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(400)
-		w.Write([]byte("400 page not found"))
+		w.WriteHeader(http.StatusBadRequest)
+		if _, err := w.Write([]byte("400 page not found")); err != nil {
+			sa.L.Error("writing body failure", zap.Error(err))
+		}
 	})
 	r.MethodNotAllowed(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(400)
-		w.Write([]byte("400 page not found"))
+		w.WriteHeader(http.StatusBadRequest)
+		if _, err := w.Write([]byte("400 page not found")); err != nil {
+			sa.L.Error("writing body failure", zap.Error(err))
+		}
 	})
 
 	r.Route("/", func(r chi.Router) {
 		r.Post("/", SaveURL(sa))
-		r.Post("/api/shorten", SaveURLJson(sa))
+		r.Get("/ping", HealthCheck(sa))
+
+		r.Route("/api", func(r chi.Router) {
+			r.Route("/shorten", func(r chi.Router) {
+				r.Post("/", SaveURLJson(sa))
+				r.Post("/batch", Batch(sa))
+			})
+
+			r.Get("/user/urls", GetSavedData(sa))
+		})
 
 		r.Route("/{url}", func(r chi.Router) {
 			r.Get("/", Redirect(sa))

@@ -1,9 +1,13 @@
 package encoder
 
 import (
-	"github.com/0xc00000f/shortener-tpl/internal/rand"
+	"context"
+	"errors"
 
+	"github.com/google/uuid"
 	"go.uber.org/zap"
+
+	"github.com/0xc00000f/shortener-tpl/internal/rand"
 )
 
 const PreferredLength = 6
@@ -56,26 +60,41 @@ func (ue *URLEncoder) encode() string {
 	return ue.rand.String(ue.length)
 }
 
-func (ue *URLEncoder) Short(long string) (short string, err error) {
+func (ue *URLEncoder) Short(ctx context.Context, userID uuid.UUID, long string) (short string, err error) {
 	for {
 		short = ue.encode()
-		exist, err := ue.storage.IsKeyExist(short)
+
+		exist, err := ue.storage.IsKeyExist(ctx, short)
 		if err != nil {
 			return "", err
 		}
+
 		if exist {
 			continue
 		}
+
 		break
 	}
 
-	err = ue.storage.Store(short, long)
+	err = ue.storage.Store(ctx, userID, short, long)
 	if err != nil {
+		var uniqueViolationError *UniqueViolationError
+		if errors.As(err, &uniqueViolationError) {
+			if err, ok := err.(*UniqueViolationError); ok { //nolint:errorlint
+				return err.Short, err
+			}
+		}
+
 		return "", err
 	}
+
 	return short, nil
 }
 
-func (ue *URLEncoder) Get(short string) (long string, err error) {
-	return ue.storage.Get(short)
+func (ue *URLEncoder) Get(ctx context.Context, short string) (long string, err error) {
+	return ue.storage.Get(ctx, short)
+}
+
+func (ue *URLEncoder) GetAll(ctx context.Context, userID uuid.UUID) (result map[string]string, err error) {
+	return ue.storage.GetAll(ctx, userID)
 }

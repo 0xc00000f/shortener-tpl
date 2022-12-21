@@ -1,7 +1,12 @@
 package main
 
 import (
+	"context"
+	"log"
 	"net/http"
+	"time"
+
+	"github.com/jackc/pgx/v4/pgxpool"
 
 	"github.com/0xc00000f/shortener-tpl/internal/config"
 	"github.com/0xc00000f/shortener-tpl/internal/encoder"
@@ -13,35 +18,66 @@ import (
 	"go.uber.org/zap"
 )
 
-func main() {
-	l, _ := zap.NewProduction()
-	defer l.Sync()
+const (
+	ShortLength              = 7
+	defaultReadHeaderTimeout = 3 * time.Second
+)
 
-	cfg, err := config.New(l)
+func main() {
+	l, err := zap.NewProduction()
+	if err != nil {
+		log.Fatalf("can't initialize zap logger: %v", err)
+	}
+	defer l.Sync() //nolint:errcheck,wsl
+
+	cfg, err := config.New()
 	if err != nil {
 		l.Fatal("creating config error", zap.Error(err))
 	}
 
-	storage, err := storage.New(cfg)
+	ctx := context.Background()
+	pgxConnPool := getPgxConnPool(ctx, cfg.DatabaseAddress)
+
+	urlStorage, err := storage.New(ctx, cfg, pgxConnPool, l)
 	if err != nil {
 		l.Fatal("creating storage error", zap.Error(err))
 	}
 
-	encoder := encoder.New(
-		encoder.SetStorage(storage),
-		encoder.SetLength(7),
+	urlEncoder := encoder.New(
+		encoder.SetStorage(urlStorage),
+		encoder.SetLength(ShortLength),
 		encoder.SetRandom(rand.New(false)),
 		encoder.SetLogger(l),
 	)
 
-	shortener := shortener.New(
-		shortener.SetEncoder(encoder),
+	urlShortener := shortener.New(
+		shortener.SetEncoder(urlEncoder),
 		shortener.InitBaseURL(cfg.BaseURL),
+		shortener.SetPgxConnPool(pgxConnPool),
 		shortener.SetLogger(l),
 	)
 
-	router := handlers.NewRouter(shortener)
+	router := handlers.NewRouter(urlShortener)
+	server := &http.Server{
+		Addr:              cfg.Address,
+		Handler:           router,
+		ReadHeaderTimeout: defaultReadHeaderTimeout,
+	}
 
 	l.Info("starting server", zap.String("address", cfg.Address))
-	l.Fatal("http server down", zap.Error(http.ListenAndServe(cfg.Address, router)))
+	l.Fatal("http server down", zap.Error(server.ListenAndServe()))
+}
+
+func getPgxConnPool(ctx context.Context, connString string) *pgxpool.Pool {
+	pgxConfig, err := pgxpool.ParseConfig(connString)
+	if err != nil {
+		return nil
+	}
+
+	pgxConnPool, err := pgxpool.ConnectConfig(ctx, pgxConfig)
+	if err != nil {
+		return nil
+	}
+
+	return pgxConnPool
 }

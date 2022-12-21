@@ -5,9 +5,11 @@
 package mock_encoder
 
 import (
+	context "context"
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
+	uuid "github.com/google/uuid"
 )
 
 // MockURLStorager is a mock of URLStorager interface.
@@ -34,45 +36,60 @@ func (m *MockURLStorager) EXPECT() *MockURLStoragerMockRecorder {
 }
 
 // Get mocks base method.
-func (m *MockURLStorager) Get(short string) (string, error) {
+func (m *MockURLStorager) Get(ctx context.Context, short string) (string, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Get", short)
+	ret := m.ctrl.Call(m, "Get", ctx, short)
 	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Get indicates an expected call of Get.
-func (mr *MockURLStoragerMockRecorder) Get(short interface{}) *gomock.Call {
+func (mr *MockURLStoragerMockRecorder) Get(ctx, short interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockURLStorager)(nil).Get), short)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockURLStorager)(nil).Get), ctx, short)
+}
+
+// GetAll mocks base method.
+func (m *MockURLStorager) GetAll(ctx context.Context, userID uuid.UUID) (map[string]string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAll", ctx, userID)
+	ret0, _ := ret[0].(map[string]string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAll indicates an expected call of GetAll.
+func (mr *MockURLStoragerMockRecorder) GetAll(ctx, userID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAll", reflect.TypeOf((*MockURLStorager)(nil).GetAll), ctx, userID)
 }
 
 // IsKeyExist mocks base method.
-func (m *MockURLStorager) IsKeyExist(short string) (bool, error) {
+func (m *MockURLStorager) IsKeyExist(ctx context.Context, short string) (bool, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "IsKeyExist", short)
+	ret := m.ctrl.Call(m, "IsKeyExist", ctx, short)
 	ret0, _ := ret[0].(bool)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // IsKeyExist indicates an expected call of IsKeyExist.
-func (mr *MockURLStoragerMockRecorder) IsKeyExist(short interface{}) *gomock.Call {
+func (mr *MockURLStoragerMockRecorder) IsKeyExist(ctx, short interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsKeyExist", reflect.TypeOf((*MockURLStorager)(nil).IsKeyExist), short)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsKeyExist", reflect.TypeOf((*MockURLStorager)(nil).IsKeyExist), ctx, short)
 }
 
 // Store mocks base method.
-func (m *MockURLStorager) Store(short, long string) error {
+func (m *MockURLStorager) Store(ctx context.Context, userID uuid.UUID, short, long string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Store", short, long)
+	ret := m.ctrl.Call(m, "Store", ctx, userID, short, long)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Store indicates an expected call of Store.
-func (mr *MockURLStoragerMockRecorder) Store(short, long interface{}) *gomock.Call {
+func (mr *MockURLStoragerMockRecorder) Store(ctx, userID, short, long interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Store", reflect.TypeOf((*MockURLStorager)(nil).Store), short, long)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Store", reflect.TypeOf((*MockURLStorager)(nil).Store), ctx, userID, short, long)
 }

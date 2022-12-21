@@ -15,5 +15,10 @@ cover:
 
 .PHONY: gen
 gen:
+	# storager
 	mockgen -source=internal/encoder/url_storager.go \
 	-destination=internal/encoder/mocks/mock_url_storager.go
+
+	# shortener
+#	mockgen -source=internal/shortener/shortener.go \
+#	-destination=internal/shortener/mocks/mock_shortener.go

@@ -1,16 +1,27 @@
-package storage
+package storage_test
 
 import (
+	"context"
 	"testing"
 
+	"github.com/google/uuid"
+	"github.com/stretchr/testify/require"
+	"go.uber.org/zap"
+
 	"github.com/stretchr/testify/assert"
+
+	"github.com/0xc00000f/shortener-tpl/internal/storage"
 )
 
 func TestMemoryStorage_Get(t *testing.T) {
+	t.Parallel()
 
-	var storage = NewMemoryStorage(nil)
-	storage.Store("ytAA2Z", "https://google.com")
-	storage.Store("hNaU8l", "https://dzen.ru/")
+	var memoryStorage = storage.NewMemoryStorage(zap.L())
+
+	ctx := context.Background()
+
+	require.NoError(t, memoryStorage.Store(ctx, uuid.Nil, "ytAA2Z", "https://google.com"))
+	require.NoError(t, memoryStorage.Store(ctx, uuid.Nil, "hNaU8l", "https://dzen.ru/"))
 
 	tests := []struct {
 		name  string
@@ -34,18 +45,20 @@ func TestMemoryStorage_Get(t *testing.T) {
 			name:  "negative #1",
 			key:   "4qwpBs",
 			value: "",
-			err:   ErrNoKeyFound,
+			err:   storage.ErrNoKeyFound,
 		},
 		{
 			name:  "negative #2",
 			key:   "",
 			value: "",
-			err:   ErrEmptyKey,
+			err:   storage.ErrEmptyKey,
 		},
 	}
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
-			value, err := storage.Get(tt.key)
+			t.Parallel()
+			value, err := memoryStorage.Get(ctx, tt.key)
 
 			assert.Equal(t, err, tt.err)
 			assert.Equal(t, value, tt.value)
@@ -54,8 +67,11 @@ func TestMemoryStorage_Get(t *testing.T) {
 }
 
 func TestMemoryStorage_Set(t *testing.T) {
+	t.Parallel()
 
-	var storage = NewMemoryStorage(nil)
+	var memoryStorage = storage.NewMemoryStorage(zap.L())
+
+	ctx := context.Background()
 
 	tests := []struct {
 		name     string
@@ -82,24 +98,25 @@ func TestMemoryStorage_Set(t *testing.T) {
 			name:     "empty value #1",
 			key:      "hNaU8l",
 			value:    "",
-			errStore: ErrEmptyValue,
-			errGet:   ErrNoKeyFound,
+			errStore: storage.ErrEmptyValue,
+			errGet:   storage.ErrNoKeyFound,
 		},
 		{
 			name:     "empty key #1",
 			key:      "",
 			value:    "",
-			errStore: ErrEmptyKey,
-			errGet:   ErrEmptyKey,
+			errStore: storage.ErrEmptyKey,
+			errGet:   storage.ErrEmptyKey,
 		},
 	}
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
-
-			err := storage.Store(tt.key, tt.value)
+			t.Parallel()
+			err := memoryStorage.Store(ctx, uuid.Nil, tt.key, tt.value)
 			assert.Equal(t, tt.errStore, err)
 
-			value, err := storage.Get(tt.key)
+			value, err := memoryStorage.Get(ctx, tt.key)
 
 			assert.Equal(t, tt.value, value)
 			assert.Equal(t, tt.errGet, err)
