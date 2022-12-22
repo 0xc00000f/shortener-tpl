@@ -10,6 +10,8 @@ import (
 	"github.com/google/uuid"
 
 	"go.uber.org/zap"
+
+	"github.com/0xc00000f/shortener-tpl/internal/models"
 )
 
 type FileStorage struct {
@@ -18,12 +20,6 @@ type FileStorage struct {
 
 	mu sync.RWMutex
 	l  *zap.Logger
-}
-
-type url struct {
-	UserID uuid.UUID `json:"userID,omitempty"`
-	Short  string    `json:"short"`
-	Long   string    `json:"long"`
 }
 
 func NewFileStorage(filename string, logger *zap.Logger) (*FileStorage, error) {
@@ -54,7 +50,7 @@ func (fs *FileStorage) InitMemory() error {
 		return nil
 	}
 
-	var url url
+	var url models.URL
 
 	scanner := bufio.NewScanner(fs.file)
 	for scanner.Scan() {
@@ -115,7 +111,7 @@ func (fs *FileStorage) Store(ctx context.Context, userID uuid.UUID, short, long 
 }
 
 func (fs *FileStorage) writeURL(userID uuid.UUID, short, long string) error {
-	s := url{
+	s := models.URL{
 		UserID: userID,
 		Short:  short,
 		Long:   long,

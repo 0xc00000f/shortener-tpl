@@ -11,18 +11,13 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/0xc00000f/shortener-tpl/internal/encoder"
+	"github.com/0xc00000f/shortener-tpl/internal/models"
 )
 
 type DatabaseStorage struct {
 	db *pgxpool.Pool
 
 	l *zap.Logger
-}
-
-type urlMapping struct {
-	userID uuid.UUID `db:"user_id"`
-	short  string    `db:"short_url"`
-	long   string    `db:"long_url"`
 }
 
 func NewDatabaseStorage(
@@ -48,18 +43,18 @@ func NewDatabaseStorage(
 }
 
 func (ds DatabaseStorage) Get(ctx context.Context, short string) (string, error) {
-	var m urlMapping
+	var m models.URL
 
 	err := ds.db.QueryRow(
 		ctx,
 		"SELECT user_id, short_url, long_url FROM url_mapping WHERE short_url = $1::text",
 		short,
-	).Scan(&m.userID, &m.short, &m.long)
+	).Scan(&m.UserID, &m.Short, &m.Long)
 	if err != nil {
 		return "", err
 	}
 
-	return m.long, nil
+	return m.Long, nil
 }
 
 func (ds DatabaseStorage) GetAll(
@@ -79,14 +74,14 @@ func (ds DatabaseStorage) GetAll(
 	defer rows.Close()
 
 	for rows.Next() {
-		var u urlMapping
+		var u models.URL
 
-		err = rows.Scan(&u.userID, &u.short, &u.long)
+		err = rows.Scan(&u.UserID, &u.Short, &u.Long)
 		if err != nil {
 			return nil, err
 		}
 
-		m[u.short] = u.long
+		m[u.Short] = u.Long
 	}
 
 	err = rows.Err()
@@ -116,20 +111,20 @@ func (ds DatabaseStorage) Store(ctx context.Context, userID uuid.UUID, short str
 			return err
 		}
 
-		var m urlMapping
+		var m models.URL
 		if err := ds.db.QueryRow(
 			ctx,
 			"SELECT user_id, short_url, long_url FROM url_mapping WHERE long_url = $1::text",
 			long,
-		).Scan(&m.userID, &m.short, &m.long); err != nil {
+		).Scan(&m.UserID, &m.Short, &m.Long); err != nil {
 			return err
 		}
 
 		return &encoder.UniqueViolationError{
 			Err:    err,
-			UserID: m.userID,
-			Short:  m.short,
-			Long:   m.long,
+			UserID: m.UserID,
+			Short:  m.Short,
+			Long:   m.Long,
 		}
 	}
 
