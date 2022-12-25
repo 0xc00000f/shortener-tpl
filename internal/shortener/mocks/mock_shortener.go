@@ -8,6 +8,7 @@ import (
 	context "context"
 	reflect "reflect"
 
+	models "github.com/0xc00000f/shortener-tpl/internal/models"
 	gomock "github.com/golang/mock/gomock"
 	uuid "github.com/google/uuid"
 )
@@ -33,6 +34,20 @@ func NewMockShortener(ctrl *gomock.Controller) *MockShortener {
 // EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockShortener) EXPECT() *MockShortenerMockRecorder {
 	return m.recorder
+}
+
+// Delete mocks base method.
+func (m *MockShortener) Delete(ctx context.Context, data []models.URL) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Delete", ctx, data)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Delete indicates an expected call of Delete.
+func (mr *MockShortenerMockRecorder) Delete(ctx, data interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockShortener)(nil).Delete), ctx, data)
 }
 
 // Get mocks base method.

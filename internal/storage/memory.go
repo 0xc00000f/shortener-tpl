@@ -9,6 +9,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/0xc00000f/shortener-tpl/internal/log"
+	"github.com/0xc00000f/shortener-tpl/internal/models"
 )
 
 var (
@@ -111,4 +112,20 @@ func (ms *MemoryStorage) GetAll(ctx context.Context, userID uuid.UUID) (result m
 	ms.l.Info("function result", log.MapToFields(result)...)
 
 	return result, nil
+}
+
+//revive:disable-next-line
+func (ms *MemoryStorage) Delete(ctx context.Context, data []models.URL) error {
+	ms.mu.RLock()
+	defer ms.mu.RUnlock()
+
+	for _, url := range data {
+		delete(ms.storage, url.Short)
+
+		if _, ok := ms.history[url.UserID]; ok {
+			delete(ms.history[url.UserID], url.Short)
+		}
+	}
+
+	return nil
 }

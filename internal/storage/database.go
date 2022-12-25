@@ -7,6 +7,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgconn"
 	"github.com/jackc/pgerrcode"
+	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"go.uber.org/zap"
 
@@ -31,6 +32,7 @@ func NewDatabaseStorage(
 		user_id uuid NOT NULL,
 		short_url text NOT NULL,
 		long_url text NOT NULL,
+		is_active boolean DEFAULT true,
 		PRIMARY KEY (id));
 		CREATE UNIQUE INDEX IF NOT EXISTS long_unique_idx on url_mapping (long_url);`
 
@@ -47,11 +49,15 @@ func (ds DatabaseStorage) Get(ctx context.Context, short string) (string, error)
 
 	err := ds.db.QueryRow(
 		ctx,
-		"SELECT user_id, short_url, long_url FROM url_mapping WHERE short_url = $1::text",
+		"SELECT user_id, short_url, long_url, is_active FROM url_mapping WHERE short_url = $1::text",
 		short,
-	).Scan(&m.UserID, &m.Short, &m.Long)
+	).Scan(&m.UserID, &m.Short, &m.Long, &m.IsActive)
 	if err != nil {
 		return "", err
+	}
+
+	if !m.IsActive {
+		return m.Long, URLDeletedError{}
 	}
 
 	return m.Long, nil
@@ -146,4 +152,35 @@ func (ds DatabaseStorage) IsKeyExist(ctx context.Context, short string) (bool, e
 	}
 
 	return i, nil
+}
+
+func (ds DatabaseStorage) Delete(ctx context.Context, data []models.URL) error {
+	tx, err := ds.db.Begin(ctx)
+	if err != nil {
+		return err
+	}
+
+	b := &pgx.Batch{}
+
+	for _, url := range data {
+		sqlStatement := `
+		UPDATE url_mapping
+		SET is_active = false
+		WHERE user_id = $1::uuid AND short_url = $2::text;
+		`
+		b.Queue(sqlStatement, url.UserID, url.Short)
+	}
+
+	batchResults := tx.SendBatch(ctx, b)
+
+	var qerr error
+
+	var rows pgx.Rows
+
+	for qerr == nil {
+		rows, qerr = batchResults.Query()
+		rows.Close()
+	}
+
+	return tx.Commit(ctx) //nolint:wrapcheck
 }
