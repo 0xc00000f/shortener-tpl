@@ -48,7 +48,10 @@ func NewRouter(sa *shortener.NaiveShortener) *chi.Mux {
 				r.Post("/batch", Batch(sa))
 			})
 
-			r.Get("/user/urls", GetSavedData(sa))
+			r.Route("/user", func(r chi.Router) {
+				r.Get("/urls", GetSavedData(sa))
+				r.Delete("/urls", Delete(sa))
+			})
 		})
 
 		r.Route("/{url}", func(r chi.Router) {
