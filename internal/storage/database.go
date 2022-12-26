@@ -173,13 +173,11 @@ func (ds DatabaseStorage) Delete(ctx context.Context, data []models.URL) error {
 
 	batchResults := tx.SendBatch(ctx, b)
 
-	var qerr error
+	rows, err := batchResults.Query()
+	rows.Close()
 
-	var rows pgx.Rows
-
-	for qerr == nil {
-		rows, qerr = batchResults.Query()
-		rows.Close()
+	if err != nil {
+		return tx.Rollback(ctx)
 	}
 
 	return tx.Commit(ctx) //nolint:wrapcheck

@@ -151,6 +151,7 @@ func (fs *FileStorage) Delete(ctx context.Context, data []models.URL) error {
 	for _, url := range data {
 		if err := fs.removeURL(url.UserID, url.Short); err != nil {
 			fs.l.Error("writing in file error: %v", zap.Error(err))
+			return err
 		}
 	}
 

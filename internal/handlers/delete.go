@@ -12,7 +12,6 @@ import (
 	"github.com/0xc00000f/shortener-tpl/internal/models"
 	"github.com/0xc00000f/shortener-tpl/internal/shortener"
 	"github.com/0xc00000f/shortener-tpl/internal/user"
-	"github.com/0xc00000f/shortener-tpl/internal/workerpool"
 )
 
 func Delete(sa *shortener.NaiveShortener) http.HandlerFunc {
@@ -44,18 +43,11 @@ func Delete(sa *shortener.NaiveShortener) http.HandlerFunc {
 		chunkSize := 10
 		chunks := chunkSlice(ib.Array, chunkSize)
 
-		jobCount := len(chunks)
-		concurrency := 4
-
-		jobs := make(chan workerpool.Job, jobCount)
-
 		for i := 0; i < len(chunks); i++ {
 			currentChunk := chunks[i]
 
-			jobs <- DeleteJob{sa: sa, urlChunk: short2url(u.UserID, currentChunk)}
+			sa.Job <- DeleteJob{sa: sa, urlChunk: short2url(u.UserID, currentChunk)}
 		}
-
-		go workerpool.RunPool(context.Background(), concurrency, jobs)
 
 		w.Header().Set("content-type", "application/json")
 		w.WriteHeader(http.StatusAccepted)

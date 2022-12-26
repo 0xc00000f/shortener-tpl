@@ -14,6 +14,7 @@ import (
 	"github.com/0xc00000f/shortener-tpl/internal/rand"
 	"github.com/0xc00000f/shortener-tpl/internal/shortener"
 	"github.com/0xc00000f/shortener-tpl/internal/storage"
+	"github.com/0xc00000f/shortener-tpl/internal/workerpool"
 
 	"go.uber.org/zap"
 )
@@ -43,6 +44,10 @@ func main() {
 		l.Fatal("creating storage error", zap.Error(err))
 	}
 
+	concurrency := 4
+	jobs := make(chan workerpool.Job)
+	go workerpool.RunPool(context.Background(), concurrency, jobs)
+
 	urlEncoder := encoder.New(
 		encoder.SetStorage(urlStorage),
 		encoder.SetLength(ShortLength),
@@ -55,6 +60,7 @@ func main() {
 		shortener.InitBaseURL(cfg.BaseURL),
 		shortener.SetPgxConnPool(pgxConnPool),
 		shortener.SetLogger(l),
+		shortener.SetJobChannel(jobs),
 	)
 
 	router := handlers.NewRouter(urlShortener)
