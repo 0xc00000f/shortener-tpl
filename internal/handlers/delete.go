@@ -4,7 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"io"
+	"log"
 	"net/http"
+	"time"
 
 	"github.com/google/uuid"
 	"go.uber.org/zap"
@@ -16,6 +18,9 @@ import (
 
 func Delete(sa *shortener.NaiveShortener) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		log.Printf("handling delete")
+		now := time.Now()
+
 		u, ok := GetUserFromRequest(r)
 		if !ok {
 			u = user.Nil
@@ -42,6 +47,8 @@ func Delete(sa *shortener.NaiveShortener) http.HandlerFunc {
 
 		chunkSize := 10
 		chunks := chunkSlice(ib.Array, chunkSize)
+
+		log.Printf("input data: %s", ib.Array)
 
 		for i := 0; i < len(chunks); i++ {
 			currentChunk := chunks[i]
