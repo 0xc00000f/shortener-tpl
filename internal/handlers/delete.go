@@ -46,7 +46,9 @@ func Delete(sa *shortener.NaiveShortener) http.HandlerFunc {
 		for i := 0; i < len(chunks); i++ {
 			currentChunk := chunks[i]
 
-			sa.Job <- DeleteJob{sa: sa, urlChunk: short2url(u.UserID, currentChunk)}
+			go func() {
+				sa.Job <- DeleteJob{sa: sa, urlChunk: short2url(u.UserID, currentChunk)}
+			}()
 		}
 
 		w.Header().Set("content-type", "application/json")
