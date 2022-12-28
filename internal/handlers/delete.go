@@ -58,6 +58,8 @@ func Delete(sa *shortener.NaiveShortener) http.HandlerFunc {
 			}()
 		}
 
+		log.Printf("delete handled: %v", time.Since(now))
+
 		w.Header().Set("content-type", "application/json")
 		w.WriteHeader(http.StatusAccepted)
 	}
