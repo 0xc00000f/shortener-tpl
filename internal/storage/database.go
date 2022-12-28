@@ -3,6 +3,7 @@ package storage
 import (
 	"context"
 	"errors"
+	"log"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgconn"
@@ -157,6 +158,7 @@ func (ds DatabaseStorage) IsKeyExist(ctx context.Context, short string) (bool, e
 func (ds DatabaseStorage) Delete(ctx context.Context, data []models.URL) error {
 	tx, err := ds.db.Begin(ctx)
 	if err != nil {
+		log.Printf("db error: %v", err)
 		return err
 	}
 
@@ -177,6 +179,7 @@ func (ds DatabaseStorage) Delete(ctx context.Context, data []models.URL) error {
 	rows.Close()
 
 	if err != nil {
+		log.Printf("db last error: %v", err)
 		return tx.Rollback(ctx)
 	}
 
