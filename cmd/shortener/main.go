@@ -47,7 +47,7 @@ func main() {
 	concurrency := 10
 	jobsCh := make(chan workerpool.Job, concurrency)
 	go func() {
-		err := workerpool.RunPoolV2(context.Background(), concurrency, jobsCh)
+		err := workerpool.RunPool(context.Background(), concurrency, jobsCh)
 		if err != nil {
 			log.Printf("runpool err: %v", err)
 		}

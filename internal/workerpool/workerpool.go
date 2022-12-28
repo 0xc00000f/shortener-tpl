@@ -19,11 +19,14 @@ func RunPool(ctx context.Context, size int, jobs chan Job) error {
 			for {
 				select {
 				case job := <-jobs:
+					log.Printf("got job to handle")
 					err := job.Run(ctx)
 					if err != nil {
 						fmt.Printf("Job error: %s \n", err)
+						log.Printf("job handled with err")
 						return err
 					}
+					log.Printf("job handled")
 				case <-ctx.Done():
 					fmt.Println("Context canceled")
 					return ctx.Err()
