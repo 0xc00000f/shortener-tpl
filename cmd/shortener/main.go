@@ -44,9 +44,9 @@ func main() {
 		l.Fatal("creating storage error", zap.Error(err))
 	}
 
-	concurrency := 4
-	jobs := make(chan workerpool.Job)
-	go workerpool.RunPool(context.Background(), concurrency, jobs)
+	concurrency := 10
+	jobsCh := make(chan workerpool.Job, concurrency)
+	go workerpool.RunPool(context.Background(), concurrency, jobsCh)
 
 	urlEncoder := encoder.New(
 		encoder.SetStorage(urlStorage),
@@ -60,7 +60,7 @@ func main() {
 		shortener.InitBaseURL(cfg.BaseURL),
 		shortener.SetPgxConnPool(pgxConnPool),
 		shortener.SetLogger(l),
-		shortener.SetJobChannel(jobs),
+		shortener.SetJobChannel(jobsCh),
 	)
 
 	router := handlers.NewRouter(urlShortener)
