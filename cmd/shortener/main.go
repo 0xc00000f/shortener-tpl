@@ -46,7 +46,12 @@ func main() {
 
 	concurrency := 10
 	jobsCh := make(chan workerpool.Job, concurrency)
-	go workerpool.RunPool(context.Background(), concurrency, jobsCh)
+	go func() {
+		err := workerpool.RunPoolV2(context.Background(), concurrency, jobsCh)
+		if err != nil {
+			log.Printf("runpool err: %w", err)
+		}
+	}()
 
 	urlEncoder := encoder.New(
 		encoder.SetStorage(urlStorage),
