@@ -19,8 +19,8 @@ var (
 )
 
 type MemoryStorage struct {
-	storage map[string]string
-	history map[uuid.UUID]map[string]string
+	storage map[string]models.URL
+	history map[uuid.UUID]map[string]models.URL
 
 	mu sync.RWMutex
 	l  *zap.Logger
@@ -28,8 +28,8 @@ type MemoryStorage struct {
 
 func NewMemoryStorage(logger *zap.Logger) *MemoryStorage {
 	return &MemoryStorage{
-		storage: make(map[string]string),
-		history: make(map[uuid.UUID]map[string]string),
+		storage: make(map[string]models.URL),
+		history: make(map[uuid.UUID]map[string]models.URL),
 		l:       logger,
 	}
 }
@@ -46,9 +46,15 @@ func (ms *MemoryStorage) Get(ctx context.Context, short string) (long string, er
 		return "", err
 	}
 
-	long, ok := ms.storage[short]
+	url, ok := ms.storage[short]
 	if !ok {
 		return "", ErrNoKeyFound
+	}
+
+	long = url.Long
+
+	if !url.IsActive {
+		return url.Long, URLDeletedError{}
 	}
 
 	ms.l.Info("function result", zap.String("long", long), zap.Error(err))
@@ -78,16 +84,23 @@ func (ms *MemoryStorage) Store(ctx context.Context, userID uuid.UUID, short, lon
 
 	if userID != uuid.Nil {
 		if _, ok := ms.history[userID]; !ok {
-			ms.history[userID] = map[string]string{}
+			ms.history[userID] = map[string]models.URL{}
 		}
 
-		ms.history[userID][short] = long
+		ms.history[userID][short] = models.URL{
+			UserID:   userID,
+			Short:    short,
+			Long:     long,
+			IsActive: true,
+		}
 	}
 
-	ms.storage[short] = long
-
-	ms.l.Info("function result history map", log.MapToFields(ms.history[userID])...)
-	ms.l.Info("function result storage map", log.MapToFields(ms.storage)...)
+	ms.storage[short] = models.URL{
+		UserID:   userID,
+		Short:    short,
+		Long:     long,
+		IsActive: true,
+	}
 
 	return nil
 }
@@ -108,7 +121,12 @@ func (ms *MemoryStorage) GetAll(ctx context.Context, userID uuid.UUID) (result m
 	defer ms.mu.RUnlock()
 
 	ms.l.Info("function input", zap.String("userID", userID.String()))
-	result = ms.history[userID]
+	almostResult := ms.history[userID]
+
+	for k, v := range almostResult {
+		result[k] = v.Long
+	}
+
 	ms.l.Info("function result", log.MapToFields(result)...)
 
 	return result, nil
@@ -120,11 +138,8 @@ func (ms *MemoryStorage) Delete(ctx context.Context, data []models.URL) error {
 	defer ms.mu.Unlock()
 
 	for _, url := range data {
-		delete(ms.storage, url.Short)
-
-		if _, ok := ms.history[url.UserID]; ok {
-			delete(ms.history[url.UserID], url.Short)
-		}
+		ms.storage[url.Short] = url
+		ms.history[url.UserID][url.Short] = url
 	}
 
 	return nil

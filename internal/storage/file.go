@@ -64,14 +64,14 @@ func (fs *FileStorage) InitMemory() error {
 			return err
 		}
 
-		fs.memory.storage[url.Short] = url.Long
+		fs.memory.storage[url.Short] = url
 
 		if url.UserID != uuid.Nil {
 			if _, ok := fs.memory.history[url.UserID]; !ok {
-				fs.memory.history[url.UserID] = map[string]string{}
+				fs.memory.history[url.UserID] = map[string]models.URL{}
 			}
 
-			fs.memory.history[url.UserID][url.Short] = url.Long
+			fs.memory.history[url.UserID][url.Short] = url
 		}
 	}
 
@@ -90,7 +90,11 @@ func (fs *FileStorage) GetAll(ctx context.Context, userID uuid.UUID) (result map
 	fs.mu.RLock()
 	defer fs.mu.RUnlock()
 
-	return fs.memory.history[userID], nil
+	for short, url := range fs.memory.history[userID] {
+		result[short] = url.Long
+	}
+
+	return result, nil
 }
 
 func (fs *FileStorage) Store(ctx context.Context, userID uuid.UUID, short, long string) error {
