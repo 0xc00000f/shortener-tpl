@@ -156,6 +156,9 @@ func (ds DatabaseStorage) IsKeyExist(ctx context.Context, short string) (bool, e
 }
 
 func (ds DatabaseStorage) Delete(ctx context.Context, data []models.URL) error {
+	log.Printf("db: delete in, data len: %s, data: %v", len(data), data)
+	defer log.Printf("db: delete in")
+
 	tx, err := ds.db.Begin(ctx)
 	if err != nil {
 		log.Printf("db error: %v", err)
