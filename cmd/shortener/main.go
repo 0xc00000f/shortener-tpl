@@ -80,6 +80,10 @@ func main() {
 }
 
 func getPgxConnPool(ctx context.Context, connString string) *pgxpool.Pool {
+	if len(connString) == 0 {
+		return nil
+	}
+
 	pgxConfig, err := pgxpool.ParseConfig(connString)
 	if err != nil {
 		return nil
