@@ -3,12 +3,15 @@ package shortener
 import (
 	"github.com/jackc/pgx/v4/pgxpool"
 	"go.uber.org/zap"
+
+	"github.com/0xc00000f/shortener-tpl/internal/workerpool"
 )
 
 type NaiveShortener struct {
 	encoder     Shortener
 	BaseURL     string
 	PgxConnPool *pgxpool.Pool
+	Job         chan workerpool.Job
 
 	L *zap.Logger
 }
@@ -50,5 +53,11 @@ func SetPgxConnPool(pool *pgxpool.Pool) Option {
 func SetLogger(l *zap.Logger) Option {
 	return func(ns *NaiveShortener) {
 		ns.L = l
+	}
+}
+
+func SetJobChannel(job chan workerpool.Job) Option {
+	return func(ns *NaiveShortener) {
+		ns.Job = job
 	}
 }

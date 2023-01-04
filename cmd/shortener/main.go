@@ -14,6 +14,7 @@ import (
 	"github.com/0xc00000f/shortener-tpl/internal/rand"
 	"github.com/0xc00000f/shortener-tpl/internal/shortener"
 	"github.com/0xc00000f/shortener-tpl/internal/storage"
+	"github.com/0xc00000f/shortener-tpl/internal/workerpool"
 
 	"go.uber.org/zap"
 )
@@ -43,6 +44,15 @@ func main() {
 		l.Fatal("creating storage error", zap.Error(err))
 	}
 
+	concurrency := 10
+	jobsCh := make(chan workerpool.Job, concurrency)
+	go func() {
+		err := workerpool.RunPoolV2(context.Background(), concurrency, jobsCh)
+		if err != nil {
+			log.Printf("runpool err: %v", err)
+		}
+	}()
+
 	urlEncoder := encoder.New(
 		encoder.SetStorage(urlStorage),
 		encoder.SetLength(ShortLength),
@@ -55,6 +65,7 @@ func main() {
 		shortener.InitBaseURL(cfg.BaseURL),
 		shortener.SetPgxConnPool(pgxConnPool),
 		shortener.SetLogger(l),
+		shortener.SetJobChannel(jobsCh),
 	)
 
 	router := handlers.NewRouter(urlShortener)
@@ -69,6 +80,10 @@ func main() {
 }
 
 func getPgxConnPool(ctx context.Context, connString string) *pgxpool.Pool {
+	if len(connString) == 0 {
+		return nil
+	}
+
 	pgxConfig, err := pgxpool.ParseConfig(connString)
 	if err != nil {
 		return nil

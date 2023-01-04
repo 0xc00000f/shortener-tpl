@@ -7,6 +7,7 @@ import (
 	"github.com/google/uuid"
 	"go.uber.org/zap"
 
+	"github.com/0xc00000f/shortener-tpl/internal/models"
 	"github.com/0xc00000f/shortener-tpl/internal/rand"
 )
 
@@ -97,4 +98,8 @@ func (ue *URLEncoder) Get(ctx context.Context, short string) (long string, err e
 
 func (ue *URLEncoder) GetAll(ctx context.Context, userID uuid.UUID) (result map[string]string, err error) {
 	return ue.storage.GetAll(ctx, userID)
+}
+
+func (ue *URLEncoder) Delete(ctx context.Context, data []models.URL) error {
+	return ue.storage.Delete(ctx, data)
 }
