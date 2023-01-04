@@ -116,8 +116,8 @@ func (ms *MemoryStorage) GetAll(ctx context.Context, userID uuid.UUID) (result m
 
 //revive:disable-next-line
 func (ms *MemoryStorage) Delete(ctx context.Context, data []models.URL) error {
-	ms.mu.RLock()
-	defer ms.mu.RUnlock()
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
 
 	for _, url := range data {
 		delete(ms.storage, url.Short)
