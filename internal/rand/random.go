@@ -9,7 +9,7 @@ import (
 type Random struct {
 	rand *rand.Rand
 
-	mu sync.Mutex
+	mu *sync.Mutex
 }
 
 func New(predictable bool) Random {
@@ -26,10 +26,10 @@ func New(predictable bool) Random {
 	source := rand.NewSource(seed)
 	random := rand.New(source) //nolint:gosec
 
-	return Random{rand: random, mu: sync.Mutex{}}
+	return Random{rand: random, mu: &sync.Mutex{}}
 }
 
-func (r Random) String(n int) string {
+func (r *Random) String(n int) string {
 	var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
 
 	b := make([]rune, n)
