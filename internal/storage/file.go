@@ -90,6 +90,8 @@ func (fs *FileStorage) GetAll(ctx context.Context, userID uuid.UUID) (result map
 	fs.mu.RLock()
 	defer fs.mu.RUnlock()
 
+	result = make(map[string]string)
+
 	for short, url := range fs.memory.history[userID] {
 		result[short] = url.Long
 	}
