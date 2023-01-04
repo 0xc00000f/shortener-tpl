@@ -182,13 +182,3 @@ func (ds DatabaseStorage) Delete(ctx context.Context, data []models.URL) error {
 
 	return nil
 }
-
-//
-//for _, url := range data {
-//sqlStatement := `
-//		UPDATE url_mapping
-//		SET is_active = false
-//		WHERE user_id = $1::uuid AND short_url = $2::text;
-//		`
-//b.Queue(sqlStatement, url.UserID, url.Short)
-//}
