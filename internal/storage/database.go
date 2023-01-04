@@ -8,7 +8,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgconn"
 	"github.com/jackc/pgerrcode"
-	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"go.uber.org/zap"
 
@@ -157,34 +156,39 @@ func (ds DatabaseStorage) IsKeyExist(ctx context.Context, short string) (bool, e
 
 func (ds DatabaseStorage) Delete(ctx context.Context, data []models.URL) error {
 	log.Printf("db: delete in, data len: %d, data: %v", len(data), data)
-	defer log.Printf("db: delete in")
+	defer log.Printf("db: delete out")
 
-	tx, err := ds.db.Begin(ctx)
+	conn, err := ds.db.Acquire(ctx)
 	if err != nil {
-		log.Printf("db error: %v", err)
+		log.Printf("Unable to acquire a database connection: %v\n", err)
 		return err
 	}
-
-	b := &pgx.Batch{}
+	defer conn.Release()
 
 	for _, url := range data {
 		sqlStatement := `
-		UPDATE url_mapping
-		SET is_active = false
-		WHERE user_id = $1::uuid AND short_url = $2::text;
-		`
-		b.Queue(sqlStatement, url.UserID, url.Short)
+				UPDATE url_mapping
+				SET is_active = false
+				WHERE user_id = $1::uuid AND short_url = $2::text;
+				`
+
+		_, err := conn.Exec(ctx,
+			sqlStatement, url.UserID, url.Short)
+		if err != nil {
+			log.Printf("Unable to DELETE: %v\n", err)
+			return err
+		}
 	}
 
-	batchResults := tx.SendBatch(ctx, b)
-
-	rows, err := batchResults.Query()
-	rows.Close()
-
-	if err != nil {
-		log.Printf("db last error: %v", err)
-		return tx.Rollback(ctx)
-	}
-
-	return tx.Commit(ctx) //nolint:wrapcheck
+	return nil
 }
+
+//
+//for _, url := range data {
+//sqlStatement := `
+//		UPDATE url_mapping
+//		SET is_active = false
+//		WHERE user_id = $1::uuid AND short_url = $2::text;
+//		`
+//b.Queue(sqlStatement, url.UserID, url.Short)
+//}

@@ -22,7 +22,7 @@ func RunPool(ctx context.Context, size int, jobs chan Job) error {
 					log.Printf("got job to handle")
 					err := job.Run(ctx)
 					if err != nil {
-						fmt.Printf("Job error: %s \n", err)
+						log.Printf("Job error: %s \n", err)
 						log.Printf("job handled with err")
 						return err
 					}
@@ -51,7 +51,7 @@ func RunPoolV2(ctx context.Context, size int, jobs chan Job) error {
 				defer func() { <-token }()
 				err := job.Run(ctx)
 				if err != nil {
-					fmt.Printf("Job error: %s \n", err)
+					log.Printf("Job error: %s \n", err)
 					return
 				}
 				log.Printf("job handled")
