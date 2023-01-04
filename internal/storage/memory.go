@@ -123,6 +123,8 @@ func (ms *MemoryStorage) GetAll(ctx context.Context, userID uuid.UUID) (result m
 	ms.l.Info("function input", zap.String("userID", userID.String()))
 	almostResult := ms.history[userID]
 
+	result = make(map[string]string)
+
 	for short, url := range almostResult {
 		result[short] = url.Long
 	}
