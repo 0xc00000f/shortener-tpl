@@ -37,28 +37,3 @@ func RunPool(ctx context.Context, size int, jobs chan Job) error {
 
 	return gr.Wait()
 }
-
-func RunPoolV2(ctx context.Context, size int, jobs chan Job) error {
-	token := make(chan struct{}, size)
-
-	for {
-		select {
-		case job := <-jobs:
-			log.Printf("got job to handle")
-
-			go func() {
-				token <- struct{}{}
-				defer func() { <-token }()
-				err := job.Run(ctx)
-				if err != nil {
-					log.Printf("Job error: %s \n", err)
-					return
-				}
-				log.Printf("job handled")
-			}()
-		case <-ctx.Done():
-			fmt.Println("Context canceled")
-			return ctx.Err()
-		}
-	}
-}

@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"net/http"
+	"sync"
 	"time"
 
 	"github.com/jackc/pgx/v4/pgxpool"
@@ -46,8 +47,15 @@ func main() {
 
 	concurrency := 10
 	jobsCh := make(chan workerpool.Job, concurrency)
+
+	var wg sync.WaitGroup
+
+	wg.Add(1)
+
 	go func() {
-		err := workerpool.RunPoolV2(context.Background(), concurrency, jobsCh)
+		defer wg.Done()
+
+		err := workerpool.RunPool(context.Background(), concurrency, jobsCh)
 		if err != nil {
 			log.Printf("runpool err: %v", err)
 		}
@@ -77,6 +85,8 @@ func main() {
 
 	l.Info("starting server", zap.String("address", cfg.Address))
 	l.Fatal("http server down", zap.Error(server.ListenAndServe()))
+
+	wg.Wait()
 }
 
 func getPgxConnPool(ctx context.Context, connString string) *pgxpool.Pool {

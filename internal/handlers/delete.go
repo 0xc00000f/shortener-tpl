@@ -50,13 +50,15 @@ func Delete(sa *shortener.NaiveShortener) http.HandlerFunc {
 
 		log.Printf("input data: %s", ib.Array)
 
-		for i := 0; i < len(chunks); i++ {
-			currentChunk := chunks[i]
+		go func() {
+			for i := 0; i < len(chunks); i++ {
+				currentChunk := chunks[i]
 
-			go func() {
-				sa.Job <- DeleteJob{sa: sa, urlChunk: short2url(u.UserID, currentChunk)}
-			}()
-		}
+				go func() {
+					sa.Job <- DeleteJob{sa: sa, urlChunk: short2url(u.UserID, currentChunk)}
+				}()
+			}
+		}()
 
 		log.Printf("delete handled: %v", time.Since(now))
 

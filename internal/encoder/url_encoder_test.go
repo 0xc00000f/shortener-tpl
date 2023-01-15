@@ -21,7 +21,7 @@ import (
 var errStorageOutOfReach = errors.New("db is down")
 
 func TestURLEncoder_Short_Positive(t *testing.T) {
-	t.Parallel()
+	//t.Parallel()
 
 	ctl := gomock.NewController(t)
 	t.Cleanup(func() { ctl.Finish() })
