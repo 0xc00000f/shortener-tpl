@@ -3,6 +3,7 @@ package storage
 import (
 	"context"
 	"errors"
+	"log"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgconn"
@@ -31,6 +32,7 @@ func NewDatabaseStorage(
 		user_id uuid NOT NULL,
 		short_url text NOT NULL,
 		long_url text NOT NULL,
+		is_active boolean DEFAULT true,
 		PRIMARY KEY (id));
 		CREATE UNIQUE INDEX IF NOT EXISTS long_unique_idx on url_mapping (long_url);`
 
@@ -47,11 +49,15 @@ func (ds DatabaseStorage) Get(ctx context.Context, short string) (string, error)
 
 	err := ds.db.QueryRow(
 		ctx,
-		"SELECT user_id, short_url, long_url FROM url_mapping WHERE short_url = $1::text",
+		"SELECT user_id, short_url, long_url, is_active FROM url_mapping WHERE short_url = $1::text",
 		short,
-	).Scan(&m.UserID, &m.Short, &m.Long)
+	).Scan(&m.UserID, &m.Short, &m.Long, &m.IsActive)
 	if err != nil {
 		return "", err
+	}
+
+	if !m.IsActive {
+		return m.Long, URLDeletedError{}
 	}
 
 	return m.Long, nil
@@ -146,4 +152,33 @@ func (ds DatabaseStorage) IsKeyExist(ctx context.Context, short string) (bool, e
 	}
 
 	return i, nil
+}
+
+func (ds DatabaseStorage) Delete(ctx context.Context, data []models.URL) error {
+	log.Printf("db: delete in, data len: %d, data: %v", len(data), data)
+	defer log.Printf("db: delete out")
+
+	conn, err := ds.db.Acquire(ctx)
+	if err != nil {
+		log.Printf("Unable to acquire a database connection: %v\n", err)
+		return err
+	}
+	defer conn.Release()
+
+	for _, url := range data {
+		sqlStatement := `
+				UPDATE url_mapping
+				SET is_active = false
+				WHERE user_id = $1::uuid AND short_url = $2::text;
+				`
+
+		_, err := conn.Exec(ctx,
+			sqlStatement, url.UserID, url.Short)
+		if err != nil {
+			log.Printf("Unable to DELETE: %v\n", err)
+			return err
+		}
+	}
+
+	return nil
 }
