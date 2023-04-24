@@ -86,7 +86,7 @@ func main() {
 
 		err := workerpool.RunPool(context.Background(), concurrency, jobsCh)
 		if err != nil {
-			log.Printf("runpool err: %w", err)
+			l.Error("runpool err", zap.Error(err))
 		}
 	}()
 
