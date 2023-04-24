@@ -109,7 +109,9 @@ func (ds DatabaseStorage) Store(ctx context.Context, userID uuid.UUID, short str
 			return err
 		}
 
-		pgErr, ok := err.(*pgconn.PgError) //nolint:errorlint
+		var pgErr *pgconn.PgError
+
+		ok := errors.As(err, &pgErr)
 		if !ok {
 			return err
 		}

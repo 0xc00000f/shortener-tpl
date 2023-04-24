@@ -80,13 +80,13 @@ func (ue *URLEncoder) Short(ctx context.Context, userID uuid.UUID, long string) 
 	err = ue.storage.Store(ctx, userID, short, long)
 	if err != nil {
 		var uniqueViolationError *UniqueViolationError
-		if errors.As(err, &uniqueViolationError) {
-			if err, ok := err.(*UniqueViolationError); ok { //nolint:errorlint
-				return err.Short, err
-			}
+
+		ok := errors.As(err, &uniqueViolationError)
+		if !ok {
+			return "", err
 		}
 
-		return "", err
+		return uniqueViolationError.Short, err
 	}
 
 	return short, nil
