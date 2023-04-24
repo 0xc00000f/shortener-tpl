@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net/http"
 	"sync"
@@ -23,9 +24,32 @@ import (
 const (
 	ShortLength              = 7
 	defaultReadHeaderTimeout = 3 * time.Second
+	NA                       = "N/A"
+)
+
+var (
+	buildVersion string
+	buildDate    string
+	buildCommit  string
 )
 
 func main() {
+	if buildVersion == "" {
+		buildVersion = NA
+	}
+
+	if buildDate == "" {
+		buildDate = NA
+	}
+
+	if buildCommit == "" {
+		buildCommit = NA
+	}
+
+	fmt.Printf("Build version: %s\n", buildVersion)
+	fmt.Printf("Build date: %s\n", buildDate)
+	fmt.Printf("Build commit: %s\n", buildCommit)
+
 	l, err := zap.NewProduction()
 	if err != nil {
 		log.Fatalf("can't initialize zap logger: %v", err)
@@ -62,7 +86,7 @@ func main() {
 
 		err := workerpool.RunPool(context.Background(), concurrency, jobsCh)
 		if err != nil {
-			log.Printf("runpool err: %v", err)
+			l.Error("runpool err", zap.Error(err))
 		}
 	}()
 

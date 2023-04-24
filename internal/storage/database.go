@@ -24,6 +24,7 @@ type DatabaseStorage struct {
 func NewDatabaseStorage(
 	ctx context.Context,
 	pgxConnPool *pgxpool.Pool,
+
 	l *zap.Logger,
 ) (DatabaseStorage, error) {
 	query := `CREATE TABLE IF NOT EXISTS url_mapping
