@@ -7,7 +7,7 @@ import (
 	"golang.org/x/tools/go/analysis/passes/inspect"
 )
 
-var ExitCheckAnalyzer = &analysis.Analyzer{ //nolint:exhaustruct
+var ExitCheckAnalyzer = &analysis.Analyzer{
 	Name: "exitcheck",
 	Doc:  "disallows the direct use of os.Exit in the main function of the main package",
 	Run:  runExitCheck,
@@ -40,7 +40,7 @@ func runExitCheck(pass *analysis.Pass) (any, error) { //revive:disable-line:cycl
 		}
 	}
 
-	return nil, nil //nolint:nilnil
+	return nil, nil
 }
 
 func isOsExit(expr ast.Expr) bool {

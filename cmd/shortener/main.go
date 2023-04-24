@@ -28,9 +28,9 @@ const (
 )
 
 var (
-	buildVersion string //nolint:gochecknoglobals
-	buildDate    string //nolint:gochecknoglobals
-	buildCommit  string //nolint:gochecknoglobals
+	buildVersion string
+	buildDate    string
+	buildCommit  string
 )
 
 func main() {
@@ -86,7 +86,7 @@ func main() {
 
 		err := workerpool.RunPool(context.Background(), concurrency, jobsCh)
 		if err != nil {
-			log.Printf("runpool err: %v", err) //nolint:forbidigo
+			log.Printf("runpool err: %w", err)
 		}
 	}()
 
