@@ -30,7 +30,12 @@ func main() {
 	if err != nil {
 		log.Fatalf("can't initialize zap logger: %v", err)
 	}
-	defer l.Sync() //nolint:errcheck,wsl
+	defer func() {
+		err = l.Sync()
+		if err != nil {
+			l.Error("zap logger sync error, probably memory leak", zap.Error(err))
+		}
+	}()
 
 	cfg, err := config.New()
 	if err != nil {

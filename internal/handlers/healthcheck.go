@@ -15,7 +15,7 @@ func HealthCheck(sa *shortener.NaiveShortener) http.HandlerFunc {
 		ctx, cancel := context.WithTimeout(r.Context(), defaultTimeout)
 		defer cancel()
 
-		if err := sa.PgxConnPool.Ping(ctx); err != nil { //nolint:contextcheck
+		if err := sa.PgxConnPool.Ping(ctx); err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
