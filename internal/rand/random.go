@@ -24,7 +24,7 @@ func New(predictable bool) Random {
 	}
 
 	source := rand.NewSource(seed)
-	random := rand.New(source) //nolint:gosec
+	random := rand.New(source)
 
 	return Random{rand: random, mu: &sync.Mutex{}}
 }

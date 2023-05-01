@@ -18,6 +18,15 @@ type Cfg struct {
 
 	// address of the database
 	DatabaseAddress string `env:"DATABASE_DSN"`
+
+	// is TLS enabled
+	TLSEnabled bool `env:"ENABLE_HTTPS" envDefault:"false"`
+
+	// tls certificate file
+	TLSCertFile string `env:"TLS_CERT_FILE" envDefault:"./certs/server.crt"`
+
+	// tls key file
+	TLSKeyFile string `env:"TLS_KEY_FILE" envDefault:"./certs/server.key"`
 }
 
 func New() (Cfg, error) {
@@ -48,6 +57,10 @@ func New() (Cfg, error) {
 		"b",
 		cfg.BaseURL,
 		"responsible for the base Address of the resulting shortened URL")
+	flag.BoolVar(&cfg.TLSEnabled,
+		"s",
+		cfg.TLSEnabled,
+		"responsible for the TLS enabled")
 	flag.Parse()
 
 	return cfg, nil
