@@ -1,9 +1,12 @@
 package config
 
 import (
+	"encoding/json"
 	"flag"
+	"os"
 
 	"github.com/caarlos0/env/v6"
+	"go.uber.org/zap"
 )
 
 type Cfg struct {
@@ -11,25 +14,28 @@ type Cfg struct {
 	Filepath string `env:"FILE_STORAGE_PATH"`
 
 	// address of the HTTP server
-	Address string `env:"SERVER_ADDRESS" envDefault:"127.0.0.1:8080"`
+	Address string `env:"SERVER_ADDRESS"`
 
 	// base URL of the resulting shortened URL
-	BaseURL string `env:"BASE_URL" envDefault:"http://127.0.0.1:8080"`
+	BaseURL string `env:"BASE_URL"`
 
 	// address of the database
 	DatabaseAddress string `env:"DATABASE_DSN"`
 
 	// is TLS enabled
-	TLSEnabled bool `env:"ENABLE_HTTPS" envDefault:"false"`
+	TLSEnabled bool `env:"ENABLE_HTTPS"`
 
 	// tls certificate file
-	TLSCertFile string `env:"TLS_CERT_FILE" envDefault:"./certs/server.crt"`
+	TLSCertFile string `env:"TLS_CERT_FILE"`
 
 	// tls key file
-	TLSKeyFile string `env:"TLS_KEY_FILE" envDefault:"./certs/server.key"`
+	TLSKeyFile string `env:"TLS_KEY_FILE"`
+
+	// json config file
+	JSONConfig string `env:"CONFIG"`
 }
 
-func New() (Cfg, error) {
+func New(logger *zap.Logger) (Cfg, error) {
 	cfg := Cfg{}
 	if err := env.Parse(&cfg); err != nil {
 		panic("can't parse config")
@@ -61,7 +67,62 @@ func New() (Cfg, error) {
 		"s",
 		cfg.TLSEnabled,
 		"responsible for the TLS enabled")
+	flag.StringVar(&cfg.JSONConfig,
+		"c",
+		cfg.JSONConfig,
+		"responsible for the json config file")
+	flag.StringVar(&cfg.JSONConfig,
+		"config",
+		cfg.JSONConfig,
+		"responsible for the json config file",
+	)
 	flag.Parse()
 
+	if err := cfg.parseJSONConfig(cfg.JSONConfig); err != nil {
+		logger.Error("can't parse json config", zap.Error(err))
+	}
+
 	return cfg, nil
+}
+
+func (c *Cfg) parseJSONConfig(path string) error {
+	b, err := os.ReadFile(path)
+	if err != nil {
+		return err
+	}
+
+	var cfg Cfg
+	if err := json.Unmarshal(b, &cfg); err != nil {
+		return err
+	}
+
+	if cfg.Filepath == "" {
+		c.Filepath = cfg.Filepath
+	}
+
+	if cfg.Address == "" {
+		c.Address = cfg.Address
+	}
+
+	if cfg.DatabaseAddress == "" {
+		c.DatabaseAddress = cfg.DatabaseAddress
+	}
+
+	if cfg.BaseURL == "" {
+		c.BaseURL = cfg.BaseURL
+	}
+
+	if !cfg.TLSEnabled {
+		c.TLSEnabled = cfg.TLSEnabled
+	}
+
+	if cfg.TLSCertFile == "" {
+		c.TLSCertFile = cfg.TLSCertFile
+	}
+
+	if cfg.TLSKeyFile == "" {
+		c.TLSKeyFile = cfg.TLSKeyFile
+	}
+
+	return nil
 }

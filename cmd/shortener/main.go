@@ -62,7 +62,7 @@ func main() {
 		}
 	}()
 
-	cfg, err := config.New()
+	cfg, err := config.New(l)
 	if err != nil {
 		l.Fatal("creating config error", zap.Error(err))
 	}
