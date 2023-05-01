@@ -54,6 +54,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("can't initialize zap logger: %v", err)
 	}
+
 	defer func() {
 		err = l.Sync()
 		if err != nil {
@@ -113,7 +114,13 @@ func main() {
 	}
 
 	l.Info("starting server", zap.String("address", cfg.Address))
-	l.Fatal("http server down", zap.Error(server.ListenAndServe()))
+
+	switch cfg.TLSEnabled {
+	case true:
+		l.Fatal("https server down", zap.Error(server.ListenAndServeTLS(cfg.TLSCertFile, cfg.TLSKeyFile)))
+	case false:
+		l.Fatal("http server down", zap.Error(server.ListenAndServe()))
+	}
 
 	wg.Wait()
 }
