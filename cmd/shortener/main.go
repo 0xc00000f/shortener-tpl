@@ -62,6 +62,13 @@ func main() {
 		}
 	}()
 
+	defer func() {
+		err = l.Sync()
+		if err != nil {
+			l.Error("zap logger sync error, probably memory leak", zap.Error(err))
+		}
+	}()
+
 	cfg, err := config.New(l)
 	if err != nil {
 		l.Fatal("creating config error", zap.Error(err))
