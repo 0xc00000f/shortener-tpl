@@ -5,7 +5,10 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
+	"os/signal"
 	"sync"
+	"syscall"
 	"time"
 
 	"github.com/jackc/pgx/v4/pgxpool"
@@ -120,14 +123,37 @@ func main() {
 		ReadHeaderTimeout: defaultReadHeaderTimeout,
 	}
 
+	idleConnsClosed := make(chan struct{})
+
+	sigint := make(chan os.Signal, 1)
+	signal.Notify(sigint, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
+
+	go func() {
+		<-sigint
+
+		l.Info("shutting down server...")
+
+		if err := server.Shutdown(context.Background()); err != nil {
+			l.Error("HTTP server Shutdown: %v", zap.Error(err))
+		}
+
+		close(idleConnsClosed)
+	}()
+
 	l.Info("starting server", zap.String("address", cfg.Address))
 
 	switch cfg.TLSEnabled {
 	case true:
-		l.Fatal("https server down", zap.Error(server.ListenAndServeTLS(cfg.TLSCertFile, cfg.TLSKeyFile)))
+		l.Fatal(
+			"https server down",
+			zap.Error(server.ListenAndServeTLS(cfg.TLSCertFile, cfg.TLSKeyFile)),
+		)
+
 	case false:
 		l.Fatal("http server down", zap.Error(server.ListenAndServe()))
 	}
+
+	<-idleConnsClosed
 
 	wg.Wait()
 }
