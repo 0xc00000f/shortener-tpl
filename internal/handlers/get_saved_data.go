@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/0xc00000f/shortener-tpl/internal/user"
@@ -57,7 +56,7 @@ func prepareResult(all map[string]string, baseURL string, l *zap.Logger) (b []by
 	res := make([]Result, 0, len(all))
 	for short, long := range all {
 		res = append(res, Result{
-			Short: fmt.Sprintf("%s/%s", baseURL, short),
+			Short: baseURL + "/" + short,
 			Long:  long,
 		})
 	}
