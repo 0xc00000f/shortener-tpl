@@ -19,8 +19,7 @@ package main
 import (
 	"golang.org/x/tools/go/analysis"
 	"golang.org/x/tools/go/analysis/multichecker"
-	"golang.org/x/tools/go/analysis/passes/asmdecl"
-	"golang.org/x/tools/go/analysis/passes/assign"
+	"golang.org/x/tools/go/analysis/passes/findcall"
 	"honnef.co/go/tools/simple"
 	"honnef.co/go/tools/staticcheck"
 
@@ -29,8 +28,7 @@ import (
 
 func main() {
 	a := []*analysis.Analyzer{
-		asmdecl.Analyzer,
-		assign.Analyzer,
+		findcall.Analyzer,
 		analyzers.ExitCheckAnalyzer,
 	}
 
@@ -39,7 +37,7 @@ func main() {
 	}
 
 	for _, v := range simple.Analyzers {
-		if v.Analyzer.Name == "S1000" || v.Analyzer.Name == "S1001" {
+		if v.Analyzer.Name == "S1005" || v.Analyzer.Name == "S1009" {
 			a = append(a, v.Analyzer)
 		}
 	}
