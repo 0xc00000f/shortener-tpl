@@ -39,7 +39,7 @@ func main() {
 	}
 
 	for _, v := range simple.Analyzers {
-		if v.Analyzer.Name == "S1005" || v.Analyzer.Name == "S1006" {
+		if v.Analyzer.Name == "S1000" || v.Analyzer.Name == "S1001" {
 			a = append(a, v.Analyzer)
 		}
 	}
