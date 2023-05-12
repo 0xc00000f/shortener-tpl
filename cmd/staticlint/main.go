@@ -23,12 +23,15 @@ import (
 	"golang.org/x/tools/go/analysis/passes/assign"
 	"honnef.co/go/tools/simple"
 	"honnef.co/go/tools/staticcheck"
+
+	"github.com/0xc00000f/shortener-tpl/cmd/staticlint/analyzers"
 )
 
 func main() {
 	a := []*analysis.Analyzer{
 		asmdecl.Analyzer,
 		assign.Analyzer,
+		analyzers.ExitCheckAnalyzer,
 	}
 
 	for _, v := range staticcheck.Analyzers {
