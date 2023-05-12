@@ -7,7 +7,7 @@ import (
 	"golang.org/x/tools/go/analysis/passes/inspect"
 )
 
-var ExitCheckAnalyzer = &analysis.Analyzer{
+var ExitCheckAnalyzer = &analysis.Analyzer{ //nolint:exhaustruct
 	Name: "exitcheck",
 	Doc:  "disallows the direct use of os.Exit in the main function of the main package",
 	Run:  runExitCheck,

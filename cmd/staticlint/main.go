@@ -19,17 +19,16 @@ package main
 import (
 	"golang.org/x/tools/go/analysis"
 	"golang.org/x/tools/go/analysis/multichecker"
-	"golang.org/x/tools/go/analysis/passes/findcall"
+	"golang.org/x/tools/go/analysis/passes/asmdecl"
+	"golang.org/x/tools/go/analysis/passes/assign"
 	"honnef.co/go/tools/simple"
 	"honnef.co/go/tools/staticcheck"
-
-	"github.com/0xc00000f/shortener-tpl/cmd/staticlint/analyzers"
 )
 
 func main() {
 	a := []*analysis.Analyzer{
-		findcall.Analyzer,
-		analyzers.ExitCheckAnalyzer,
+		asmdecl.Analyzer,
+		assign.Analyzer,
 	}
 
 	for _, v := range staticcheck.Analyzers {
@@ -37,7 +36,7 @@ func main() {
 	}
 
 	for _, v := range simple.Analyzers {
-		if v.Analyzer.Name == "S1005" || v.Analyzer.Name == "S1009" {
+		if v.Analyzer.Name == "S1005" || v.Analyzer.Name == "S1006" {
 			a = append(a, v.Analyzer)
 		}
 	}
