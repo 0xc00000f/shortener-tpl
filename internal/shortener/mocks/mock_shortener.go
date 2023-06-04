@@ -80,6 +80,21 @@ func (mr *MockShortenerMockRecorder) GetAll(ctx, userID interface{}) *gomock.Cal
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAll", reflect.TypeOf((*MockShortener)(nil).GetAll), ctx, userID)
 }
 
+// GetStats mocks base method.
+func (m *MockShortener) GetStats(ctx context.Context) (models.Stats, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetStats", ctx)
+	ret0, _ := ret[0].(models.Stats)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetStats indicates an expected call of GetStats.
+func (mr *MockShortenerMockRecorder) GetStats(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStats", reflect.TypeOf((*MockShortener)(nil).GetStats), ctx)
+}
+
 // Short mocks base method.
 func (m *MockShortener) Short(ctx context.Context, userID uuid.UUID, long string) (string, error) {
 	m.ctrl.T.Helper()

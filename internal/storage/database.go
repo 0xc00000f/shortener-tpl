@@ -99,6 +99,20 @@ func (ds DatabaseStorage) GetAll(
 	return m, nil
 }
 
+func (ds DatabaseStorage) GetStats(ctx context.Context) (models.Stats, error) {
+	var m models.Stats
+
+	err := ds.db.QueryRow(
+		ctx,
+		"SELECT COUNT(user_id) AS count_users, COUNT(short_url) AS count_urls FROM url_mapping",
+	).Scan(&m.CountUsers, &m.CountURLs)
+	if err != nil {
+		return models.Stats{}, err
+	}
+
+	return m, nil
+}
+
 func (ds DatabaseStorage) Store(ctx context.Context, userID uuid.UUID, short string, long string) error {
 	query := `INSERT INTO url_mapping(user_id, short_url, long_url) VALUES ($1::uuid, $2::text, $3::text)`
 

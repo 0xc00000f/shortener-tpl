@@ -8,10 +8,11 @@ import (
 )
 
 type NaiveShortener struct {
-	encoder     Shortener
-	BaseURL     string
-	PgxConnPool *pgxpool.Pool
-	Job         chan workerpool.Job
+	encoder       Shortener
+	BaseURL       string
+	PgxConnPool   *pgxpool.Pool
+	Job           chan workerpool.Job
+	TrustedSubnet string
 
 	L *zap.Logger
 }
@@ -59,5 +60,11 @@ func SetLogger(l *zap.Logger) Option {
 func SetJobChannel(job chan workerpool.Job) Option {
 	return func(ns *NaiveShortener) {
 		ns.Job = job
+	}
+}
+
+func SetTrustedSubnet(subnet string) Option {
+	return func(ns *NaiveShortener) {
+		ns.TrustedSubnet = subnet
 	}
 }

@@ -54,6 +54,10 @@ func NewRouter(sa *shortener.NaiveShortener) *chi.Mux {
 				r.Get("/urls", GetSavedData(sa))
 				r.Delete("/urls", Delete(sa))
 			})
+
+			if sa.TrustedSubnet != "" {
+				r.Get("/internal/stats", GetStats(sa))
+			}
 		})
 
 		r.Route("/{url}", func(r chi.Router) {

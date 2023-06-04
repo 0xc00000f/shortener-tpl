@@ -33,6 +33,9 @@ type Cfg struct {
 
 	// json config file
 	JSONConfig string `env:"CONFIG"`
+
+	// trusted subnet
+	TrustedSubnet string `env:"TRUSTED_SUBNET"`
 }
 
 func New(logger *zap.Logger) (Cfg, error) {
@@ -76,6 +79,10 @@ func New(logger *zap.Logger) (Cfg, error) {
 		cfg.JSONConfig,
 		"responsible for the json config file",
 	)
+	flag.StringVar(&cfg.TrustedSubnet,
+		"t",
+		cfg.TrustedSubnet,
+		"responsible for trusted subnet address")
 	flag.Parse()
 
 	if err := cfg.parseJSONConfig(cfg.JSONConfig); err != nil {
@@ -122,6 +129,10 @@ func (c *Cfg) parseJSONConfig(path string) error {
 
 	if cfg.TLSKeyFile == "" {
 		c.TLSKeyFile = cfg.TLSKeyFile
+	}
+
+	if cfg.TrustedSubnet == "" {
+		c.TrustedSubnet = cfg.TrustedSubnet
 	}
 
 	return nil

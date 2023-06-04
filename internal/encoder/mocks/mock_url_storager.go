@@ -80,6 +80,21 @@ func (mr *MockURLStoragerMockRecorder) GetAll(ctx, userID interface{}) *gomock.C
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAll", reflect.TypeOf((*MockURLStorager)(nil).GetAll), ctx, userID)
 }
 
+// GetStats mocks base method.
+func (m *MockURLStorager) GetStats(ctx context.Context) (models.Stats, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetStats", ctx)
+	ret0, _ := ret[0].(models.Stats)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetStats indicates an expected call of GetStats.
+func (mr *MockURLStoragerMockRecorder) GetStats(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStats", reflect.TypeOf((*MockURLStorager)(nil).GetStats), ctx)
+}
+
 // IsKeyExist mocks base method.
 func (m *MockURLStorager) IsKeyExist(ctx context.Context, short string) (bool, error) {
 	m.ctrl.T.Helper()

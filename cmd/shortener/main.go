@@ -114,6 +114,7 @@ func main() {
 		shortener.SetPgxConnPool(pgxConnPool),
 		shortener.SetLogger(l),
 		shortener.SetJobChannel(jobsCh),
+		shortener.SetTrustedSubnet(cfg.TrustedSubnet),
 	)
 
 	router := handlers.NewRouter(urlShortener)

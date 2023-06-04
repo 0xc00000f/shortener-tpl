@@ -98,6 +98,18 @@ func (fs *FileStorage) GetAll(ctx context.Context, userID uuid.UUID) (result map
 	return result, nil
 }
 
+func (fs *FileStorage) GetStats(ctx context.Context) (models.Stats, error) {
+	fs.mu.RLock()
+	defer fs.mu.RUnlock()
+
+	count := 0
+	for _, kvpairs := range fs.memory.history {
+		count += len(kvpairs)
+	}
+
+	return models.Stats{CountUsers: len(fs.memory.history), CountURLs: count}, nil
+}
+
 func (fs *FileStorage) Store(ctx context.Context, userID uuid.UUID, short, long string) error {
 	fs.mu.Lock()
 	defer fs.mu.Unlock()
