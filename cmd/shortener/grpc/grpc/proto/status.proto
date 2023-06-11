@@ -1,0 +1,14 @@
+syntax = "proto3";
+package shortener;
+
+option go_package = "./cmd/shortener/grpc/proto";
+
+service ShortenerService {
+  rpc status(StatusReq) returns (StatusResp);
+}
+
+message StatusReq {}
+
+message StatusResp {
+  int64 uptime = 1;
+}
