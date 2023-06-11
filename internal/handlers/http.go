@@ -25,6 +25,8 @@ func NewRouter(sa *shortener.NaiveShortener) *chi.Mux {
 	r.Use(CookieAuth)
 	r.Use(UnzipBody)
 
+	r.Mount("/debug", middleware.Profiler())
+
 	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		if _, err := w.Write([]byte("400 page not found")); err != nil {
@@ -52,6 +54,10 @@ func NewRouter(sa *shortener.NaiveShortener) *chi.Mux {
 				r.Get("/urls", GetSavedData(sa))
 				r.Delete("/urls", Delete(sa))
 			})
+
+			if sa.TrustedSubnet != "" {
+				r.Get("/internal/stats", GetStats(sa))
+			}
 		})
 
 		r.Route("/{url}", func(r chi.Router) {

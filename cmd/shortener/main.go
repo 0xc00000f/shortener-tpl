@@ -2,9 +2,13 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net/http"
+	"os"
+	"os/signal"
 	"sync"
+	"syscall"
 	"time"
 
 	"github.com/jackc/pgx/v4/pgxpool"
@@ -23,13 +27,37 @@ import (
 const (
 	ShortLength              = 7
 	defaultReadHeaderTimeout = 3 * time.Second
+	NA                       = "N/A"
+)
+
+var (
+	buildVersion string
+	buildDate    string
+	buildCommit  string
 )
 
 func main() {
+	if buildVersion == "" {
+		buildVersion = NA
+	}
+
+	if buildDate == "" {
+		buildDate = NA
+	}
+
+	if buildCommit == "" {
+		buildCommit = NA
+	}
+
+	fmt.Printf("Build version: %s\n", buildVersion)
+	fmt.Printf("Build date: %s\n", buildDate)
+	fmt.Printf("Build commit: %s\n", buildCommit)
+
 	l, err := zap.NewProduction()
 	if err != nil {
 		log.Fatalf("can't initialize zap logger: %v", err)
 	}
+
 	defer func() {
 		err = l.Sync()
 		if err != nil {
@@ -37,7 +65,14 @@ func main() {
 		}
 	}()
 
-	cfg, err := config.New()
+	defer func() {
+		err = l.Sync()
+		if err != nil {
+			l.Error("zap logger sync error, probably memory leak", zap.Error(err))
+		}
+	}()
+
+	cfg, err := config.New(l)
 	if err != nil {
 		l.Fatal("creating config error", zap.Error(err))
 	}
@@ -62,7 +97,7 @@ func main() {
 
 		err := workerpool.RunPool(context.Background(), concurrency, jobsCh)
 		if err != nil {
-			log.Printf("runpool err: %v", err)
+			l.Error("runpool err", zap.Error(err))
 		}
 	}()
 
@@ -79,6 +114,7 @@ func main() {
 		shortener.SetPgxConnPool(pgxConnPool),
 		shortener.SetLogger(l),
 		shortener.SetJobChannel(jobsCh),
+		shortener.SetTrustedSubnet(cfg.TrustedSubnet),
 	)
 
 	router := handlers.NewRouter(urlShortener)
@@ -88,8 +124,37 @@ func main() {
 		ReadHeaderTimeout: defaultReadHeaderTimeout,
 	}
 
+	idleConnsClosed := make(chan struct{})
+
+	sigint := make(chan os.Signal, 1)
+	signal.Notify(sigint, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
+
+	go func() {
+		<-sigint
+
+		l.Info("shutting down server...")
+
+		if err := server.Shutdown(context.Background()); err != nil {
+			l.Error("HTTP server Shutdown: %v", zap.Error(err))
+		}
+
+		close(idleConnsClosed)
+	}()
+
 	l.Info("starting server", zap.String("address", cfg.Address))
-	l.Fatal("http server down", zap.Error(server.ListenAndServe()))
+
+	switch cfg.TLSEnabled {
+	case true:
+		l.Fatal(
+			"https server down",
+			zap.Error(server.ListenAndServeTLS(cfg.TLSCertFile, cfg.TLSKeyFile)),
+		)
+
+	case false:
+		l.Fatal("http server down", zap.Error(server.ListenAndServe()))
+	}
+
+	<-idleConnsClosed
 
 	wg.Wait()
 }

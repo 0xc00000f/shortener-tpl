@@ -24,6 +24,7 @@ type DatabaseStorage struct {
 func NewDatabaseStorage(
 	ctx context.Context,
 	pgxConnPool *pgxpool.Pool,
+
 	l *zap.Logger,
 ) (DatabaseStorage, error) {
 	query := `CREATE TABLE IF NOT EXISTS url_mapping
@@ -93,6 +94,20 @@ func (ds DatabaseStorage) GetAll(
 	err = rows.Err()
 	if err != nil {
 		return nil, err
+	}
+
+	return m, nil
+}
+
+func (ds DatabaseStorage) GetStats(ctx context.Context) (models.Stats, error) {
+	var m models.Stats
+
+	err := ds.db.QueryRow(
+		ctx,
+		"SELECT COUNT(user_id) AS count_users, COUNT(short_url) AS count_urls FROM url_mapping",
+	).Scan(&m.CountUsers, &m.CountURLs)
+	if err != nil {
+		return models.Stats{}, err
 	}
 
 	return m, nil

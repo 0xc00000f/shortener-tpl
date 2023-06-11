@@ -135,6 +135,19 @@ func (ms *MemoryStorage) GetAll(ctx context.Context, userID uuid.UUID) (result m
 }
 
 //revive:disable-next-line
+func (ms *MemoryStorage) GetStats(ctx context.Context) (models.Stats, error) {
+	ms.mu.RLock()
+	defer ms.mu.RUnlock()
+
+	count := 0
+	for _, kvpairs := range ms.history {
+		count += len(kvpairs)
+	}
+
+	return models.Stats{CountUsers: len(ms.history), CountURLs: count}, nil
+}
+
+//revive:disable-next-line
 func (ms *MemoryStorage) Delete(ctx context.Context, data []models.URL) error {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
