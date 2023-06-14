@@ -1,0 +1,85 @@
+syntax = "proto3";
+
+package shortener;
+
+message IOBatch {
+  string correlation_id = 1;
+  string original_url = 2;
+  string short_url = 3;
+}
+
+message DeleteResp {
+  repeated string array = 1;
+}
+
+message Result {
+  string short_url = 1;
+  string original_url = 2;
+}
+
+message ShortRequest {
+  string url = 1;
+}
+
+message ShortResponse {
+  string result = 1;
+}
+
+message Stats {
+  string correlation_id = 1;
+  string short_url = 2;
+}
+
+service Shortener {
+  rpc Batch(BatchRequest) returns (BatchResponse) {}
+  rpc Delete(DeleteRequest) returns (DeleteResponse) {}
+  rpc GetSavedData(GetSavedDataRequest) returns (GetSavedDataResponse) {}
+  rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse) {}
+  rpc Redirect(RedirectRequest) returns (RedirectResponse) {}
+  rpc SaveURL(SaveURLRequest) returns (SaveURLResponse) {}
+  rpc GetStats(GetStatsRequest) returns (GetStatsResponse) {}
+}
+
+message BatchRequest {
+  repeated IOBatch batch = 1;
+}
+
+message BatchResponse {
+  repeated IOBatch result = 1;
+}
+
+message DeleteRequest {
+  repeated string array = 1;
+}
+
+message DeleteResponse {}
+
+message GetSavedDataRequest {}
+
+message GetSavedDataResponse {
+  repeated Result result = 1;
+}
+
+message HealthCheckRequest {}
+
+message HealthCheckResponse {}
+
+message RedirectRequest {
+  string url = 1;
+}
+
+message RedirectResponse {}
+
+message SaveURLRequest {
+  string url = 1;
+}
+
+message SaveURLResponse {
+  string result = 1;
+}
+
+message GetStatsRequest {}
+
+message GetStatsResponse {
+  repeated Stats stats = 1;
+}
