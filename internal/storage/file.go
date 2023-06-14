@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"context"
 	"encoding/json"
-	"io/ioutil"
 	"os"
 	"strings"
 	"sync"
@@ -99,6 +98,18 @@ func (fs *FileStorage) GetAll(ctx context.Context, userID uuid.UUID) (result map
 	return result, nil
 }
 
+func (fs *FileStorage) GetStats(ctx context.Context) (models.Stats, error) {
+	fs.mu.RLock()
+	defer fs.mu.RUnlock()
+
+	count := 0
+	for _, kvpairs := range fs.memory.history {
+		count += len(kvpairs)
+	}
+
+	return models.Stats{CountUsers: len(fs.memory.history), CountURLs: count}, nil
+}
+
 func (fs *FileStorage) Store(ctx context.Context, userID uuid.UUID, short, long string) error {
 	fs.mu.Lock()
 	defer fs.mu.Unlock()
@@ -165,7 +176,7 @@ func (fs *FileStorage) Delete(ctx context.Context, data []models.URL) error {
 }
 
 func (fs *FileStorage) removeURL(userID uuid.UUID, short string) error {
-	input, err := ioutil.ReadFile(fs.file.Name())
+	input, err := os.ReadFile(fs.file.Name())
 	if err != nil {
 		return err
 	}
@@ -187,7 +198,7 @@ func (fs *FileStorage) removeURL(userID uuid.UUID, short string) error {
 	}
 
 	output := strings.Join(lines, "\n")
-	err = ioutil.WriteFile(fs.file.Name(), []byte(output), 0666)
+	err = os.WriteFile(fs.file.Name(), []byte(output), 0666)
 	if err != nil {
 		return err
 	}

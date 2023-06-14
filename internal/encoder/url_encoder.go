@@ -103,3 +103,7 @@ func (ue *URLEncoder) GetAll(ctx context.Context, userID uuid.UUID) (result map[
 func (ue *URLEncoder) Delete(ctx context.Context, data []models.URL) error {
 	return ue.storage.Delete(ctx, data)
 }
+
+func (ue *URLEncoder) GetStats(ctx context.Context) (models.Stats, error) {
+	return ue.storage.GetStats(ctx)
+}

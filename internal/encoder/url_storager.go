@@ -14,4 +14,5 @@ type URLStorager interface {
 	Store(ctx context.Context, userID uuid.UUID, short string, long string) error
 	IsKeyExist(ctx context.Context, short string) (bool, error)
 	Delete(ctx context.Context, data []models.URL) error
+	GetStats(ctx context.Context) (models.Stats, error)
 }
