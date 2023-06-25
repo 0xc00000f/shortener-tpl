@@ -25,6 +25,8 @@ func NewRouter(sa *shortener.NaiveShortener) *chi.Mux {
 	r.Use(CookieAuth)
 	r.Use(UnzipBody)
 
+	r.Mount("/debug", middleware.Profiler())
+
 	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		if _, err := w.Write([]byte("400 page not found")); err != nil {
